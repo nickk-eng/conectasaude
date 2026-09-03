@@ -1,0 +1,154 @@
+:root {
+  --fundo-inicial: #0d1b2a;
+  --cartao: #14293c;
+  --texto: #eafff6;
+  --padrao: #9ab5b0;
+  --fundo: #2dd4a8;
+}
+
+* { 
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 24px;
+  font-family: Manrope, Arial, sans-serif;
+  color: var(--texto);
+  background: var(--fundo-inicial);
+}
+
+.container { width: min(100%, 400px); }
+.container > input { position: absolute; opacity: 0; }
+header { margin-bottom: 24px; text-align: center; }
+
+.logo {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 12px;
+  border-radius: 16px;
+  background: var(--fundo);
+}
+
+.logo img { width: 38px; height: 38px; object-fit: contain; }
+h1 { margin: 0; font-size: 26px; }
+header p { margin: 6px 0 0; color: var(--padrao); font-size: 14px; }
+
+.secao-formulario {
+  padding: 24px;
+  border: 1px solid #285062;
+  border-radius: 20px;
+  background: var(--cartao);
+}
+
+.nav-formulario {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 24px;
+}
+
+.nav-formulario label {
+  padding: 10px;
+  text-align: center;
+  color: var(--padrao);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+
+#entrar:checked ~ .secao-formulario .nav-formulario label[for="entrar"],
+#cadastrar:checked ~ .secao-formulario .nav-formulario label[for="cadastrar"] {
+  color: var(--fundo);
+  border-color: var(--fundo);
+}
+
+.login,
+.formulario-cadastro { display: none; }
+
+#entrar:checked ~ .secao-formulario .login,
+#cadastrar:checked ~ .secao-formulario .formulario-cadastro {
+  display: grid;
+  gap: 16px;
+}
+
+.login > label,
+.formulario-cadastro > label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px;
+  font: inherit;
+  color: var(--texto);
+  background: var(--fundo-inicial);
+  border: 1px solid #285062;
+  border-radius: 10px;
+}
+
+input:focus { outline: 2px solid var(--fundo); outline-offset: 1px; }
+
+.tipo-usuario { margin: 0; padding: 0; border: 0; }
+.tipo-usuario legend { margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+.opcoes-tipo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.opcoes-tipo label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #285062;
+  border-radius: 10px;
+}
+
+.opcoes-tipo label:has(input:checked) {
+  color: var(--fundo);
+  border-color: var(--fundo);
+}
+
+input[type="radio"] { accent-color: var(--fundo); }
+
+a, .formulario-cadastro p label, .login p label {
+  color: var(--fundo);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+a { font-size: 13px; text-decoration: none; }
+
+button {
+  padding: 13px;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--fundo-inicial);
+  background: var(--fundo);
+  cursor: pointer;
+}
+
+.login p,
+.formulario-cadastro p {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--padrao);
+}
+
+@media (max-width: 420px) {
+  body { padding: 16px; }
+  .secao-formulario { padding: 20px; }
+}

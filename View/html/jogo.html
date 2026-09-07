@@ -4,43 +4,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jogo da Velha | ConectaSaúde</title>
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/jogo.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/jogo.css">
 </head>
-<body class="pagina-do-jogo">
-  <main class="jogo-da-velha">
-    <header class="topo-do-jogo">
-      <div><span class="chip" id="nivel">Nível</span><span class="chip" id="modo">Modo</span><span class="chip-escondido" id="ano-escolar">Ano</span></div>
-      <a href="index.html">Voltar ao início</a>
+<body class="pagina-jogo">
+  <main class="jogo">
+    <header class="topo-jogo">
+      <div><span class="chip" id="nivel">Nível</span><span class="chip" id="modo">Modo</span><span class="chip escondido" id="ano-escolar">Ano</span></div>
+      <a href="/home">Voltar ao início</a>
     </header>
 
-    <section class="painel-de-inicio" id="inicio">
+    <section class="painel inicio" id="inicio">
       <h1>Antes de começar</h1>
       <p>Informe seu ano escolar para o professor acompanhar os resultados.</p>
-      <form id="form-de-inicio">
+      <form id="form-inicio">
         <label>Qual é o seu ano?
           <select id="ano" required>
             <option value="6º ano">6º ano</option><option value="7º ano">7º ano</option><option value="8º ano">8º ano</option><option value="9º ano">9º ano</option><option value="1º ano do ensino médio">1º ano do ensino médio</option><option value="2º ano do ensino médio">2º ano do ensino médio</option><option value="3º ano do ensino médio">3º ano do ensino médio</option>
           </select>
         </label>
-        <label>Seu nome (opcional)<input id="nome" type="text" maxlength="60" placeholder="Ex.: Ana Ribeiro"></label>
+        <label>Seu nome<input id="nome" type="text" maxlength="60" placeholder="Ex.: Ana Ribeiro"></label>
         <button type="submit">Começar a jogar</button>
       </form>
     </section>
 
-    <section class="area-de-jogo-escondido" id="partida">
+    <section class="area-jogo escondido" id="partida">
       <div class="painel">
         <h2>Jogo da velha</h2>
-        
         <p id="vez"></p>
-        <div class="tabuleiro-jogo-da-velha" id="tabuleiro">
+        <div class="tabuleiro" id="tabuleiro">
           <button type="button" disabled></button><button type="button" disabled></button><button type="button" disabled></button>
           <button type="button" disabled></button><button type="button" disabled></button><button type="button" disabled></button>
           <button type="button" disabled></button><button type="button" disabled></button><button type="button" disabled></button>
         </div>
         <p class="placar">Acertos: <strong id="acertos">0</strong> | Erros: <strong id="erros">0</strong></p>
       </div>
-      <div class="painel-do-jogo">
+      <div class="painel">
         <span class="chip" id="tempo">Tempo: 20s</span>
         <h2 id="titulo-pergunta">Responda para liberar uma jogada</h2>
         <p id="pergunta" class="pergunta"></p>
@@ -49,13 +48,13 @@
       </div>
     </section>
 
-    <section class="painel-escondido" id="fim">
+    <section class="painel escondido" id="fim">
       <h1 id="titulo-final"></h1>
       <p id="texto-final"></p>
       <button type="button" id="novamente">Jogar novamente</button>
-      <a class="link-botao" href="index.html">Voltar ao início</a>
+      <a class="link-botao" href="/home">Voltar ao início</a>
     </section>
   </main>
-  <script src="../js/jogo.js"></script>
+  <script src="/js/jogo.js"></script>
 </body>
 </html>

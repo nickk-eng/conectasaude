@@ -1,204 +1,165 @@
-.pagina-do-jogo {
-  display: block;
-  padding: 24px;
+.pagina-jogo { 
+  display: block; 
+  padding: 24px; 
 }
 
-.jogo-da-velha {
-  width: min(100%, 980px);
-  margin: auto;
+.jogo { 
+  width: min(100%, 980px); 
+  margin: auto; 
 }
 
-.topo-do-jogo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid #285062;
+.topo-jogo { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  gap: 12px; 
+  padding-bottom: 18px; 
+  border-bottom: 1px solid #285062; 
 }
 
-.topo-do-jogo a {
-  color: var(--fundo);
-  font-weight: bold;
-  text-decoration: none;
+.topo-jogo a { 
+  color: var(--fundo); 
+  font-weight: bold; 
+  text-decoration: none; 
 }
 
-
-.chip {
-  display: inline-block;
-  margin-right: 6px;
-  padding: 6px 12px;
-  color: var(--fundo);
-  background: #173f45;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: bold;
+.chip { 
+  display: inline-block; 
+  margin-right: 6px; 
+  padding: 6px 12px; 
+  color: var(--fundo); 
+  background: #173f45; 
+  border-radius: 20px; 
+  font-size: 12px; 
+  font-weight: bold; 
 }
 
-.painel,
-.painel-do-jogo,
-.painel-de-inicio,
-.painel-de-fim {
-  padding: 24px;
-  background: var(--cartao);
-  border: 1px solid #285062;
-  border-radius: 10px;
+.painel { 
+  padding: 24px; 
+  background: var(--cartao); 
+  border: 1px solid #285062; 
+  border-radius: 18px; 
 }
 
-.painel-de-inicio,
-.painel-de-fim {
-  max-width: 520px;
-  margin-top: 28px;
+.inicio { 
+  max-width: 520px; 
+  margin-top: 28px; 
 }
 
-.painel h1,
-.painel h2,
-.painel-do-jogo h2,
-.painel-de-inicio h1,
-.painel-de-fim h1 {
-  margin-bottom: 10px;
+.painel h1, .painel h2 { 
+  margin-bottom: 10px; 
 }
 
-.painel > p,
-.painel-de-inicio > p,
-.painel-de-fim > p {
-  color: var(--padrao);
+.painel > p { 
+  color: var(--padrao); 
 }
 
-#form-de-inicio {
-  display: grid;
-  gap: 16px;
-  margin-top: 18px;
+#form-inicio { 
+  display: grid; 
+  gap: 16px; 
+  margin-top: 18px; 
 }
 
-#form-de-inicio label {
-  display: grid;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: bold;
+#form-inicio label { 
+  display: grid; 
+  gap: 6px; 
+  font-size: 14px; 
+  font-weight: bold; 
 }
 
-select,
-input[type="text"] {
-  width: 100%;
-  padding: 12px;
-  color: var(--texto);
-  background: var(--fundo-inicial);
-  border: 1px solid #285062;
-  border-radius: 10px;
-  font: inherit;
+select, input[type="text"] { 
+  width: 100%; 
+  padding: 12px; 
+  color: var(--texto); 
+  background: var(--fundo-inicial); 
+  border: 1px solid #285062; 
+  border-radius: 10px; 
+  font: inherit; 
 }
 
-select:focus,
-input[type="text"]:focus {
-  outline: 2px solid var(--fundo);
-  outline-offset: 1px;
+.area-jogo { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 18px; 
+  margin-top: 28px; 
 }
 
-.area-de-jogo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-top: 28px;
+.tabuleiro { 
+  display: grid; 
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 8px; 
+  margin-top: 16px; 
 }
 
-.tabuleiro-jogo-da-velha {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 16px;
+.tabuleiro button { 
+  aspect-ratio: 1; 
+  padding: 0; 
+  font-size: 38px; 
+  color: var(--fundo); 
+  background: var(--fundo-inicial); 
+  border: 1px solid #285062; 
+  border-radius: 12px; 
 }
 
-.tabuleiro-jogo-da-velha button {
-  aspect-ratio: 1;
-  padding: 0;
-  color: var(--fundo);
-  background: var(--fundo-inicial);
-  border: 1px solid #285062;
-  border-radius: 8px;
-  font-size: 38px;
+.tabuleiro button[data-jogador="o"] { 
+  color: #ffd166; 
 }
 
-.tabuleiro-jogo-da-velha button[data-jogador="o"] {
-  color: #ffd166;
-}
-
-.tabuleiro-jogo-da-velha button.liberada {
-  cursor: pointer;
+.tabuleiro button.liberada { 
+  cursor: pointer; 
   border-color: var(--fundo);
 }
 
-.tabuleiro-jogo-da-velha button:disabled {
-  cursor: not-allowed;
+.placar, .retorno { 
+  margin-top: 16px; 
 }
 
-.placar,
-.retorno {
-  margin-top: 16px;
+.pergunta { 
+  margin-top: 18px; 
+  font-size: 17px; 
+  line-height: 1.5; 
 }
 
-.pergunta {
-  margin-top: 18px;
-  font-size: 17px;
-  line-height: 1.5;
-}
-
-.alternativas {
-  display: grid;
+.alternativas { 
+  display: grid; 
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 16px; 
 }
 
-.alternativas button {
-  text-align: left;
-  color: var(--texto);
-  background: var(--fundo-inicial);
-  border: 1px solid #285062;
+.alternativas button { 
+  text-align: left; 
+  color: var(--texto); 
+  background: var(--fundo-inicial); 
+  border: 1px solid #285062; 
 }
 
-.alternativas button.correta {
-  border-color: var(--fundo);
-  background: #173f45;
+.alternativas button.correta { 
+  border-color: var(--fundo); 
+  background: #173f45; 
 }
 
-.alternativas button.errada {
-  border-color: #ff9e9e;
+.alternativas button.errada { 
+  border-color: #ff9e9e; 
 }
 
-.retorno.certo {
-  color: var(--fundo);
+.retorno.certo { 
+  color: var(--fundo); 
 }
 
-.retorno.errado {
+.retorno.errado { 
   color: #ff9e9e;
 }
 
-.link-botao {
-  display: inline-block;
-  margin-left: 10px;
-  padding: 13px;
-  color: var(--fundo);
-  font-weight: bold;
-  text-decoration: none;
+.link-botao { 
+  display: inline-block; 
+  margin-left: 10px; 
+  padding: 13px; 
+  color: var(--fundo); 
+  font-weight: bold; 
+  text-decoration: none; 
 }
 
-.area-de-jogo-escondido,
-.painel-escondido,
-.chip-escondido {
-  display: none !important;
+.escondido { 
+  display: none !important; 
 }
-
-@media (max-width: 700px) {
-  .pagina-do-jogo {
-    padding: 16px;
-  }
-
-  .area-de-jogo {
-    grid-template-columns: 1fr;
-  }
-
-  .topo-do-jogo {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
+@media (max-width: 700px) { .pagina-jogo { padding: 16px; }.area-jogo { grid-template-columns: 1fr; }.topo-jogo { align-items: flex-start; flex-direction: column; } }

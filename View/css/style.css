@@ -148,6 +148,16 @@ button {
   color: var(--padrao);
 }
 
+.mensagem {
+  min-height: 20px;
+  margin-top: 16px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.mensagem.sucesso { color: var(--fundo); }
+.mensagem.erro { color: #ff9e9e; }
+
 @media (max-width: 420px) {
   body { padding: 16px; }
   .secao-formulario { padding: 20px; }

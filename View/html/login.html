@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConectaSaúde</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <main class="container">
+        <input type="radio" id="entrar" name="aba-formulario" checked>
+        <input type="radio" id="cadastrar" name="aba-formulario">
+
+        <header>
+            <div class="logo"><img src="/img/coracao.png" alt="Logo do ConectaSaúde"></div>
+            <h1>Bem-vindo ao ConectaSaúde</h1>
+            <p>Acesse ou crie sua conta para continuar.</p>
+        </header>
+
+        <section class="secao-formulario">
+            <nav class="nav-formulario" aria-label="Acesso à conta">
+                <label for="entrar">Entrar</label>
+                <label for="cadastrar">Cadastrar</label>
+            </nav>
+
+            <form class="login" id="form-login">
+                <label>
+                    E-mail
+                    <input name="email" type="email" placeholder="Digite seu e-mail" required>
+                </label>
+                <label>
+                    Senha
+                    <input name="password" type="password" placeholder="Sua senha" required>
+                </label>
+                <button type="submit">Entrar</button>
+                <p>Não tem uma conta? <label for="cadastrar">Cadastrar</label></p>
+            </form>
+
+            <form class="formulario-cadastro" id="form-cadastro">
+                <label>
+                    E-mail
+                    <input name="email" type="email" placeholder="Digite seu e-mail" required>
+                </label>
+                <fieldset class="tipo-usuario">
+                    <legend>Você é:</legend>
+                    <div class="opcoes-tipo">
+                        <label><input type="radio" name="tipo_usuario" value="aluno" required> Aluno</label>
+                        <label><input type="radio" name="tipo_usuario" value="professor" required> Professor</label>
+                    </div>
+                </fieldset>
+                <label>
+                    Senha
+                    <input name="password" type="password" placeholder="Sua senha" required>
+                </label>
+                <label>
+                    Confirmar senha
+                    <input name="confirm_password" type="password" placeholder="Confirme sua senha" required>
+                </label>
+                <button type="submit">Criar conta</button>
+                <p>Já tem uma conta? <label for="entrar">Entrar</label></p>
+            </form>
+            <p class="mensagem" id="mensagem" role="status" aria-live="polite"></p>
+        </section>
+    </main>
+    <script src="/js/login.js"></script>
+</body>
+</html>

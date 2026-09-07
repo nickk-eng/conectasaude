@@ -1,0 +1,29 @@
+{
+  "name": "conectsaude",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file=.env server.js",
+    "dev": "nodemon --exec \"node --env-file-if-exists=.env\" server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nickk-eng/conectasaude.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Nickk-eng/conectasaude/issues"
+  },
+  "homepage": "https://github.com/Nickk-eng/conectasaude#readme",
+  "dependencies": {
+    "express": "^5.2.1",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

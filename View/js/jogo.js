@@ -1,7 +1,10 @@
 const parametros = new URLSearchParams(window.location.search);
 const nivel = parametros.get('nivel') || 'Fácil';
+
 const modo = parametros.get('modo') || 'computador';
-const perguntas = [
+
+let perguntas = [
+
   { texto: 'Qual bebida é mais importante para manter o corpo hidratado?', opcoes: ['Refrigerante', 'Água', 'Energético'], certa: 1 },
   { texto: 'Dormir bem ajuda principalmente em quê?', opcoes: ['Na memória e no descanso', 'Em ficar acordado o dia todo', 'Em substituir a alimentação'], certa: 0 },
   { texto: 'Qual hábito ajuda a cuidar da saúde mental?', opcoes: ['Guardar todos os problemas', 'Conversar com alguém de confiança', 'Não descansar'], certa: 1 },
@@ -17,11 +20,19 @@ let podeJogar = false;
 let respostaEncerrada = false;
 let tempo;
 
+async function carregarPerguntasAprovadas() {
+  const resposta = await fetch('/api/jogo/perguntas');
+  if (!resposta.ok) return;
+  const dados = await resposta.json();
+  if (dados.perguntas.length) perguntas = dados.perguntas;
+}
+
 document.querySelector('#nivel').textContent = `Nível: ${nivel}`;
 document.querySelector('#modo').textContent = modo === 'colega' ? 'Modo: colega' : 'Modo: computador';
 
 document.querySelector('#form-inicio').addEventListener('submit', async (evento) => {
   evento.preventDefault();
+
   const ano = document.querySelector('#ano').value;
   const nome = document.querySelector('#nome').value.trim();
   const resposta = await salvarPerfilAluno(ano, nome);
@@ -31,6 +42,7 @@ document.querySelector('#form-inicio').addEventListener('submit', async (evento)
   document.querySelector('#inicio').classList.add('escondido');
   document.querySelector('#partida').classList.remove('escondido');
   document.querySelector('#vez').textContent = 'Responda à pergunta para liberar a sua jogada.';
+  await carregarPerguntasAprovadas();
   mostrarPergunta();
 });
 

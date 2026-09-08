@@ -9,6 +9,7 @@ const view = path.join(__dirname, 'View');
 app.use(express.json());
 app.use('/css', express.static(path.join(view, 'css')));
 app.use('/js', express.static(path.join(view, 'js')));
+
 app.use('/img', express.static(path.join(__dirname, 'img')));
 
 function cookies(req) { return Object.fromEntries((req.headers.cookie || '').split(';').filter(Boolean).map(item => { const [k, ...v] = item.trim().split('='); return [k, decodeURIComponent(v.join('='))]; })); }
@@ -38,6 +39,8 @@ app.post('/api/auth/cadastro', async (req, res) => {
     console.error('Erro ao criar conta:', erro.message);
     res.status(503).json({ mensagem: 'Não foi possível acessar o banco de dados. Configure o arquivo .env e tente novamente.' });
   }
+
+
 });
 
 app.post('/api/auth/login', async (req, res) => {
@@ -49,16 +52,56 @@ app.post('/api/auth/login', async (req, res) => {
   res.json({ usuario: publico(usuario) });
 });
 
+
 app.post('/api/auth/sair', async (req, res) => { await banco.query('DELETE FROM sessoes WHERE id = $1', [cookies(req).conectaSaudeSession]); res.setHeader('Set-Cookie', 'conectaSaudeSession=; Max-Age=0; Path=/; HttpOnly; SameSite=Strict'); res.status(204).end(); });
 app.get('/api/auth/eu', autenticar, (req, res) => res.json({ usuario: publico(req.usuario) }));
 app.put('/api/aluno/perfil', autenticar, permitir('aluno'), async (req, res) => { const nome = String(req.body.nome || '').trim().slice(0, 60); const turma = String(req.body.turma || '').trim().slice(0, 60); if (!turma) return res.status(400).json({ mensagem: 'Informe a turma.' }); const resultado = await banco.query('UPDATE usuarios SET nome = $1, turma = $2 WHERE id = $3 RETURNING id, email, nome, perfil, turma', [nome, turma, req.usuario.id]); res.json({ usuario: publico(resultado.rows[0]) }); });
 app.get('/api/professor/alunos', autenticar, permitir('professor', 'admin'), async (_req, res) => { const dados = await banco.query("SELECT id, email, nome, perfil, turma FROM usuarios WHERE perfil = 'aluno' ORDER BY nome, email"); res.json({ alunos: dados.rows.map(publico) }); });
 app.get('/api/admin/usuarios', autenticar, permitir('admin'), async (_req, res) => { const dados = await banco.query('SELECT id, email, nome, perfil, turma FROM usuarios ORDER BY criado_em DESC'); res.json({ usuarios: dados.rows.map(publico) }); });
 
+
+
+app.post('/api/professor/perguntas', autenticar, permitir('professor'), async (req, res) => {
+  const texto = String(req.body.texto || '').trim().slice(0, 500);
+  const alternativas = Array.isArray(req.body.alternativas) ? req.body.alternativas.map((item) => String(item || '').trim().slice(0, 200)) : [];
+  const respostaCorreta = Number(req.body.respostaCorreta);
+  const nivel = ['Fácil', 'Médio', 'Difícil'].includes(req.body.nivel) ? req.body.nivel : 'Fácil';
+  if (texto.length < 10) return res.status(400).json({ mensagem: 'Escreva uma pergunta com pelo menos 10 caracteres.' });
+  if (alternativas.length !== 3 || alternativas.some((item) => !item)) return res.status(400).json({ mensagem: 'Preencha as três alternativas.' });
+  if (req.body.respostaCorreta === '' || !Number.isInteger(respostaCorreta) || respostaCorreta < 0 || respostaCorreta > 2) return res.status(400).json({ mensagem: 'Escolha a resposta correta.' });
+  const resultado = await banco.query(
+    'INSERT INTO perguntas (texto, alternativas, resposta_correta, nivel, autor_id) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+    [texto, JSON.stringify(alternativas), respostaCorreta, nivel, req.usuario.id]
+  );
+  res.status(201).json({ mensagem: 'Pergunta enviada para aprovação do administrador.', id: resultado.rows[0].id });
+});
+
+app.get('/api/admin/perguntas', autenticar, permitir('admin'), async (_req, res) => {
+  const dados = await banco.query("SELECT p.id, p.texto, p.alternativas, p.resposta_correta, p.nivel, p.status, p.criado_em, u.nome, u.email FROM perguntas p JOIN usuarios u ON u.id = p.autor_id ORDER BY CASE p.status WHEN 'pendente' THEN 0 ELSE 1 END, p.criado_em DESC");
+  res.json({ perguntas: dados.rows });
+  
+});
+
+app.patch('/api/admin/perguntas/:id', autenticar, permitir('admin'), async (req, res) => {
+  const status = req.body.status;
+  if (!['aprovada', 'recusada'].includes(status)) return res.status(400).json({ mensagem: 'Status inválido.' });
+  const resultado = await banco.query("UPDATE perguntas SET status = $1, avaliada_por = $2, avaliada_em = NOW() WHERE id = $3 AND status = 'pendente' RETURNING id", [status, req.usuario.id, req.params.id]);
+  if (!resultado.rowCount) return res.status(404).json({ mensagem: 'Pergunta pendente não encontrada.' });
+  res.json({ mensagem: `Pergunta ${status === 'aprovada' ? 'aprovada' : 'recusada'} com sucesso.` });
+});
+
+app.get('/api/jogo/perguntas', autenticar, permitir('aluno'), async (_req, res) => {
+  const dados = await banco.query("SELECT id, texto, alternativas, resposta_correta FROM perguntas WHERE status = 'aprovada' ORDER BY RANDOM() LIMIT 20");
+  res.json({ perguntas: dados.rows.map((pergunta) => ({ texto: pergunta.texto, opcoes: typeof pergunta.alternativas === 'string' ? JSON.parse(pergunta.alternativas) : pergunta.alternativas, certa: pergunta.resposta_correta })) });
+});
+
 app.get('/', (_req, res) => res.sendFile(path.join(view, 'html', 'login.html')));
 app.get('/home', pagina('home.html', 'aluno', 'professor'));
 app.get('/jogo', pagina('jogo.html', 'aluno'));
 app.get('/admin', pagina('admin.html', 'admin'));
 
+async function prepararBanco() {
+  await banco.query("CREATE TABLE IF NOT EXISTS perguntas (id SERIAL PRIMARY KEY, texto VARCHAR(500) NOT NULL, alternativas JSONB NOT NULL, resposta_correta SMALLINT NOT NULL CHECK (resposta_correta BETWEEN 0 AND 2), nivel VARCHAR(10) NOT NULL DEFAULT 'Fácil', status VARCHAR(10) NOT NULL DEFAULT 'pendente' CHECK (status IN ('pendente', 'aprovada', 'recusada')), autor_id UUID NOT NULL REFERENCES usuarios(id), avaliada_por UUID REFERENCES usuarios(id), criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), avaliada_em TIMESTAMPTZ)");
+}
 async function criarAdmin() { if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_SENHA) return; const email = process.env.ADMIN_EMAIL.trim().toLowerCase(); const existe = await banco.query('SELECT id FROM usuarios WHERE email = $1', [email]); if (!existe.rowCount) await banco.query("INSERT INTO usuarios (email, senha_hash, perfil, nome) VALUES ($1, $2, 'admin', 'Administrador')", [email, await hash(process.env.ADMIN_SENHA)]); }
-criarAdmin().then(() => app.listen(process.env.PORT || 3000, () => console.log('ConectaSaúde rodando em http://localhost:3000'))).catch(erro => { console.error('Erro ao conectar no PostgreSQL:', erro.message); process.exit(1); });
+prepararBanco().then(criarAdmin).then(() => app.listen(process.env.PORT || 3000, () => console.log('ConectaSaúde rodando em http://localhost:3000'))).catch(erro => { console.error('Erro ao preparar o banco de dados:', erro.message); process.exit(1); });

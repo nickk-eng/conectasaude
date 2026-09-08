@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Início | ConectaSaúde</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/home.css">
+</head>
+<body class="pagina-home">
+  <main class="home">
+    <header class="cabecalho-home">
+      <div class="marca">
+        <div class="logo"><img src="../../img/coracao.png" alt="Logo do ConectaSaúde"></div>
+        <strong>ConectaSaúde</strong>
+      </div>
+      <button id="sair" class="botao-sair" type="button">Sair</button>
+    </header>
+
+    <section class="boas-vindas">
+      <p id="tipo-usuario">Olá!</p>
+      <h1 id="titulo-home">Bem-vindo ao ConectaSaúde</h1>
+      <p id="texto-home">Aprenda sobre saúde de um jeito simples e divertido.</p>
+    </section>
+
+    <section id="area-aluno">
+      <h2>Escolha a dificuldade</h2>
+      <div class="cards tres-colunas">
+        <button class="card dificuldade" data-nivel="Fácil" type="button"><span>Fácil</span><h3>Começar devagar</h3><p>Perguntas mais simples para aprender.</p></button>
+        <button class="card dificuldade medio" data-nivel="Médio" type="button"><span>Médio</span><h3>Desafio normal</h3><p>Teste o que você já sabe.</p></button>
+        <button class="card dificuldade dificil" data-nivel="Difícil" type="button"><span>Difícil</span><h3>Nível avançado</h3><p>Perguntas para quem quer se superar.</p></button>
+      </div>
+
+      <h2>Como quer jogar?</h2>
+      <div class="cards duas-colunas">
+        <button class="card jogar" data-modo="colega" type="button"><h3>Com um colega</h3><p>Convide alguém para jogar com você.</p></button>
+        <button class="card jogar" data-modo="computador" type="button"><h3>Contra o computador</h3><p>Jogue quando quiser e pratique bastante.</p></button>
+      </div>
+      <p id="mensagem-jogo" class="mensagem" role="status"></p>
+    </section>
+
+    <section id="area-professor" hidden>
+      <h2>Resumo da turma</h2>
+      <div class="cards tres-colunas">
+        <div class="card numero"><span>Alunos cadastrados</span><strong id="total-alunos">0</strong></div>
+        <div class="card numero"><span>Acertos</span><strong class="verde">0%</strong></div>
+        <div class="card numero"><span>Erros</span><strong class="vermelho">0%</strong></div>
+      </div>
+
+      <h2>Alunos cadastrados</h2>
+      <div class="lista-alunos">
+        <table>
+          <thead><tr><th>Aluno</th><th>E-mail</th><th>Turma / ano</th></tr></thead>
+          <tbody id="corpo-alunos"></tbody>
+        </table>
+        <p id="sem-alunos">Ainda não há alunos com turma informada.</p>
+      </div>
+
+      <h2>Ferramentas</h2>
+      <div class="cards duas-colunas">
+        <button class="card ferramenta" data-acao="Os relatórios ainda não têm dados." type="button"><h3>Ver relatórios</h3><p>Acompanhe os acertos e erros dos alunos.</p></button>
+        <button id="abrir-criar-pergunta" class="card ferramenta" type="button"><h3>Criar pergunta</h3><p>Envie perguntas para aprovação do administrador.</p></button>
+      </div>
+      <p id="mensagem-professor" class="mensagem" role="status"></p>
+
+      <section id="formulario-pergunta" class="formulario-pergunta" hidden aria-labelledby="titulo-formulario-pergunta">
+        <h2 id="titulo-formulario-pergunta">Nova pergunta</h2>
+        <p>Após o envio, um administrador deverá aprovar a pergunta antes que ela apareça no jogo.</p>
+        <form id="criar-pergunta">
+          <label>Pergunta<textarea name="texto" maxlength="500" minlength="10" required placeholder="Ex.: Qual hábito ajuda a manter uma boa saúde?"></textarea></label>
+          <label>Alternativa 1<input name="alternativa1" maxlength="200" required></label>
+          <label>Alternativa 2<input name="alternativa2" maxlength="200" required></label>
+          <label>Alternativa 3<input name="alternativa3" maxlength="200" required></label>
+          <label>Resposta correta<select name="respostaCorreta" required><option value="">Selecione uma alternativa</option><option value="0">Alternativa 1</option><option value="1">Alternativa 2</option><option value="2">Alternativa 3</option></select></label>
+          <label>Nível<select name="nivel"><option>Fácil</option><option>Médio</option><option>Difícil</option></select></label>
+          <div class="acoes-formulario"><button type="submit">Enviar para aprovação</button><button id="cancelar-pergunta" class="botao-secundario" type="button">Cancelar</button></div>
+        </form>
+      </section>
+    </section>
+  </main>
+  <script src="../js/home.js"></script>
+</body>
+</html>

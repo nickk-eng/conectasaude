@@ -12,12 +12,23 @@ app.use('/css', express.static(path.join(view, 'css')));
 app.use('/js', express.static(path.join(view, 'js')));
 app.use('/img', express.static(path.join(__dirname, 'img')));
 
-function cookies(req) { 
-   Object.fromEntries((req.headers.cookie || '').split(';').filter(Boolean).map(item => { 
-    const [k, ...v] = item.trim().split('='); 
-    return [k, decodeURIComponent(v.join('='))]; })); }
+function cookies(req) {
+  return Object.fromEntries(
+    (req.headers.cookie || '')
+      .split(';')
+      .filter(Boolean)
+      .map(item => {
+        const [k, ...v] = item.trim().split('=');
+        return [k, decodeURIComponent(v.join('='))];
+      })
+  );
+}
 function hash(senha, salt = crypto.randomBytes(16).toString('hex')) { 
-  return new Promise((ok, erro) => crypto.scrypt(senha, salt, 64, (e, valor) => e ? erro(e) : ok(`${salt}:${valor.toString('hex')}`))); }
+  return new Promise((ok, erro) => 
+    crypto.scrypt(senha, salt, 64, (e, valor) => e ? erro(e) : ok(`${salt}:
+      ${valor.toString('hex')}`
+))); 
+}
 async function confereSenha(senha, salva) { 
   const [salt] = salva.split(':'); 
   return crypto.timingSafeEqual(Buffer.from(await hash(senha, salt)), Buffer.from(salva)); }

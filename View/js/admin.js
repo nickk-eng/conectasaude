@@ -5,7 +5,7 @@ function mostrarMensagem(texto, tipo) { mensagem.textContent = texto; mensagem.c
 function escapar(texto) { const elemento = document.createElement('span'); elemento.textContent = texto; return elemento.innerHTML; }
 async function carregarPerguntas() {
 
-  const resposta = await fetch('/api/admin/perguntas');
+  const resposta = await apiFetch('/api/admin/perguntas');
   if (!resposta.ok) return window.location.href = '/';
   const { perguntas } = await resposta.json();
   document.querySelector('#sem-perguntas').hidden = perguntas.length > 0;
@@ -21,11 +21,11 @@ lista.addEventListener('click', async (evento) => {
   if (!botao) return;
   botao.disabled = true;
 
-  const resposta = await fetch(`/api/admin/perguntas/${botao.dataset.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: botao.dataset.status }) });
+  const resposta = await apiFetch(`/api/admin/perguntas/${botao.dataset.id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: botao.dataset.status }) });
   const dados = await resposta.json();
   mostrarMensagem(dados.mensagem, resposta.ok ? 'sucesso' : 'erro');
   if (resposta.ok) carregarPerguntas(); else botao.disabled = false;
 });
 
-document.querySelector('#sair').addEventListener('click', async () => { await fetch('/api/auth/sair', { method: 'POST' }); window.location.href = '/'; });
+document.querySelector('#sair').addEventListener('click', async () => { try { await apiFetch('/api/auth/sair', { method: 'POST' }); } finally { removerToken(); } window.location.href = '/'; });
 carregarPerguntas();

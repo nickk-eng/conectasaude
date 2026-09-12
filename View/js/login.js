@@ -41,5 +41,6 @@ formLogin.addEventListener('submit', async (evento) =>{
   
   const resultado = await resposta.json();
   if (!resposta.ok) return mostrarMensagem(resultado.mensagem, 'erro');
+  salvarToken(resultado.token);
   window.location.href = resultado.usuario.perfil === 'admin' ? '/admin' : '/home';
 });

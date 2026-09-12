@@ -23,9 +23,18 @@ body {
   background: var(--fundo-inicial);
 }
 
-.container { width: min(100%, 400px); }
-.container > input { position: absolute; opacity: 0; }
-header { margin-bottom: 24px; text-align: center; }
+.container { 
+  width: min(100%, 400px); 
+}
+
+.container > input { 
+  position: absolute; opacity: 0; 
+}
+
+header { 
+  margin-bottom: 24px; 
+  text-align: center; 
+}
 
 .logo {
   display: grid;
@@ -37,9 +46,22 @@ header { margin-bottom: 24px; text-align: center; }
   background: var(--fundo);
 }
 
-.logo img { width: 38px; height: 38px; object-fit: contain; }
-h1 { margin: 0; font-size: 26px; }
-header p { margin: 6px 0 0; color: var(--padrao); font-size: 14px; }
+.logo img {
+   width: 38px; 
+   height: 38px; 
+   object-fit: contain; 
+}
+
+h1 { 
+  margin: 0; 
+  font-size: 26px; 
+}
+
+header p { 
+  margin: 6px 0 0; 
+  color: var(--padrao); 
+  font-size: 14px; 
+}
 
 .secao-formulario {
   padding: 24px;
@@ -69,7 +91,9 @@ header p { margin: 6px 0 0; color: var(--padrao); font-size: 14px; }
 }
 
 .login,
-.formulario-cadastro { display: none; }
+.formulario-cadastro { 
+  display: none; 
+}
 
 #entrar:checked ~ .secao-formulario .login,
 #cadastrar:checked ~ .secao-formulario .formulario-cadastro {
@@ -96,11 +120,26 @@ input[type="password"] {
   border-radius: 10px;
 }
 
-input:focus { outline: 2px solid var(--fundo); outline-offset: 1px; }
+input:focus { 
+  outline: 2px solid var(--fundo); 
+  outline-offset: 1px; 
+}
 
-.tipo-usuario { margin: 0; padding: 0; border: 0; }
-.tipo-usuario legend { margin-bottom: 8px; font-size: 14px; font-weight: 600; }
-.opcoes-tipo { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tipo-usuario { 
+  margin: 0; 
+  padding: 0; 
+  border: 0; 
+}
+.tipo-usuario legend { 
+  margin-bottom: 8px; 
+  font-size: 14px; 
+  font-weight: 600; 
+}
+.opcoes-tipo { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 10px; 
+}
 
 .opcoes-tipo label {
   display: flex;
@@ -119,7 +158,9 @@ input:focus { outline: 2px solid var(--fundo); outline-offset: 1px; }
   border-color: var(--fundo);
 }
 
-input[type="radio"] { accent-color: var(--fundo); }
+input[type="radio"] { 
+  accent-color: var(--fundo); 
+}
 
 a, .formulario-cadastro p label, .login p label {
   color: var(--fundo);
@@ -127,7 +168,10 @@ a, .formulario-cadastro p label, .login p label {
   cursor: pointer;
 }
 
-a { font-size: 13px; text-decoration: none; }
+a { 
+  font-size: 13px; 
+  text-decoration: none; 
+}
 
 button {
   padding: 13px;
@@ -155,10 +199,17 @@ button {
   font-size: 13px;
 }
 
-.mensagem.sucesso { color: var(--fundo); }
-.mensagem.erro { color: #ff9e9e; }
+.mensagem.sucesso { 
+  color: var(--fundo); 
+}
+.mensagem.erro { 
+  color: #ff9e9e; 
+}
 
 @media (max-width: 420px) {
-  body { padding: 16px; }
-  .secao-formulario { padding: 20px; }
+  body { padding: 16px; 
+  }
+  .secao-formulario { 
+    padding: 20px; 
+  }
 }

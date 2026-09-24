@@ -9,12 +9,31 @@
 </head>
 <body class="pagina-admin">
   <main class="admin">
-    <header class="cabecalho-admin"><div><p>ConectaSaúde</p><h1>Administração de perguntas</h1></div><button id="sair" class="botao-sair" type="button">Sair</button></header>
+    <header class="cabecalho-admin"><div><p>ConectaSaúde</p><h1>Painel administrativo</h1></div><button id="sair" class="botao-sair" type="button">Sair</button></header>
     <section class="introducao"><h2>Questões enviadas pelos professores</h2><p>Revise o conteúdo antes de disponibilizá-lo aos alunos.</p></section>
     <p id="mensagem-admin" class="mensagem" role="status"></p>
     <div id="lista-perguntas" class="lista-perguntas"></div>
     <p id="sem-perguntas" hidden>Nenhuma pergunta foi enviada até agora.</p>
+    <section class="auditoria" aria-labelledby="titulo-auditoria">
+      <div class="cabecalho-secao">
+        <div>
+          <h2 id="titulo-auditoria">Auditoria de acessos</h2>
+          <p>Atividades recentes de usuários e funcionalidades do sistema.</p>
+        </div>
+        <button id="atualizar-auditoria" type="button">Atualizar</button>
+      </div>
+      <div class="tabela-auditoria">
+        <table>
+          <thead>
+            <tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Recurso</th><th>Rota</th></tr>
+          </thead>
+          <tbody id="corpo-auditoria"></tbody>
+        </table>
+      </div>
+      <p id="sem-auditoria" hidden>Nenhum registro de auditoria encontrado.</p>
+    </section>
   </main>
-  <script src="../js/admin.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/admin.js"></script>
 </body>
 </html>

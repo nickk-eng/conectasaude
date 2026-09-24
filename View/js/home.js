@@ -7,7 +7,7 @@ const tituloHome = document.querySelector('#titulo-home');
 
 let nivelEscolhido = '';
 async function iniciarPagina() {
-  const resposta = await fetch('/api/auth/eu');
+  const resposta = await apiFetch('/api/auth/eu');
   if (!resposta.ok) return window.location.href = '/';
   const { usuario } = await resposta.json();
   tipoUsuario.textContent = `Olá, ${usuario.email}!`;
@@ -20,7 +20,7 @@ async function iniciarPagina() {
 
 }
 async function mostrarAlunos() {
-  const resposta = await fetch('/api/professor/alunos');
+  const resposta = await apiFetch('/api/professor/alunos');
   const { alunos } = await resposta.json();
   const corpo = document.querySelector('#corpo-alunos');
   document.querySelector('#total-alunos').textContent = alunos.length;
@@ -62,7 +62,7 @@ document.querySelector('#cancelar-pergunta')?.addEventListener('click', () => {
 document.querySelector('#criar-pergunta')?.addEventListener('submit', async (evento) => {
   evento.preventDefault();
   const formulario = new FormData(evento.currentTarget);
-  const resposta = await fetch('/api/professor/perguntas', {
+  const resposta = await apiFetch('/api/professor/perguntas', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ texto: formulario.get('texto'), alternativas: [formulario.get('alternativa1'), formulario.get('alternativa2'), formulario.get('alternativa3')], respostaCorreta: formulario.get('respostaCorreta'), nivel: formulario.get('nivel') })
   });
@@ -73,7 +73,11 @@ document.querySelector('#criar-pergunta')?.addEventListener('submit', async (eve
 });
 
 document.querySelector('#sair').addEventListener('click', async () => {
-  await fetch('/api/auth/sair', { method: 'POST' });
+  try {
+    await apiFetch('/api/auth/sair', { method: 'POST' });
+  } finally {
+  removerToken();
+  }
   window.location.href = '/';
 });
 iniciarPagina();

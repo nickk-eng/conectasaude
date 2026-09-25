@@ -1,0 +1,104 @@
+.pagina-legal {
+  display: block;
+  padding: 32px 16px;
+}
+.documento-legal {
+  width: min(100%, 980px);
+  margin: 0 auto;
+  padding: clamp(24px, 5vw, 56px);
+  border: 1px solid #285062;
+  border-radius: 20px;
+  background: var(--cartao);
+}
+.documento-legal header {
+  margin: 22px 0 38px;
+  text-align: left;
+}
+.documento-legal header h1 {
+  font-size: clamp(30px, 5vw, 44px);
+}
+.documento-legal header p,
+.documento-legal p {
+  color: var(--padrao);
+  line-height: 1.65;
+}
+.documento-legal section {
+  margin-top: 30px;
+}
+.documento-legal h2 {
+  margin-bottom: 12px;
+  font-size: 21px;
+}
+.documento-legal strong {
+  color: var(--texto);
+}
+.etiqueta {
+  color: var(--fundo) !important;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.tabela-responsiva {
+  overflow-x: auto;
+  border: 1px solid #285062;
+  border-radius: 12px;
+}
+.documento-legal table {
+  width: 100%;
+  min-width: 800px;
+  border-collapse: collapse;
+}
+.documento-legal th,
+.documento-legal td {
+  padding: 14px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid #285062;
+  color: var(--padrao);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.documento-legal th {
+  color: var(--texto);
+  background: #0d1b2a;
+}
+.form-privacidade {
+  display: grid;
+  gap: 14px;
+  max-width: 620px;
+  margin-top: 20px;
+}
+.form-privacidade label {
+  display: grid;
+  gap: 6px;
+  color: var(--texto);
+  font-weight: 700;
+  font-size: 14px;
+}
+.form-privacidade select,
+.form-privacidade textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #285062;
+  border-radius: 10px;
+  color: var(--texto);
+  background: var(--fundo-inicial);
+  font: inherit;
+}
+.form-privacidade textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+.form-privacidade select:focus,
+.form-privacidade textarea:focus {
+  outline: 2px solid var(--fundo);
+  outline-offset: 1px;
+}
+.rodape-documento {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 42px;
+  padding-top: 22px;
+  border-top: 1px solid #285062;
+}

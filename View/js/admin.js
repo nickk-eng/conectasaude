@@ -8,6 +8,7 @@ function formatarData(data) { return new Date(data).toLocaleString('pt-BR'); }
 
 async function carregarPerguntas() {
 
+  
   const resposta = await apiFetch('/api/admin/perguntas');
   if (!resposta.ok) return window.location.href = '/';
   const { perguntas } = await resposta.json();

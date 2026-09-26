@@ -7,6 +7,7 @@ const telaPerfil = document.querySelector('#tela-perfil');
 let usuarioAtual = null;
 
 
+
 let nivelEscolhido = '';
 async function iniciarPagina() {
   const resposta = await apiFetch('/api/auth/eu');

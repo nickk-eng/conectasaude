@@ -22,4 +22,5 @@ formPrivacidade.addEventListener("submit", async (evento) => {
     mensagemPrivacidade.textContent = "Não foi possível conectar ao servidor.";
     mensagemPrivacidade.className = "mensagem erro";
   }
+  
 });

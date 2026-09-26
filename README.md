@@ -47,6 +47,7 @@ ADMIN_SENHA=uma-senha-forte
 PORT=3000
 ```
 
+
 - `DATABASE_URL`: conexão com o PostgreSQL. Altere usuário, senha, servidor ou porta quando necessário.
 - `ADMIN_EMAIL` e `ADMIN_SENHA`: credenciais da conta de administrador criada na primeira inicialização.
 - `PORT`: porta em que o site será aberto. O valor padrão é `3000`.

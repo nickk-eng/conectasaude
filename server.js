@@ -9,6 +9,7 @@ const view = path.join(__dirname, 'View');
 const VERSAO_TERMOS = '1.0';
 const AUTOR_SEMENTE_ID = '4cbe19df-8f77-4e17-990f-a84240734ff5';
 
+
 app.use(express.json());
 app.use('/css', express.static(path.join(view, 'css')));
 app.use('/js', express.static(path.join(view, 'js')));

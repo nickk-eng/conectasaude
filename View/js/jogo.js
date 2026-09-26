@@ -14,6 +14,7 @@ let respostaEncerrada = false;
 let tempo;
 
 
+
 async function carregarPerguntasAprovadas() {
 
   const resposta = await apiFetch(

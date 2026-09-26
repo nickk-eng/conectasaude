@@ -23,6 +23,7 @@ document.querySelectorAll('.botao-olho').forEach((botao) => {
   });
 });
 
+
 formCadastro.addEventListener('submit', async (evento) => {
   evento.preventDefault();
   mostrarMensagem('');

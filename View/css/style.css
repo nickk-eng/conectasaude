@@ -231,6 +231,7 @@ button {
   box-sizing: border-box;
 }
 
+
 .campo-senha input[type="text"] {
   color: var(--texto) !important;
   background-color: var(--fundo-inicial) !important;

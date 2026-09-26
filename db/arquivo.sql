@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS perguntas (
     criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+
 ALTER TABLE perguntas
     ADD COLUMN IF NOT EXISTS avaliada_por UUID
     REFERENCES usuarios(id)

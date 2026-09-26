@@ -36,4 +36,5 @@ formularioRecuperacao.addEventListener('submit', async (evento) => {
   } finally {
     botao.disabled = false;
   }
+  
 });

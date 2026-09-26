@@ -18,6 +18,7 @@ function hash(senha) {
   return bcrypt.hash(senha, 12);
 }
 
+
 function confereSenha(senha, salva) {
   return bcrypt.compare(senha, salva);
 }

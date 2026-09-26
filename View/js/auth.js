@@ -16,3 +16,4 @@ function apiFetch(url, opcoes = {}) {
 
   return fetch(url, { ...opcoes, headers: cabecalhos });
 }
+

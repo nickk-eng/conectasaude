@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar senha | ConectaSaúde</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <main class="container">
+    <div class="logo"><img src="../../img/coracao.png" alt="Logo do ConectaSaúde"></div>
+    <h1>Recuperar senha</h1>
+    <p>Informe seu e-mail e escolha uma nova senha.</p>
+    <p class="aviso-recuperacao">Esta versão não confirma a identidade por e-mail. Use apenas em ambiente de demonstração.</p>
+    <form id="form-recuperar-senha">
+      <label for="email-recuperacao">E-mail da conta</label>
+      <input id="email-recuperacao" name="email" type="email" autocomplete="email" maxlength="150" required>
+      <label for="nova-senha">Nova senha (mínimo de 8 caracteres)</label>
+      <input id="nova-senha" name="novaSenha" type="password" autocomplete="new-password" minlength="8" required>
+      <label for="confirmar-senha">Confirme a nova senha</label>
+      <input id="confirmar-senha" name="confirmarSenha" type="password" autocomplete="new-password" minlength="8" required>
+      <button class="botao-enviar" type="submit">Salvar nova senha</button>
+      <p id="mensagem-recuperacao" class="mensagem" role="status" aria-live="polite"></p>
+      <p><a href="/">Voltar para entrar</a></p>
+    </form>
+  </main>
+  <script src="/js/solicitar-redefinicao.js"></script>
+</body>
+</html>

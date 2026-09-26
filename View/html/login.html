@@ -10,37 +10,31 @@
     <main class="container">
         <input type="radio" id="entrar" name="aba-formulario" checked>
         <input type="radio" id="cadastrar" name="aba-formulario">
-
         <header>
             <div class="logo"><img src="/img/coracao.png" alt="Logo do ConectaSaúde"></div>
             <h1>Bem-vindo ao ConectaSaúde</h1>
             <p>Acesse ou crie sua conta para continuar.</p>
         </header>
-
         <section class="secao-formulario">
             <nav class="nav-formulario" aria-label="Acesso à conta">
                 <label for="entrar">Entrar</label>
                 <label for="cadastrar">Cadastrar</label>
             </nav>
-
             <form class="login" id="form-login">
-                <label>
-                    E-mail
-                    <input name="email" type="email" placeholder="Digite seu e-mail" required>
-                </label>
-                <label>
-                    Senha
-                    <input name="password" type="password" placeholder="Sua senha" required>
-                </label>
-                <button type="submit">Entrar</button>
+                <label for="email-login">E-mail</label>
+                <input id="email-login" name="email" type="email" placeholder="Digite seu e-mail" autocomplete="email" maxlength="150" required>
+                <label for="senha-login">Senha</label>
+                <div class="campo-senha">
+                    <input id="senha-login" name="password" type="password" placeholder="Sua senha" autocomplete="current-password" required>
+                    <button class="botao-olho" type="button" data-campo="senha-login" aria-label="Mostrar senha" title="Mostrar senha"><svg class="icone-olho" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+                <p><a href="/alterar-senha">Esqueci minha senha</a></p>
+                <button class="botao-enviar" type="submit">Entrar</button>
                 <p>Não tem uma conta? <label for="cadastrar">Cadastrar</label></p>
             </form>
-
             <form class="formulario-cadastro" id="form-cadastro">
-                <label>
-                    E-mail
-                    <input name="email" type="email" placeholder="Digite seu e-mail" required>
-                </label>
+                <label for="email-cadastro">E-mail</label>
+                <input id="email-cadastro" name="email" type="email" placeholder="Digite seu e-mail" autocomplete="email" maxlength="150" required>
                 <fieldset class="tipo-usuario">
                     <legend>Você é:</legend>
                     <div class="opcoes-tipo">
@@ -48,15 +42,18 @@
                         <label><input type="radio" name="tipo_usuario" value="professor" required> Professor</label>
                     </div>
                 </fieldset>
-                <label>
-                    Senha
-                    <input name="password" type="password" placeholder="Sua senha" required>
-                </label>
-                <label>
-                    Confirmar senha
-                    <input name="confirm_password" type="password" placeholder="Confirme sua senha" required>
-                </label>
-                <button type="submit">Criar conta</button>
+                <label for="senha-cadastro">Senha</label>
+                <div class="campo-senha">
+                    <input id="senha-cadastro" name="password" type="password" autocomplete="new-password" minlength="8" pattern="(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}" title="Use ao menos 8 caracteres, uma letra maiúscula, um número e um caractere especial." required placeholder="Digite sua senha">
+                    <button class="botao-olho" type="button" data-campo="senha-cadastro" aria-label="Mostrar senha" title="Mostrar senha"><svg class="icone-olho" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+                <label for="confirmar-senha">Confirmar senha</label>
+                <div class="campo-senha">
+                    <input id="confirmar-senha" name="confirm_password" type="password" autocomplete="new-password" minlength="8" required placeholder="Confirme sua senha">
+                    <button class="botao-olho" type="button" data-campo="confirmar-senha" aria-label="Mostrar senha" title="Mostrar senha"><svg class="icone-olho" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                </div>
+                <label class="aceite-termos"><input type="checkbox" name="aceitar_termos" required><span>Li e aceito os <a href="/termos" target="_blank" rel="noopener">Termos de Uso</a>.</span></label>
+                <button class="botao-enviar" type="submit">Criar conta</button>
                 <p>Já tem uma conta? <label for="entrar">Entrar</label></p>
             </form>
             <p class="mensagem" id="mensagem" role="status" aria-live="polite"></p>

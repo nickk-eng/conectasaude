@@ -14,7 +14,7 @@
         <div class="logo"><img src="../../img/coracao.png" alt="Logo do ConectaSaúde"></div>
         <strong>ConectaSaúde</strong>
       </div>
-      <button id="sair" class="botao-sair" type="button">Sair</button>
+      <div class="acoes-conta"><button id="abrir-perfil" class="botao-perfil" type="button">Meu perfil</button><button id="sair" class="botao-sair" type="button">Sair</button></div>
     </header>
 
     <section class="boas-vindas">
@@ -22,6 +22,45 @@
       <h1 id="titulo-home">Bem-vindo ao ConectaSaúde</h1>
       <p id="texto-home">Aprenda sobre saúde de um jeito simples e divertido.</p>
     </section>
+
+<dialog id="tela-perfil" class="tela-perfil" aria-labelledby="titulo-perfil">
+    <form id="form-perfil">
+        <div class="cabecalho-perfil">
+            <div>
+                <p>Minha conta</p>
+                <h2 id="titulo-perfil">Meu perfil</h2>
+            </div>
+            <button id="fechar-perfil" class="fechar-perfil" type="button" aria-label="Fechar"> x </button>
+        </div>
+
+        <img id="avatar-perfil" mclass="avatar-perfil"  src="" alt="Avatar do perfil">
+        <p id="tipo-perfil" class="tipo-perfil"></p>
+        <label for="email-perfil">E-mail</label>
+        <input  id="email-perfil"  type="email"readonly>
+
+        <label for="nome-perfil">Nome</label>
+        <input  id="nome-perfil" name="nome" type="text" maxlength="60" autocomplete="name" required>
+        <label id="label-turma-perfil" for="turma-perfil">Turma / ano </label>
+        <input id="turma-perfil"  name="turma" type="text" maxlength="60" placeholder="Ex.: 8º ano" >
+        <p id="mensagem-perfil" class="mensagem" role="status" aria-live="polite"></p>
+        <div class="acoes-perfil">
+            <button type="submit">  Salvar alterações </button>
+            <button id="cancelar-perfil" class="botao-secundario" type="button"> Fechar</button>
+        </div>
+    </form>
+
+    <section  class="conta-encerramento" aria-labelledby="titulo-encerrar-conta">
+        <h3 id="titulo-encerrar-conta"> Excluir conta </h3>
+        <p> O acesso será bloqueado e sua sessão será encerrada.
+            Confirme sua senha para continuar.</p>
+        <form id="form-encerrar-conta">
+            <label for="senha-encerrar-conta"> Confirme sua senha </label>
+            <input id="senha-encerrar-conta" name="senha" type="password" autocomplete="current-password" required>
+            <button class="botao-encerrar-conta" type="submit"> Excluir minha conta </button>
+        </form>
+        <p id="mensagem-conta" class="mensagem" role="status" aria-live="polite"></p>
+    </section>
+</dialog>
 
     <section id="area-aluno">
       <h2>Escolha a dificuldade</h2>
@@ -77,7 +116,10 @@
         </form>
       </section>
     </section>
-  </main>
+    <footer class="links-legais-home" aria-label="Informações legais">
+      <a href="/termos">Termos de Uso</a>
+      <a href="/privacidade">Política de Privacidade</a>
+    </footer>  </main>
   <script src="/js/auth.js"></script>
   <script src="/js/home.js"></script>
 </body>

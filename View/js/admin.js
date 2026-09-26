@@ -20,6 +20,14 @@ async function carregarPerguntas() {
   }).join('');
 }
 
+async function carregarSolicitacoesPrivacidade() {
+  const resposta = await apiFetch('/api/admin/solicitacoes-privacidade');
+  if (!resposta.ok) return;
+  const { solicitacoes } = await resposta.json();
+  const corpo = document.querySelector('#corpo-solicitacoes');
+  document.querySelector('#sem-solicitacoes').hidden = solicitacoes.length > 0;
+  corpo.innerHTML = solicitacoes.map((item) => `<tr><td>${escapar(formatarData(item.criado_em))}</td><td>${escapar(item.solicitante)}</td><td>${escapar(item.tipo)}</td><td>${escapar(item.mensagem || '—')}</td><td>${escapar(item.status)}</td></tr>`).join('');
+}
 async function carregarAuditoria() {
   const resposta = await apiFetch('/api/admin/auditoria?limite=50');
   if (!resposta.ok) return;
@@ -43,10 +51,13 @@ lista.addEventListener('click', async (evento) => {
   if (resposta.ok) {
     carregarPerguntas();
     carregarAuditoria();
+carregarSolicitacoesPrivacidade();
   } else botao.disabled = false;
 });
 
 document.querySelector('#atualizar-auditoria').addEventListener('click', carregarAuditoria);
+document.querySelector('#atualizar-solicitacoes').addEventListener('click', carregarSolicitacoesPrivacidade);
 document.querySelector('#sair').addEventListener('click', async () => { try { await apiFetch('/api/auth/sair', { method: 'POST' }); } finally { removerToken(); } window.location.href = '/'; });
 carregarPerguntas();
 carregarAuditoria();
+carregarSolicitacoesPrivacidade();

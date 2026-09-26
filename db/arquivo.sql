@@ -4,79 +4,140 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 DO $$ 
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'perfil_usuario') THEN
-        CREATE TYPE perfil_usuario AS ENUM ('aluno', 'professor', 'admin');
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_type
+        WHERE typname = 'perfil_usuario'
+    ) THEN
+        CREATE TYPE perfil_usuario AS ENUM (
+            'aluno',
+            'professor',
+            'admin'
+        );
     END IF;
 END $$;
 
 CREATE TABLE IF NOT EXISTS usuarios (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email VARCHAR(150) NOT NULL UNIQUE,
-  senha_hash TEXT NOT NULL,
-  perfil perfil_usuario NOT NULL,
-  nome VARCHAR(60) NOT NULL DEFAULT '',
-  turma VARCHAR(60) NOT NULL DEFAULT '',
-  criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(150) NOT NULL,
+    senha_hash TEXT NOT NULL,
+    perfil perfil_usuario NOT NULL,
+    nome VARCHAR(60) NOT NULL DEFAULT '',
+    turma VARCHAR(60) NOT NULL DEFAULT '',
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    encerrada_em TIMESTAMPTZ,
+    termos_aceitos_em TIMESTAMPTZ,
+    termos_versao VARCHAR(20)
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_ativo_idx
+    ON usuarios(email)
+    WHERE ativo = TRUE;
 
 CREATE TABLE IF NOT EXISTS sessoes (
-  id UUID PRIMARY KEY,
-  usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
-  expira_em TIMESTAMPTZ NOT NULL,
-  criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id UUID PRIMARY KEY,
+    usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    expira_em TIMESTAMPTZ NOT NULL,
+    criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS sessoes_usuario_id_idx ON sessoes(usuario_id);
+CREATE INDEX IF NOT EXISTS sessoes_usuario_id_idx
+    ON sessoes(usuario_id);
+
+ALTER TABLE usuarios
+    ADD COLUMN IF NOT EXISTS termos_aceitos_em TIMESTAMPTZ;
+
+ALTER TABLE usuarios
+    ADD COLUMN IF NOT EXISTS termos_versao VARCHAR(20);
+
 
 CREATE TABLE IF NOT EXISTS auditoria_acessos (
-  id BIGSERIAL PRIMARY KEY,
-  usuario_id UUID REFERENCES usuarios(id) ON DELETE SET NULL,
-  usuario_email VARCHAR(150),
-  perfil VARCHAR(20),
-  acao VARCHAR(80) NOT NULL,
-  recurso VARCHAR(120) NOT NULL,
-  detalhes JSONB NOT NULL DEFAULT '{}'::jsonb,
-  metodo VARCHAR(10) NOT NULL,
-  rota TEXT NOT NULL,
-  ip VARCHAR(80),
-  user_agent TEXT,
-  criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id BIGSERIAL PRIMARY KEY,
+    usuario_id UUID REFERENCES usuarios(id) ON DELETE SET NULL,
+    usuario_email VARCHAR(150),
+    perfil VARCHAR(20),
+    acao VARCHAR(80) NOT NULL,
+    recurso VARCHAR(120) NOT NULL,
+    detalhes JSONB NOT NULL DEFAULT '{}'::jsonb,
+    metodo VARCHAR(10) NOT NULL,
+    rota TEXT NOT NULL,
+    ip VARCHAR(80),
+    user_agent TEXT,
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS auditoria_acessos_criado_em_idx ON auditoria_acessos(criado_em DESC);
-CREATE INDEX IF NOT EXISTS auditoria_acessos_usuario_id_idx ON auditoria_acessos(usuario_id);
+CREATE INDEX IF NOT EXISTS auditoria_acessos_criado_em_idx
+    ON auditoria_acessos(criado_em DESC);
+
+CREATE INDEX IF NOT EXISTS auditoria_acessos_usuario_id_idx
+    ON auditoria_acessos(usuario_id);
+
+CREATE TABLE IF NOT EXISTS solicitacoes_privacidade (
+    id BIGSERIAL PRIMARY KEY,
+    usuario_id UUID NOT NULL
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE,
+    tipo VARCHAR(30) NOT NULL,
+    mensagem TEXT NOT NULL DEFAULT '',
+    status VARCHAR(20) NOT NULL DEFAULT 'recebida',
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS solicitacoes_privacidade_usuario_id_idx
+    ON solicitacoes_privacidade(usuario_id);
 
 CREATE TABLE IF NOT EXISTS perguntas (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  texto TEXT NOT NULL,
-  alternativas JSONB NOT NULL,
-  resposta_correta INT NOT NULL,
-  nivel VARCHAR(20) NOT NULL,
-  status VARCHAR(20) NOT NULL DEFAULT 'pendente',
-  autor_id UUID REFERENCES usuarios(id) ON DELETE SET NULL,
-  criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    texto TEXT NOT NULL,
+    alternativas JSONB NOT NULL,
+    resposta_correta INT NOT NULL,
+    nivel VARCHAR(20) NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pendente',
+    autor_id UUID REFERENCES usuarios(id) ON DELETE SET NULL,
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 ALTER TABLE perguntas
-DROP CONSTRAINT IF EXISTS perguntas_resposta_correta_check;
+    ADD COLUMN IF NOT EXISTS avaliada_por UUID
+    REFERENCES usuarios(id)
+    ON DELETE SET NULL;
 
 ALTER TABLE perguntas
-ADD CONSTRAINT perguntas_resposta_correta_check
-CHECK (resposta_correta BETWEEN 0 AND 3);
+    ADD COLUMN IF NOT EXISTS avaliada_em TIMESTAMPTZ;
 
--- Garantir existência do autor com o UUID fornecido
-INSERT INTO usuarios (id, email, senha_hash, perfil, nome)
+
+ALTER TABLE perguntas
+    DROP CONSTRAINT IF EXISTS perguntas_resposta_correta_check;
+
+ALTER TABLE perguntas
+    ADD CONSTRAINT perguntas_resposta_correta_check
+    CHECK (resposta_correta BETWEEN 0 AND 3);
+
+INSERT INTO usuarios (
+    id,
+    email,
+    senha_hash,
+    perfil,
+    nome
+)
 VALUES (
     '4cbe19df-8f77-4e17-990f-a84240734ff5',
-    'autor@sistema.com',
-    'hash_temporaria_mudar_depois',
-    'admin',
-    'Autor das Perguntas'
+    'autor-semente@invalid.local',
+    'seed-only-not-a-login',
+    'professor',
+    'Autor temporário das perguntas de exemplo'
 )
 ON CONFLICT (id) DO NOTHING;
-
 INSERT INTO perguntas
-(texto, alternativas, resposta_correta, nivel, status, autor_id)
+(
+    texto,
+    alternativas,
+    resposta_correta,
+    nivel,
+    status,
+    autor_id
+)
 VALUES
 
 (
@@ -384,5 +445,6 @@ VALUES
     'aprovada',
     '4cbe19df-8f77-4e17-990f-a84240734ff5'
 );
+
 
 COMMIT;

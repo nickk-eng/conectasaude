@@ -14,7 +14,19 @@
     <p id="mensagem-admin" class="mensagem" role="status"></p>
     <div id="lista-perguntas" class="lista-perguntas"></div>
     <p id="sem-perguntas" hidden>Nenhuma pergunta foi enviada até agora.</p>
-    <section class="auditoria" aria-labelledby="titulo-auditoria">
+    <section class="auditoria" aria-labelledby="titulo-solicitacoes">
+      <div class="cabecalho-secao">
+        <div><h2 id="titulo-solicitacoes">Solicitações de privacidade</h2><p>Pedidos registrados pelos usuários para análise da equipe.</p></div>
+        <button id="atualizar-solicitacoes" type="button">Atualizar</button>
+      </div>
+      <div class="tabela-auditoria">
+        <table>
+          <thead><tr><th>Data</th><th>Solicitante</th><th>Tipo</th><th>Detalhes</th><th>Status</th></tr></thead>
+          <tbody id="corpo-solicitacoes"></tbody>
+        </table>
+      </div>
+      <p id="sem-solicitacoes" hidden>Nenhuma solicitação recebida.</p>
+    </section>    <section class="auditoria" aria-labelledby="titulo-auditoria">
       <div class="cabecalho-secao">
         <div>
           <h2 id="titulo-auditoria">Auditoria de acessos</h2>

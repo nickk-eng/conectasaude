@@ -57,6 +57,19 @@
                 <button class="botao-enviar" type="submit">Criar conta</button>
                 <p>Já tem uma conta? <label for="entrar">Entrar</label></p>
             </form>
+            <form class="confirmacao-totp" id="form-confirmacao-totp" hidden>
+                <h2 id="titulo-mfa">Confirme seu acesso</h2>
+                <p id="instrucao-mfa">Abra seu aplicativo autenticador e informe o código de 6 dígitos.</p>
+                <div class="qr-totp" id="area-qr-totp" hidden>
+                    <img id="qr-code-totp" alt="QR Code para configurar o aplicativo autenticador">
+                    <p>Não consegue escanear? Adicione uma chave manualmente:</p>
+                    <code id="chave-manual-totp"></code>
+                </div>
+                <label for="codigo-totp">Código do autenticador</label>
+                <input id="codigo-totp" name="codigo" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" required>
+                <button class="botao-enviar" type="submit">Confirmar e entrar</button>
+                <button class="link-botao" id="voltar-login" type="button">Voltar ao login</button>
+            </form>
             <p class="mensagem" id="mensagem" role="status" aria-live="polite"></p>
         </section>
     </main>

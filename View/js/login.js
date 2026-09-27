@@ -1,7 +1,9 @@
 const formCadastro = document.querySelector('#form-cadastro');
 const formLogin = document.querySelector('#form-login');
+const formConfirmacaoTotp = document.querySelector('#form-confirmacao-totp');
 const mensagem = document.querySelector('#mensagem');
 const abaEntrar = document.querySelector('#entrar');
+let desafioMfaId = '';
 
 function mostrarMensagem(texto, tipo = '') {
   mensagem.textContent = texto;
@@ -10,6 +12,17 @@ function mostrarMensagem(texto, tipo = '') {
 
 function emailNormalizado(valor) {
   return valor.trim().toLowerCase();
+}
+
+function voltarParaLogin() {
+  formConfirmacaoTotp.hidden = true;
+  formLogin.hidden = false;
+  document.querySelector('#codigo-totp').value = '';
+  document.querySelector('#area-qr-totp').hidden = true;
+  document.querySelector('#qr-code-totp').src = '';
+  document.querySelector('#chave-manual-totp').textContent = '';
+  desafioMfaId = '';
+  mostrarMensagem('');
 }
 
 document.querySelectorAll('.botao-olho').forEach((botao) => {
@@ -60,16 +73,54 @@ formLogin.addEventListener('submit', async (evento) => {
   mostrarMensagem('');
   const dados = new FormData(formLogin);
   try {
+    const email = emailNormalizado(dados.get('email'));
     const resposta = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: emailNormalizado(dados.get('email')), senha: dados.get('password') })
+      body: JSON.stringify({ email, senha: dados.get('password') })
     });
     const resultado = await resposta.json();
     if (!resposta.ok) return mostrarMensagem(resultado.mensagem || 'Não foi possível entrar.', 'erro');
+    if (resultado.mfaRequerida) {
+      desafioMfaId = resultado.desafioId;
+      formLogin.hidden = true;
+      document.querySelector('#titulo-mfa').textContent = resultado.configuracaoMfa ? 'Configure seu autenticador' : 'Confirme seu acesso';
+      document.querySelector('#instrucao-mfa').textContent = resultado.mensagem;
+      document.querySelector('#area-qr-totp').hidden = !resultado.configuracaoMfa;
+      document.querySelector('#qr-code-totp').src = resultado.qrCode || '';
+      document.querySelector('#chave-manual-totp').textContent = resultado.chaveManual || '';
+      formConfirmacaoTotp.hidden = false;
+      document.querySelector('#codigo-totp').focus();
+      return mostrarMensagem(resultado.mensagem, 'sucesso');
+    }
     salvarToken(resultado.token);
     window.location.href = resultado.usuario.perfil === 'admin' ? '/admin' : '/home';
   } catch {
     mostrarMensagem('Não foi possível conectar ao servidor.', 'erro');
   }
+});
+
+formConfirmacaoTotp.addEventListener('submit', async (evento) => {
+  evento.preventDefault();
+  mostrarMensagem('');
+  const codigo = document.querySelector('#codigo-totp').value.replace(/\D/g, '');
+  try {
+    const resposta = await fetch('/api/auth/verificar-totp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ desafioId: desafioMfaId, codigo })
+    });
+    const resultado = await resposta.json();
+    if (!resposta.ok) return mostrarMensagem(resultado.mensagem || 'Não foi possível confirmar o código.', 'erro');
+    salvarToken(resultado.token);
+    window.location.href = resultado.usuario.perfil === 'admin' ? '/admin' : '/home';
+  } catch {
+    mostrarMensagem('Não foi possível conectar ao servidor.', 'erro');
+  }
+});
+
+document.querySelector('#voltar-login').addEventListener('click', voltarParaLogin);
+
+document.querySelector('#cadastrar').addEventListener('change', () => {
+  if (document.querySelector('#cadastrar').checked) voltarParaLogin();
 });

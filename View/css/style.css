@@ -111,7 +111,9 @@ header p {
 }
 
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+input[type="tel"],
+input[inputmode="numeric"] {
   width: 100%;
   padding: 12px;
   font: inherit;
@@ -321,4 +323,64 @@ button {
   line-height: 1.45;
   color: var(--padrao);
   cursor: pointer;
+}
+
+.confirmacao-totp {
+  display: grid;
+  gap: 16px;
+}
+
+.confirmacao-totp[hidden] {
+  display: none;
+}
+
+.confirmacao-totp h2 {
+  font-size: 20px;
+}
+
+.confirmacao-totp p,
+.login label span {
+  color: var(--padrao);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.qr-totp {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 14px;
+  text-align: center;
+  border: 1px solid #285062;
+  border-radius: 10px;
+}
+
+.qr-totp[hidden] {
+  display: none;
+}
+
+.qr-totp img {
+  width: 180px;
+  height: 180px;
+  padding: 6px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.qr-totp code {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: var(--texto);
+}
+
+.botao-secundario,
+.link-botao {
+  color: var(--texto);
+  background: transparent;
+  border: 1px solid #285062;
+}
+
+.link-botao {
+  border: 0;
+  color: var(--fundo);
 }

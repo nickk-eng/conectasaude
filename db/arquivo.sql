@@ -28,7 +28,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     encerrada_em TIMESTAMPTZ,
     termos_aceitos_em TIMESTAMPTZ,
-    termos_versao VARCHAR(20)
+    termos_versao VARCHAR(20),
+    mfa_totp_segredo TEXT,
+    mfa_totp_ativo BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_ativo_idx
@@ -50,6 +52,45 @@ ALTER TABLE usuarios
 
 ALTER TABLE usuarios
     ADD COLUMN IF NOT EXISTS termos_versao VARCHAR(20);
+
+ALTER TABLE usuarios
+    ADD COLUMN IF NOT EXISTS mfa_totp_segredo TEXT;
+
+ALTER TABLE usuarios
+    ADD COLUMN IF NOT EXISTS mfa_totp_ativo BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE usuarios
+    DROP COLUMN IF EXISTS telefone;
+
+CREATE TABLE IF NOT EXISTS desafios_mfa (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('login', 'configuracao')),
+    segredo_temporario TEXT,
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expira_em TIMESTAMPTZ NOT NULL,
+    tentativas SMALLINT NOT NULL DEFAULT 0
+);
+
+DELETE FROM desafios_mfa;
+
+ALTER TABLE desafios_mfa
+    DROP COLUMN IF EXISTS telefone;
+
+ALTER TABLE desafios_mfa
+    DROP COLUMN IF EXISTS ultimo_envio_em;
+
+ALTER TABLE desafios_mfa
+    DROP COLUMN IF EXISTS reenvios;
+
+ALTER TABLE desafios_mfa
+    ADD COLUMN IF NOT EXISTS tipo VARCHAR(20) NOT NULL DEFAULT 'login';
+
+ALTER TABLE desafios_mfa
+    ADD COLUMN IF NOT EXISTS segredo_temporario TEXT;
+
+CREATE INDEX IF NOT EXISTS desafios_mfa_usuario_expira_idx
+    ON desafios_mfa(usuario_id, expira_em DESC);
 
 
 CREATE TABLE IF NOT EXISTS auditoria_acessos (

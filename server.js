@@ -1,13 +1,19 @@
 const express = require('express');
 const path = require('path');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
+const { generateSecret, generateURI, verify } = require('otplib');
+const QRCode = require('qrcode');
 
 const app = express();
 const banco = new Pool({ connectionString: process.env.DATABASE_URL });
 const view = path.join(__dirname, 'View');
 const VERSAO_TERMOS = '1.0';
 const AUTOR_SEMENTE_ID = '4cbe19df-8f77-4e17-990f-a84240734ff5';
+const DURACAO_DESAFIO_MFA = '10 minutes';
+const MAX_TENTATIVAS_MFA = 5;
+const NOME_AUTENTICADOR = 'ConectaSaúde';
 
 
 app.use(express.json());
@@ -22,6 +28,74 @@ function hash(senha) {
 
 function confereSenha(senha, salva) {
   return bcrypt.compare(senha, salva);
+}
+
+function idDesafioValido(id) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(id || ''));
+}
+
+function chaveMfa() {
+  const chave = Buffer.from(String(process.env.MFA_ENCRYPTION_KEY || ''), 'base64');
+  if (chave.length !== 32) {
+    throw new Error('MFA_ENCRYPTION_KEY deve conter uma chave Base64 de 32 bytes.');
+  }
+  return chave;
+}
+
+function cifrarSegredoMfa(segredo) {
+  const iv = crypto.randomBytes(12);
+  const cifra = crypto.createCipheriv('aes-256-gcm', chaveMfa(), iv);
+  const conteudo = Buffer.concat([cifra.update(segredo, 'utf8'), cifra.final()]);
+  return [iv.toString('base64'), cifra.getAuthTag().toString('base64'), conteudo.toString('base64')].join('.');
+}
+
+function decifrarSegredoMfa(valor) {
+  const [ivCodificado, tagCodificada, conteudoCodificado] = String(valor || '').split('.');
+  if (!ivCodificado || !tagCodificada || !conteudoCodificado) throw new Error('Segredo TOTP inválido.');
+  const decifra = crypto.createDecipheriv('aes-256-gcm', chaveMfa(), Buffer.from(ivCodificado, 'base64'));
+  decifra.setAuthTag(Buffer.from(tagCodificada, 'base64'));
+  return Buffer.concat([decifra.update(Buffer.from(conteudoCodificado, 'base64')), decifra.final()]).toString('utf8');
+}
+
+async function criarSessao(usuario, req) {
+  const sessao = await banco.query(
+    `INSERT INTO sessoes (id, usuario_id, expira_em)
+     VALUES (gen_random_uuid(), $1, NOW() + INTERVAL '8 hours')
+     RETURNING id`,
+    [usuario.id]
+  );
+  await registrarAuditoria(req, 'login_realizado', 'autenticacao', {}, usuario);
+  return sessao.rows[0].id;
+}
+
+async function desafioMfaAtivo(usuarioId) {
+  const resultado = await banco.query(
+    `SELECT id, tipo, segredo_temporario, expira_em, tentativas
+     FROM desafios_mfa
+     WHERE usuario_id = $1 AND expira_em > NOW() AND tentativas < $2
+     ORDER BY criado_em DESC
+     LIMIT 1`,
+    [usuarioId, MAX_TENTATIVAS_MFA]
+  );
+  return resultado.rows[0] || null;
+}
+
+async function respostaDesafioMfa(res, usuario, desafio) {
+  const resposta = {
+    mfaRequerida: true,
+    desafioId: desafio.id,
+    configuracaoMfa: desafio.tipo === 'configuracao'
+  };
+  if (desafio.tipo === 'configuracao') {
+    const segredo = decifrarSegredoMfa(desafio.segredo_temporario);
+    const uri = generateURI({ secret: segredo, issuer: NOME_AUTENTICADOR, label: usuario.email });
+    resposta.qrCode = await QRCode.toDataURL(uri, { width: 220, margin: 1 });
+    resposta.chaveManual = segredo;
+    resposta.mensagem = 'Escaneie o QR Code no seu aplicativo autenticador e informe o código gerado.';
+  } else {
+    resposta.mensagem = 'Abra seu aplicativo autenticador e informe o código de 6 dígitos.';
+  }
+  return res.json(resposta);
 }
 
 function publico(usuario) { 
@@ -119,7 +193,7 @@ app.post('/api/auth/cadastro', async (req, res) => {
   }
       
   try { 
-    const resultado = await banco.query('INSERT INTO usuarios (email, senha_hash, perfil, termos_aceitos_em, termos_versao) VALUES ($1, $2, $3, NOW(), $4) RETURNING id, email, nome, perfil, turma', [emailLimpo, await hash(senha), perfil, VERSAO_TERMOS]); 
+    const resultado = await banco.query('INSERT INTO usuarios (email, senha_hash, perfil, termos_aceitos_em, termos_versao) VALUES ($1, $2, $3, NOW(), $4) RETURNING id, email, nome, perfil, turma', [emailLimpo, await hash(senha), perfil, VERSAO_TERMOS]);
     await registrarAuditoria(req, 'cadastro_criado', 'usuarios', { email: emailLimpo, perfil }, resultado.rows[0]);
     res.status(201).json({ mensagem: 'Conta criada. Agora você pode entrar.' }); 
   } catch (erro) {
@@ -150,18 +224,67 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(401).json({ mensagem: 'E-mail ou senha inválidos.' });
     }
 
-    const sessao = await banco.query(
-      `INSERT INTO sessoes (id, usuario_id, expira_em)
-       VALUES (gen_random_uuid(), $1, NOW() + INTERVAL '8 hours')
+    const desafioExistente = await desafioMfaAtivo(usuario.id);
+    if (desafioExistente) {
+      return respostaDesafioMfa(res, usuario, desafioExistente);
+    }
+
+    const tipo = usuario.mfa_totp_ativo ? 'login' : 'configuracao';
+    const segredoTemporario = tipo === 'configuracao' ? cifrarSegredoMfa(generateSecret()) : null;
+    const desafio = await banco.query(
+      `INSERT INTO desafios_mfa (usuario_id, tipo, segredo_temporario, expira_em)
+       VALUES ($1, $2, $3, NOW() + INTERVAL '${DURACAO_DESAFIO_MFA}')
        RETURNING id`,
-      [usuario.id]
+      [usuario.id, tipo, segredoTemporario]
     );
-    const token = sessao.rows[0].id;
-    await registrarAuditoria(req, 'login_realizado', 'autenticacao', {}, usuario);
+    await registrarAuditoria(req, tipo === 'configuracao' ? 'totp_configuracao_iniciada' : 'totp_desafio_iniciado', 'autenticacao', {}, usuario);
+    return respostaDesafioMfa(res, usuario, { id: desafio.rows[0].id, tipo, segredo_temporario: segredoTemporario });
+  } catch (erro) {
+    console.error('Erro ao iniciar confirmação por aplicativo autenticador:', erro.message);
+    res.status(503).json({ mensagem: 'Não foi possível iniciar a confirmação em duas etapas. Verifique a configuração do servidor e tente novamente.' });
+  }
+});
+
+app.post('/api/auth/verificar-totp', async (req, res) => {
+  try {
+    const desafioId = String(req.body.desafioId || '');
+    const codigo = String(req.body.codigo || '').replace(/\D/g, '');
+    if (!idDesafioValido(desafioId) || !/^\d{6}$/.test(codigo)) {
+      return res.status(400).json({ mensagem: 'Informe o código de 6 dígitos do aplicativo autenticador.' });
+    }
+
+    const resultado = await banco.query(
+      `SELECT d.id AS desafio_id, d.tipo AS desafio_tipo, d.segredo_temporario, d.tentativas, u.*
+       FROM desafios_mfa d JOIN usuarios u ON u.id = d.usuario_id
+       WHERE d.id = $1 AND d.expira_em > NOW() AND d.tentativas < $2 AND u.ativo = TRUE`,
+      [desafioId, MAX_TENTATIVAS_MFA]
+    );
+    const usuario = resultado.rows[0];
+    if (!usuario) return res.status(401).json({ mensagem: 'Este código expirou ou atingiu o limite de tentativas. Entre novamente para solicitar outro.' });
+
+    await banco.query('UPDATE desafios_mfa SET tentativas = tentativas + 1 WHERE id = $1', [desafioId]);
+    const segredo = usuario.desafio_tipo === 'configuracao'
+      ? decifrarSegredoMfa(usuario.segredo_temporario)
+      : decifrarSegredoMfa(usuario.mfa_totp_segredo);
+    const verificacao = await verify({ token: codigo, secret: segredo, epochTolerance: 30 });
+    if (!verificacao.valid) {
+      await registrarAuditoria(req, 'codigo_totp_recusado', 'autenticacao', {}, usuario);
+      return res.status(401).json({ mensagem: 'Código inválido ou expirado. Confira o aplicativo autenticador e tente novamente.' });
+    }
+
+    const desafioConsumido = await banco.query('DELETE FROM desafios_mfa WHERE id = $1 RETURNING id', [desafioId]);
+    if (!desafioConsumido.rowCount) {
+      return res.status(401).json({ mensagem: 'Este código já foi utilizado. Entre novamente para solicitar outro.' });
+    }
+    if (usuario.desafio_tipo === 'configuracao') {
+      await banco.query('UPDATE usuarios SET mfa_totp_segredo = $1, mfa_totp_ativo = TRUE WHERE id = $2', [usuario.segredo_temporario, usuario.id]);
+      await registrarAuditoria(req, 'totp_configurado', 'autenticacao', {}, usuario);
+    }
+    const token = await criarSessao(usuario, req);
     res.json({ usuario: publico(usuario), token });
   } catch (erro) {
-    console.error('Erro ao entrar:', erro.message);
-    res.status(503).json({ mensagem: 'Não foi possível acessar o servidor. Tente novamente.' });
+    console.error('Erro ao confirmar código TOTP:', erro.message);
+    res.status(503).json({ mensagem: 'Não foi possível confirmar o código. Tente novamente.' });
   }
 });
 
@@ -210,7 +333,7 @@ app.post('/api/auth/encerrar-conta', autenticar, async (req, res) => {
       `UPDATE usuarios
        SET ativo = FALSE, encerrada_em = NOW(), senha_hash = '',
            email = 'anonimizado+' || id::text || '@invalid.local',
-           nome = 'Autor anonimizado', turma = '',
+           nome = 'Autor anonimizado', turma = '', mfa_totp_segredo = NULL, mfa_totp_ativo = FALSE,
            termos_aceitos_em = NULL, termos_versao = NULL
        WHERE id = $1 AND ativo = TRUE`,
       [req.usuario.id]
@@ -420,6 +543,18 @@ async function prepararBanco() {
   await banco.query('ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS encerrada_em TIMESTAMPTZ');
   await banco.query('ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS termos_aceitos_em TIMESTAMPTZ');
   await banco.query('ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS termos_versao VARCHAR(20)');
+  await banco.query('ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS mfa_totp_segredo TEXT');
+  await banco.query('ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS mfa_totp_ativo BOOLEAN NOT NULL DEFAULT FALSE');
+  await banco.query('ALTER TABLE usuarios DROP COLUMN IF EXISTS telefone');
+  await banco.query("CREATE TABLE IF NOT EXISTS desafios_mfa (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('login', 'configuracao')), segredo_temporario TEXT, criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), expira_em TIMESTAMPTZ NOT NULL, tentativas SMALLINT NOT NULL DEFAULT 0)");
+  await banco.query('DELETE FROM desafios_mfa');
+  await banco.query('ALTER TABLE desafios_mfa DROP COLUMN IF EXISTS telefone');
+  await banco.query('ALTER TABLE desafios_mfa DROP COLUMN IF EXISTS ultimo_envio_em');
+  await banco.query('ALTER TABLE desafios_mfa DROP COLUMN IF EXISTS reenvios');
+  await banco.query("ALTER TABLE desafios_mfa ADD COLUMN IF NOT EXISTS tipo VARCHAR(20) NOT NULL DEFAULT 'login'");
+  await banco.query('ALTER TABLE desafios_mfa ADD COLUMN IF NOT EXISTS segredo_temporario TEXT');
+  await banco.query('CREATE INDEX IF NOT EXISTS desafios_mfa_usuario_expira_idx ON desafios_mfa(usuario_id, expira_em DESC)');
+  await banco.query('DELETE FROM desafios_mfa WHERE expira_em <= NOW() OR tentativas >= ' + MAX_TENTATIVAS_MFA);
   await banco.query("CREATE TABLE IF NOT EXISTS solicitacoes_privacidade (id BIGSERIAL PRIMARY KEY, usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, tipo VARCHAR(30) NOT NULL, mensagem TEXT NOT NULL DEFAULT '', status VARCHAR(20) NOT NULL DEFAULT 'recebida', criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW())");
   await banco.query('CREATE INDEX IF NOT EXISTS solicitacoes_privacidade_usuario_id_idx ON solicitacoes_privacidade(usuario_id)');
   await banco.query('ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_email_key');

@@ -45,14 +45,28 @@ DATABASE_URL=postgresql://postgres:SUA_SENHA@localhost:5432/conectasaude
 ADMIN_EMAIL=admin@conectasaude.com
 ADMIN_SENHA=uma-senha-forte
 PORT=3000
+MFA_ENCRYPTION_KEY=chave_base64_de_32_bytes
 ```
 
 
 - `DATABASE_URL`: conexão com o PostgreSQL. Altere usuário, senha, servidor ou porta quando necessário.
 - `ADMIN_EMAIL` e `ADMIN_SENHA`: credenciais da conta de administrador criada na primeira inicialização.
 - `PORT`: porta em que o site será aberto. O valor padrão é `3000`.
+- `MFA_ENCRYPTION_KEY`: chave usada para proteger os segredos do aplicativo autenticador armazenados no banco. Ela deve ter 32 bytes codificados em Base64.
 
 O arquivo `.env` não deve ser enviado ao repositório, pois contém dados sensíveis.
+
+### Ativar a confirmação em duas etapas
+
+O projeto usa o padrão TOTP, compatível com Google Authenticator, Microsoft Authenticator e Authy. Não precisa criar conta nem usar API externa.
+
+Antes de iniciar o servidor, gere uma chave local e adicione-a ao `.env`:
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+Copie o resultado para `MFA_ENCRYPTION_KEY`. Guarde essa chave em segurança: se ela for perdida, os códigos já configurados não poderão ser validados e será necessário configurar o autenticador novamente.
 
 ## 4. Instale as dependências
 
@@ -90,7 +104,7 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 ## Funcionalidades
 
-- Cadastro, login, alteração de senha e encerramento de conta.
+- Cadastro, login com confirmação por aplicativo autenticador, alteração de senha e encerramento de conta.
 - Perfis de aluno, professor e administrador.
 - Jogo com perguntas por nível de dificuldade.
 - Envio de perguntas por professores e aprovação ou recusa por administradores.

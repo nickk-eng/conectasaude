@@ -1,0 +1,115 @@
+.pagina-avaliacao .painel {
+  max-width: 720px;
+  margin: 28px auto 0;
+}
+
+.aviso-avaliacao {
+  margin: 14px 0 20px;
+  padding: 12px 14px;
+  color: var(--padrao);
+  background: var(--fundo-inicial);
+  border: 1px solid #285062;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.barra-progresso {
+  height: 8px;
+  margin-bottom: 18px;
+  background: var(--fundo-inicial);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.barra-progresso div {
+  width: 0;
+  height: 100%;
+  background: var(--fundo);
+  transition: width 0.25s ease;
+}
+
+.alternativas button.selecionada {
+  border-color: var(--fundo);
+  background: #173f45;
+}
+
+.acoes-avaliacao {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.pagina-avaliacao .botao-secundario {
+  color: var(--texto);
+  background: transparent;
+  border: 1px solid #285062;
+}
+
+.pagina-avaliacao button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.link-principal {
+  margin: 18px 0 0;
+  color: var(--fundo-inicial);
+  background: var(--fundo);
+  border-radius: 10px;
+}
+
+.comparacao {
+  display: flex;
+  gap: 12px;
+  margin: 18px 0;
+}
+
+.comparacao div {
+  flex: 1;
+  padding: 14px;
+  text-align: center;
+  background: var(--fundo-inicial);
+  border: 1px solid #285062;
+  border-radius: 12px;
+}
+
+.comparacao span {
+  display: block;
+  color: var(--padrao);
+  font-size: 12px;
+}
+
+.comparacao strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 20px;
+}
+
+.revisao h2 {
+  margin: 22px 0 10px;
+}
+
+.revisao ol {
+  display: grid;
+  gap: 12px;
+  padding-left: 20px;
+}
+
+.revisao li {
+  line-height: 1.5;
+}
+
+.revisao .certo {
+  color: var(--fundo);
+}
+
+.revisao .errado {
+  color: #ff9e9e;
+}
+
+@media (max-width: 560px) {
+  .comparacao {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administração | ConectaSaúde</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/admin.css">
+</head>
+
+<body class="pagina-admin">
+  <main class="admin">
+    <header class="cabecalho-admin"><div><p>ConectaSaúde</p><h1>Painel administrativo</h1></div><button id="sair" class="botao-sair" type="button">Sair</button></header>
+    <section class="introducao"><h2>Questões enviadas pelos professores</h2><p>Revise o conteúdo antes de disponibilizá-lo aos alunos.</p></section>
+    <p id="mensagem-admin" class="mensagem" role="status"></p>
+    <section class="resumo-admin" aria-labelledby="titulo-resumo-admin">
+      <h2 id="titulo-resumo-admin">Visão geral</h2>
+      <div class="indicadores-admin">
+        <article class="indicador-admin"><span>Perguntas no banco</span><strong id="total-perguntas-admin">0</strong></article>
+        <article class="indicador-admin"><span>Aguardando revisão</span><strong id="pendentes-admin">0</strong></article>
+        <article class="indicador-admin"><span>Usuários ativos</span><strong id="usuarios-ativos-admin">0</strong></article>
+      </div>
+      <div class="graficos-admin">
+        <section class="grafico-admin" aria-labelledby="titulo-grafico-status">
+          <h3 id="titulo-grafico-status">Perguntas por situação</h3>
+          <div id="grafico-status-perguntas" class="barras-admin" role="group" aria-label="Quantidade de perguntas por situação"></div>
+        </section>
+        <section class="grafico-admin" aria-labelledby="titulo-grafico-temas">
+          <h3 id="titulo-grafico-temas">Perguntas por tema de IST</h3>
+          <div id="grafico-temas-perguntas" class="barras-admin" role="group" aria-label="Quantidade de perguntas por tema"></div>
+        </section>
+      </div>
+    </section>
+    <div id="lista-perguntas" class="lista-perguntas"></div>
+    <p id="sem-perguntas" hidden>Nenhuma pergunta foi enviada até agora.</p>
+    <section class="auditoria" aria-labelledby="titulo-gestao-perguntas">
+      <div class="cabecalho-secao"><div><h2 id="titulo-gestao-perguntas">Banco de perguntas</h2><p>Cadastre, edite ou remova perguntas do jogo.</p></div><button id="nova-pergunta-admin" type="button">Nova pergunta</button></div>
+      <form id="form-pergunta-admin" class="formulario-pergunta" hidden>
+        <h3 id="titulo-form-pergunta-admin">Nova pergunta</h3>
+        <label>Pergunta<textarea name="texto" maxlength="500" minlength="10" required></textarea></label>
+        <label>Alternativas (uma por linha)<textarea name="alternativas" required placeholder="Informe exatamente três alternativas, uma por linha."></textarea></label>
+        <label>Índice da resposta correta (começa em 0)<input name="respostaCorreta" type="number" min="0" max="2" required></label>
+        <label>Nível<select name="nivel"><option>Fácil</option><option>Médio</option><option>Difícil</option></select></label>
+        <label>Categoria<select name="categoriaIst" required>
+          <option value="">Selecione</option><option value="hiv-aids">HIV e aids</option><option value="sifilis">Sífilis</option>
+          <option value="gonorreia">Gonorreia</option><option value="clamidia">Clamídia</option><option value="hpv">HPV</option>
+          <option value="herpes-genital">Herpes genital</option><option value="hepatites-virais">Hepatites virais</option>
+          <option value="tricomoniase">Tricomoníase</option><option value="prevencao-geral">Prevenção e conceitos gerais</option>
+        </select></label>
+        <label>Status<select name="status"><option value="aprovada">Aprovada</option><option value="pendente">Pendente</option><option value="recusada">Recusada</option></select></label>
+        <div class="acoes-formulario"><button type="submit">Salvar pergunta</button><button id="cancelar-pergunta-admin" type="button">Cancelar</button></div>
+      </form>
+      <p id="mensagem-pergunta-admin" class="mensagem" role="status"></p>
+    </section>
+    <section class="auditoria" aria-labelledby="titulo-usuarios">
+      <div class="cabecalho-secao"><div><h2 id="titulo-usuarios">Gestão de usuários</h2><p>Gerencie contas e aprove ou recuse solicitações de professor. Você também pode revogar esse acesso.</p></div><button id="atualizar-usuarios" type="button">Atualizar</button></div>
+      <div class="tabela-auditoria"><table><thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Turma</th><th>Status</th><th>Ação</th></tr></thead><tbody id="corpo-usuarios"></tbody></table></div>
+      <p id="sem-usuarios" hidden>Nenhum usuário encontrado.</p><p id="mensagem-usuarios" class="mensagem" role="status"></p>
+    </section>
+    <section class="auditoria" aria-labelledby="titulo-solicitacoes">
+      <div class="cabecalho-secao">
+        <div><h2 id="titulo-solicitacoes">Solicitações de privacidade</h2><p>Pedidos registrados pelos usuários para análise da equipe.</p></div>
+        <button id="atualizar-solicitacoes" type="button">Atualizar</button>
+      </div>
+      <div class="tabela-auditoria">
+        <table>
+          <thead><tr><th>Data</th><th>Solicitante</th><th>Tipo</th><th>Detalhes</th><th>Status</th></tr></thead>
+          <tbody id="corpo-solicitacoes"></tbody>
+        </table>
+      </div>
+      <p id="sem-solicitacoes" hidden>Nenhuma solicitação recebida.</p>
+    </section>    <section class="auditoria" aria-labelledby="titulo-auditoria">
+      <div class="cabecalho-secao">
+        <div>
+          <h2 id="titulo-auditoria">Auditoria de acessos</h2>
+          <p>Atividades recentes de usuários e funcionalidades do sistema.</p>
+        </div>
+        <button id="atualizar-auditoria" type="button">Atualizar</button>
+      </div>
+      <div class="tabela-auditoria">
+        <table>
+          <thead>
+            <tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Recurso</th><th>Rota</th></tr>
+          </thead>
+          <tbody id="corpo-auditoria"></tbody>
+        </table>
+      </div>
+      <p id="sem-auditoria" hidden>Nenhum registro de auditoria encontrado.</p>
+    </section>
+  </main>
+  <script src="/js/auth.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Início | ConectaSaúde</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/home.css">
+</head>
+
+<body class="pagina-home">
+  <main class="home">
+    <header class="cabecalho-home">
+      <div class="marca">
+        <div class="logo"><img src="../../img/coracao.png" alt="Logo do ConectaSaúde"></div>
+        <strong>ConectaSaúde</strong>
+      </div>
+      <div class="acoes-conta"><button id="abrir-perfil" class="botao-perfil" type="button">Meu perfil</button><button id="sair" class="botao-sair" type="button">Sair</button></div>
+    </header>
+
+    <section class="boas-vindas">
+      <p id="tipo-usuario">Olá!</p>
+      <h1 id="titulo-home">Bem-vindo ao ConectaSaúde</h1>
+      <p id="texto-home">Aprenda sobre saúde de um jeito simples e divertido.</p>
+    </section>
+
+<dialog id="tela-perfil" class="tela-perfil" aria-labelledby="titulo-perfil">
+    <form id="form-perfil">
+        <div class="cabecalho-perfil">
+            <div>
+                <p>Minha conta</p>
+                <h2 id="titulo-perfil">Meu perfil</h2>
+            </div>
+            <button id="fechar-perfil" class="fechar-perfil" type="button" aria-label="Fechar"> x </button>
+        </div>
+
+        <img id="avatar-perfil" mclass="avatar-perfil"  src="" alt="Avatar do perfil">
+        <p id="tipo-perfil" class="tipo-perfil"></p>
+        <div id="acesso-professor" hidden>
+            <p>O acesso de professor precisa ser aprovado pelo administrador.</p>
+            <button id="solicitar-professor" type="button">Solicitar acesso de professor</button>
+            <p id="mensagem-acesso-professor" class="mensagem" role="status" aria-live="polite"></p>
+        </div>
+        <label for="email-perfil">E-mail</label>
+        <input  id="email-perfil"  type="email"readonly>
+
+        <label for="nome-perfil">Nome</label>
+        <input  id="nome-perfil" name="nome" type="text" maxlength="60" autocomplete="name" required>
+        <label id="label-turma-perfil" for="turma-perfil">Ano do ensino médio</label>
+        <select id="turma-perfil" name="turma">
+            <option value="">Selecione seu ano</option>
+            <option value="1º ano do ensino médio">1º ano do ensino médio</option>
+            <option value="2º ano do ensino médio">2º ano do ensino médio</option>
+            <option value="3º ano do ensino médio">3º ano do ensino médio</option>
+        </select>
+        <p id="aviso-ano-perfil" hidden>O ano escolar fica fixo após a primeira escolha.</p>
+        <p id="mensagem-perfil" class="mensagem" role="status" aria-live="polite"></p>
+        <div class="acoes-perfil">
+            <button type="submit">  Salvar alterações </button>
+            <button id="cancelar-perfil" class="botao-secundario" type="button"> Fechar</button>
+        </div>
+    </form>
+
+    <section id="historico-aluno" class="historico-aluno" aria-labelledby="titulo-historico" hidden>
+      <h2 id="titulo-historico">Meu histórico de partidas</h2>
+      <p>Resultados das partidas concluídas nesta conta. Em partidas com colegas, cada aluno tem seu próprio histórico.</p>
+      <p id="status-historico" role="status" aria-live="polite"></p>
+      <div id="dados-historico" hidden>
+        <div class="resumo-historico">
+          <div><span>Acertos</span><strong id="historico-acertos" class="verde">0</strong></div>
+          <div><span>Erros</span><strong id="historico-erros" class="vermelho">0</strong></div>
+          <div><span>Aproveitamento</span><strong id="historico-taxa">0%</strong></div>
+        </div>
+        <p id="historico-total"></p>
+        <div class="tabela-historico"><table>
+          <caption>Histórico por partida</caption>
+          <thead><tr><th>Data</th><th>Nível / modo</th><th>Acertos</th><th>Erros</th></tr></thead>
+          <tbody id="partidas-historico"></tbody>
+        </table></div>
+        <div class="acoes-perfil"><button id="historico-anterior" type="button">Anterior</button><span id="historico-pagina"></span><button id="historico-proxima" type="button">Próxima</button></div>
+      </div>
+      <button id="recarregar-historico" type="button" hidden>Tentar novamente</button>
+    </section>
+
+    <section  class="conta-encerramento" aria-labelledby="titulo-encerrar-conta">
+        <h3 id="titulo-encerrar-conta"> Excluir conta </h3>
+        <p> O acesso será bloqueado e sua sessão será encerrada.
+            Confirme sua senha para continuar.</p>
+        <form id="form-encerrar-conta">
+            <label for="senha-encerrar-conta"> Confirme sua senha </label>
+            <input id="senha-encerrar-conta" name="senha" type="password" autocomplete="current-password" required>
+            <button class="botao-encerrar-conta" type="submit"> Excluir minha conta </button>
+        </form>
+        <p id="mensagem-conta" class="mensagem" role="status" aria-live="polite"></p>
+    </section>
+</dialog>
+
+    <section id="area-aluno">
+      <section id="avaliacao-diagnostica" class="avaliacao-diagnostica" aria-labelledby="avaliacao-titulo" hidden>
+        <div>
+          <span id="avaliacao-passo"></span>
+          <h3 id="avaliacao-titulo"></h3>
+          <p id="avaliacao-texto"></p>
+        </div>
+        <a id="avaliacao-botao" class="botao-link" href="/avaliacao?tipo=pre" hidden></a>
+      </section>
+
+      <h2>Escolha o tema da partida</h2>
+      <label for="categoria-ists-jogo">Tema de ISTs</label>
+      <select id="categoria-ists-jogo">
+        <option value="">Todos os temas</option>
+        <option value="hiv-aids">HIV e aids</option>
+        <option value="sifilis">Sífilis</option>
+        <option value="gonorreia">Gonorreia</option>
+        <option value="clamidia">Clamídia</option>
+        <option value="hpv">HPV</option>
+        <option value="herpes-genital">Herpes genital</option>
+        <option value="hepatites-virais">Hepatites virais</option>
+        <option value="tricomoniase">Tricomoníase</option>
+        <option value="prevencao-geral">Prevenção e conceitos gerais</option>
+      </select>
+      <h2>Escolha a dificuldade</h2>
+      <div class="cards tres-colunas">
+        <button class="card dificuldade" data-nivel="Fácil" type="button"><span>Fácil</span><h3>Começar devagar</h3><p>Perguntas mais simples para aprender.</p></button>
+        <button class="card dificuldade medio" data-nivel="Médio" type="button"><span>Médio</span><h3>Desafio normal</h3><p>Teste o que você já sabe.</p></button>
+        <button class="card dificuldade dificil" data-nivel="Difícil" type="button"><span>Difícil</span><h3>Nível avançado</h3><p>Perguntas para quem quer se superar.</p></button>
+      </div>
+
+      <h2>Como quer jogar?</h2>
+      <div class="cards duas-colunas">
+        <button class="card jogar" data-modo="colega" type="button"><h3>Com um colega</h3><p>Crie uma sala ou entre com o código de um colega.</p></button>
+        <button class="card jogar" data-modo="computador" type="button"><h3>Contra o computador</h3><p>Jogue quando quiser e pratique bastante.</p></button>
+      </div>
+      <p id="mensagem-jogo" class="mensagem" role="status"></p>
+      <section id="area-salas" class="area-salas" aria-labelledby="titulo-salas" hidden>
+        <span class="selo-salas">MULTIPLAYER</span>
+        <h2 id="titulo-salas">Jogar com outro aluno</h2>
+        <p class="descricao-salas">Cada participante usa a própria conta e joga na mesma partida.</p>
+        <div class="opcoes-salas">
+          <form id="criar-sala" class="cartao-sala">
+            <h3>Criar uma sala</h3>
+            <p>Escolha um código e convide um colega.</p>
+            <label for="codigo-criar-sala">Código da sala</label>
+            <input id="codigo-criar-sala" name="codigo" type="text" inputmode="numeric" maxlength="8" pattern="[0-9]{1,8}" autocomplete="off" required placeholder="Ex.: 123456">
+            <label for="nivel-criar-sala">Dificuldade</label>
+            <select id="nivel-criar-sala" name="nivel" required><option value="">Selecione a dificuldade</option><option>Fácil</option><option>Médio</option><option>Difícil</option></select>
+            <input id="categoria-criar-sala" name="categoriaIst" type="hidden">
+            <p id="tema-criar-sala" class="tema-sala"></p>
+            <button type="submit">Criar sala</button>
+          </form>
+          <form id="entrar-sala" class="cartao-sala">
+            <h3>Entrar em uma sala</h3>
+            <p>Digite o código recebido do colega. A dificuldade será a da sala.</p>
+            <label for="codigo-entrar-sala">Código do convite</label>
+            <input id="codigo-entrar-sala" name="codigo" type="text" inputmode="numeric" maxlength="8" pattern="[0-9]{1,8}" autocomplete="off" required placeholder="Digite o código">
+            <button type="submit" class="botao-entrar-sala">Entrar na sala</button>
+          </form>
+        </div>
+        <a id="voltar-sala" href="/sala" hidden>Voltar à minha sala</a>
+        <p id="mensagem-salas" class="mensagem" role="status"></p>
+      </section>
+    </section>
+
+    <section id="area-professor" hidden>
+      <h2>Resumo da turma</h2>
+      <div class="cards tres-colunas">
+        <div class="card numero"><span>Alunos cadastrados</span><strong id="total-alunos">0</strong></div>
+        <div class="card numero"><span>Média no pré-teste</span><strong id="media-pre">—</strong></div>
+        <div class="card numero"><span>Média no pós-teste</span><strong id="media-pos" class="verde">—</strong></div>
+      </div>
+
+      <h2>Desempenho da turma</h2>
+      <p>Comparação das médias dos alunos que já fizeram cada avaliação.</p>
+      <div id="grafico-avaliacoes" class="painel-grafico" role="group" aria-label="Gráfico de comparação entre as médias do pré-teste e do pós-teste">
+        <p class="grafico-vazio">Carregando dados das avaliações…</p>
+      </div>
+
+      <h2>Alunos cadastrados</h2>
+      <div class="lista-alunos">
+        <table>
+          <thead><tr><th>Aluno</th><th>E-mail</th><th>Turma / ano</th><th>Responsáveis legais</th></tr></thead>
+          <tbody id="corpo-alunos"></tbody>
+        </table>
+        <p id="sem-alunos">Ainda não há alunos com turma informada.</p>
+      </div>
+
+      <h2>Indicadores por tema de ISTs</h2>
+      <p>Distribuição do banco de perguntas por tema e situação de revisão.</p>
+      <div id="grafico-ists" class="painel-grafico grafico-ists" role="group" aria-label="Gráfico do total de perguntas por tema de IST">
+        <p class="grafico-vazio">Carregando indicadores…</p>
+      </div>
+      <div class="lista-alunos">
+        <table>
+          <thead><tr><th>Tema</th><th>Total</th><th>Aprovadas</th><th>Pendentes</th><th>Recusadas</th></tr></thead>
+          <tbody id="corpo-indicadores-ists"></tbody>
+        </table>
+      </div>
+
+      <h2>Avaliação diagnóstica</h2>
+      <div class="lista-alunos">
+        <table>
+          <thead><tr><th>Aluno</th><th>Turma / ano</th><th>Pré-teste</th><th>Pós-teste</th><th>Evolução</th></tr></thead>
+          <tbody id="corpo-avaliacoes"></tbody>
+        </table>
+        <p id="sem-avaliacoes">Nenhum aluno concluiu o pré-teste ainda.</p>
+      </div>
+      <p id="resumo-evolucao" class="mensagem" role="status"></p>
+
+      <h2>Ferramentas</h2>
+      <div class="cards duas-colunas">
+        <button id="abrir-relatorios" class="card ferramenta" type="button"><h3>Ver relatórios</h3><p>Acompanhe os acertos e erros dos alunos.</p></button>
+        <button id="abrir-criar-pergunta" class="card ferramenta" type="button"><h3>Criar pergunta</h3><p>Envie perguntas para aprovação do administrador.</p></button>
+      </div>
+      <p id="mensagem-professor" class="mensagem" role="status"></p>
+
+      <section id="relatorios-professor" class="formulario-pergunta" hidden aria-labelledby="titulo-relatorios">
+        <h2 id="titulo-relatorios">Relatórios das partidas</h2>
+        <form id="filtros-relatorio" class="filtros-relatorio">
+          <label>Turma<input name="turma" maxlength="60" placeholder="Todas as turmas"></label>
+          <label>De<input name="de" type="date"></label>
+          <label>Até<input name="ate" type="date"></label>
+          <button type="submit">Aplicar filtros</button>
+        </form>
+        <p id="mensagem-relatorio" class="mensagem" role="status"></p>
+        <div class="lista-alunos"><table><thead><tr><th>Aluno</th><th>Turma</th><th>Partidas</th><th>Acertos</th><th>Erros</th><th>Taxa de acerto</th><th>Última partida</th></tr></thead><tbody id="corpo-relatorio"></tbody></table></div>
+      </section>
+
+      <section id="formulario-pergunta" class="formulario-pergunta" hidden aria-labelledby="titulo-formulario-pergunta">
+        <h2 id="titulo-formulario-pergunta">Nova pergunta</h2>
+        <p>Após o envio, um administrador deverá aprovar a pergunta antes que ela apareça no jogo.</p>
+        <form id="criar-pergunta">
+          <label>Pergunta<textarea name="texto" maxlength="500" minlength="10" required placeholder="Ex.: Qual hábito ajuda a manter uma boa saúde?"></textarea></label>
+          <label>Alternativa 1<input name="alternativa1" maxlength="200" required></label>
+          <label>Alternativa 2<input name="alternativa2" maxlength="200" required></label>
+          <label>Alternativa 3<input name="alternativa3" maxlength="200" required></label>
+          <label>Resposta correta<select name="respostaCorreta" required><option value="">Selecione uma alternativa</option><option value="0">Alternativa 1</option><option value="1">Alternativa 2</option><option value="2">Alternativa 3</option></select></label>
+          <label>Nível<select name="nivel"><option>Fácil</option><option>Médio</option><option>Difícil</option></select></label>
+          <label>Categoria da IST<select name="categoriaIst" required>
+            <option value="">Selecione uma categoria</option>
+            <option value="hiv-aids">HIV e aids</option><option value="sifilis">Sífilis</option>
+            <option value="gonorreia">Gonorreia</option><option value="clamidia">Clamídia</option>
+            <option value="hpv">HPV</option><option value="herpes-genital">Herpes genital</option>
+            <option value="hepatites-virais">Hepatites virais</option><option value="tricomoniase">Tricomoníase</option>
+            <option value="prevencao-geral">Prevenção e conceitos gerais</option>
+          </select></label>
+          <div class="acoes-formulario"><button type="submit">Enviar para aprovação</button><button id="cancelar-pergunta" class="botao-secundario" type="button">Cancelar</button></div>
+        </form>
+      </section>
+    </section>
+    <footer class="links-legais-home" aria-label="Informações legais">
+      <a href="/termos">Termos de Uso</a>
+      <a href="/privacidade">Política de Privacidade</a>
+    </footer>  </main>
+  <script src="/js/auth.js"></script>
+  <script src="/js/home.js"></script>
+</body>
+</html>

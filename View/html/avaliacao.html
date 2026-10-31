@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avaliação | ConectaSaúde</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/jogo.css">
+  <link rel="stylesheet" href="/css/avaliacao.css">
+</head>
+
+<body class="pagina-jogo pagina-avaliacao">
+  <main class="jogo">
+    <header class="topo-jogo">
+      <div><span class="chip" id="chip-tipo">Avaliação</span><span class="chip escondido" id="chip-progresso"></span></div>
+      <a href="/home">Voltar ao início</a>
+    </header>
+
+    <section class="painel" id="carregando">
+      <p>Carregando a avaliação...</p>
+    </section>
+
+    <section class="painel escondido" id="introducao">
+      <h1 id="titulo-introducao"></h1>
+      <p id="texto-introducao"></p>
+      <p class="aviso-avaliacao">Nesta avaliação você não vê se acertou cada pergunta. Isso ajuda a medir o quanto você aprendeu. Responda com sinceridade, sem consultar ninguém.</p>
+      <button type="button" id="comecar">Começar</button>
+    </section>
+
+    <section class="painel escondido" id="questao">
+      <div class="barra-progresso" aria-hidden="true"><div id="barra-preenchida"></div></div>
+      <h2 id="numero-pergunta"></h2>
+      <p id="pergunta" class="pergunta"></p>
+      <div id="alternativas" class="alternativas"></div>
+      <p id="aviso" class="retorno errado" role="status"></p>
+      <div class="acoes-avaliacao">
+        <button type="button" id="anterior" class="botao-secundario">Anterior</button>
+        <button type="button" id="proxima">Próxima</button>
+      </div>
+    </section>
+
+    <section class="painel escondido" id="resultado">
+      <h1 id="titulo-resultado"></h1>
+      <p id="texto-resultado"></p>
+      <div id="comparacao" class="comparacao escondido">
+        <div><span>Pré-teste</span><strong id="nota-pre"></strong></div>
+        <div><span>Pós-teste</span><strong id="nota-pos"></strong></div>
+        <div><span>Evolução</span><strong id="nota-evolucao"></strong></div>
+      </div>
+      <div id="revisao" class="revisao escondido">
+        <h2>Revisão das respostas</h2>
+        <ol id="lista-revisao"></ol>
+      </div>
+      <a class="link-botao link-principal" id="link-seguir" href="/home">Voltar ao início</a>
+    </section>
+
+    <section class="painel escondido" id="erro">
+      <h1>Não foi possível abrir a avaliação</h1>
+      <p id="texto-erro"></p>
+      <a class="link-botao link-principal" href="/home">Voltar ao início</a>
+    </section>
+  </main>
+  <script src="/js/auth.js"></script>
+  <script src="/js/avaliacao.js"></script>
+</body>
+</html>

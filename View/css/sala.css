@@ -1,0 +1,6 @@
+[hidden] { display: none !important; }
+#erro-sala { color: #ff9e9e; margin: 12px 0; }
+#jogadores-sala, #placar-sala { white-space: pre-line; line-height: 1.8; }
+#sair-sala { margin: 10px 0; background: #9c3944; color: white; }
+#pergunta-sala { font-size: 20px; line-height: 1.5; }
+#fim-sala { margin-top: 20px; }

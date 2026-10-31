@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sala multiplayer | ConectaSaúde</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/jogo.css">
+  <link rel="stylesheet" href="/css/sala.css">
+</head>
+<body class="pagina-jogo">
+  <main class="jogo">
+    <header class="topo-jogo">
+      <div><span class="chip" id="codigo-sala">Sala</span><span class="chip" id="nivel-sala"></span><span class="chip" id="categoria-sala"></span></div>
+      <a id="voltar-inicio-sala" href="/home">Voltar ao início</a>
+    </header>
+    <section class="painel">
+      <h1>Sala multiplayer</h1>
+      <p id="jogadores-sala"></p>
+      <p id="status-sala" role="status" aria-live="polite">Conectando à sala…</p>
+      <p id="erro-sala" role="alert"></p>
+      <button id="iniciar-sala" type="button" hidden>Iniciar partida</button>
+      <button id="sair-sala" type="button">Sair da sala</button>
+    </section>
+    <section id="partida-sala" class="area-jogo" hidden>
+      <div class="painel">
+        <h2>Jogo da velha</h2>
+        <p id="vez-sala"></p>
+        <div class="tabuleiro" id="tabuleiro-sala">
+          <button type="button" aria-label="Casa 1" disabled></button><button type="button" aria-label="Casa 2" disabled></button><button type="button" aria-label="Casa 3" disabled></button>
+          <button type="button" aria-label="Casa 4" disabled></button><button type="button" aria-label="Casa 5" disabled></button><button type="button" aria-label="Casa 6" disabled></button>
+          <button type="button" aria-label="Casa 7" disabled></button><button type="button" aria-label="Casa 8" disabled></button><button type="button" aria-label="Casa 9" disabled></button>
+        </div>
+        <p id="placar-sala"></p>
+      </div>
+      <div class="painel">
+        <span id="tempo-sala" class="chip"></span>
+        <h2 id="pergunta-sala"></h2>
+        <div id="alternativas-sala" class="alternativas"></div>
+      </div>
+    </section>
+    <section id="fim-sala" class="painel" hidden>
+      <h2 id="resultado-sala"></h2>
+      <p>O histórico individual dos dois alunos foi salvo.</p>
+      <a href="/home">Voltar ao início e jogar novamente</a>
+    </section>
+  </main>
+  <script src="/js/auth.js"></script>
+  <script src="/js/sala.js"></script>
+</body>
+</html>

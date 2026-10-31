@@ -7,24 +7,30 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/jogo.css">
 </head>
+
 <body class="pagina-jogo">
   <main class="jogo">
     <header class="topo-jogo">
-      <div><span class="chip" id="nivel">Nível</span><span class="chip" id="modo">Modo</span><span class="chip escondido" id="ano-escolar">Ano</span></div>
+      <div><span class="chip" id="nivel">Nível</span><span class="chip" id="modo">Modo</span><span class="chip" id="categoria-ists-chip">Tema</span><span class="chip escondido" id="ano-escolar">Ano</span></div>
       <a href="/home">Voltar ao início</a>
     </header>
 
+
     <section class="painel inicio" id="inicio">
       <h1>Antes de começar</h1>
-      <p>Informe seu ano escolar para o professor acompanhar os resultados.</p>
+      <p>Confira seu ano escolar para o professor acompanhar os resultados. Após a primeira escolha, ele não poderá ser alterado.</p>
+      <p id="status-perfil-inicio" role="status"></p>
       <form id="form-inicio">
         <label>Qual é o seu ano?
           <select id="ano" required>
-            <option value="6º ano">6º ano</option><option value="7º ano">7º ano</option><option value="8º ano">8º ano</option><option value="9º ano">9º ano</option><option value="1º ano do ensino médio">1º ano do ensino médio</option><option value="2º ano do ensino médio">2º ano do ensino médio</option><option value="3º ano do ensino médio">3º ano do ensino médio</option>
+            <option value="">Selecione seu ano</option>
+            <option value="1º ano do ensino médio">1º ano do ensino médio</option>
+            <option value="2º ano do ensino médio">2º ano do ensino médio</option>
+            <option value="3º ano do ensino médio">3º ano do ensino médio</option>
           </select>
         </label>
         <label>Seu nome<input id="nome" type="text" maxlength="60" placeholder="Ex.: Ana Ribeiro"></label>
-        <button type="submit">Começar a jogar</button>
+        <button type="submit" disabled>Começar a jogar</button>
       </form>
     </section>
 
@@ -52,6 +58,7 @@
       <h1 id="titulo-final"></h1>
       <p id="texto-final"></p>
       <button type="button" id="novamente">Jogar novamente</button>
+      <a class="link-botao escondido" id="link-pos-teste" href="/avaliacao?tipo=pos">Fazer o pós-teste</a>
       <a class="link-botao" href="/home">Voltar ao início</a>
     </section>
   </main>

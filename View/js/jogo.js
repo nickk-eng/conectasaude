@@ -1,5 +1,6 @@
 const parametros = new URLSearchParams(window.location.search);
 const nivel = parametros.get('nivel') || 'Fácil';
+const categoriaIst = parametros.get('categoriaIst') || '';
 const modo = parametros.get('modo') || 'computador';
 
 let perguntas = [];
@@ -13,13 +14,20 @@ let podeJogar = false;
 let respostaEncerrada = false;
 let tempo;
 
+
+
 async function carregarPerguntasAprovadas() {
 
   const resposta = await apiFetch(
-    '/api/jogo/perguntas?nivel=' + encodeURIComponent(nivel)
+    '/api/jogo/perguntas?nivel=' + encodeURIComponent(nivel) + '&categoriaIst=' + encodeURIComponent(categoriaIst)
   );
 
   const dados = await resposta.json().catch(() => ({}));
+
+  if (resposta.status === 403 && dados.codigo === 'PRE_TESTE_PENDENTE') {
+    window.location.href = '/avaliacao?tipo=pre';
+    throw new Error('Você precisa fazer o pré-teste antes de jogar. Redirecionando...');
+  }
 
   if (!resposta.ok) {
     throw new Error(
@@ -68,6 +76,34 @@ document.querySelector('#modo').textContent =
   modo === 'colega'
     ? 'Modo: colega'
     : 'Modo: computador';
+
+const rotulosCategoriaIst = {
+  'hiv-aids': 'HIV e aids', sifilis: 'Sífilis', gonorreia: 'Gonorreia',
+  clamidia: 'Clamídia', hpv: 'HPV', 'herpes-genital': 'Herpes genital',
+  'hepatites-virais': 'Hepatites virais', tricomoniase: 'Tricomoníase',
+  'prevencao-geral': 'Prevenção geral'
+};
+document.querySelector('#categoria-ists-chip').textContent = categoriaIst
+  ? `Tema: ${rotulosCategoriaIst[categoriaIst] || 'Todos'}`
+  : 'Tema: todos';
+
+async function carregarPerfilInicial() {
+  const status = document.querySelector('#status-perfil-inicio');
+  try {
+    const resposta = await apiFetch('/api/auth/eu');
+    if (!resposta.ok) throw new Error('Não foi possível carregar seu perfil. Recarregue a página.');
+    const { usuario } = await resposta.json();
+    const campoAno = document.querySelector('#ano');
+    campoAno.value = usuario.turma || '';
+    campoAno.disabled = Boolean(campoAno.value);
+    document.querySelector('#nome').value = usuario.nome || '';
+    document.querySelector('#form-inicio button[type="submit"]').disabled = false;
+  } catch (erro) {
+    status.textContent = erro.message || 'Não foi possível carregar seu perfil. Recarregue a página.';
+  }
+}
+
+carregarPerfilInicial();
 
 document.querySelector('#form-inicio').addEventListener('submit', async (evento) => {
     evento.preventDefault();
@@ -164,7 +200,7 @@ function mostrarPergunta() {
 }
 
 function mostrarAvisoSemPerguntas(
-  mensagem = `Ainda não há perguntas aprovadas ${nivel}.`
+  mensagem = `Ainda não há perguntas aprovadas ${nivel}${categoriaIst ? ` no tema ${rotulosCategoriaIst[categoriaIst] || 'selecionado'}` : ''}.`
 ) {
 
   clearInterval(tempo);
@@ -604,6 +640,32 @@ function finalizar(titulo) {
     titulo;
   document.querySelector('#texto-final').textContent =
     `Você acertou ${acertos} pergunta(s) e errou ${erros}.`;
+  registrarFimDeJogo(titulo);
+}
+
+function registrarFimDeJogo(resultado) {
+  apiFetch('/api/jogo/resultado', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      acertos,
+      erros,
+      nivel,
+      modo,
+      resultado
+    })
+  }).then(mostrarLinkPosTeste).catch(() => {});
+}
+
+async function mostrarLinkPosTeste() {
+  const resposta = await apiFetch('/api/avaliacao/status');
+  if (!resposta.ok) return;
+  const etapa = await resposta.json();
+  if (etapa.proximaEtapa === 'pos') {
+    document.querySelector('#link-pos-teste').classList.remove('escondido');
+  }
 }
 
 document

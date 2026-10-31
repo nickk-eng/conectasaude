@@ -8,6 +8,7 @@ function removerToken() {
   sessionStorage.removeItem(CHAVE_SESSAO);
 }
 
+
 function apiFetch(url, opcoes = {}) {
   const cabecalhos = new Headers(opcoes.headers || {});
   const token = sessionStorage.getItem(CHAVE_SESSAO);
@@ -16,3 +17,4 @@ function apiFetch(url, opcoes = {}) {
 
   return fetch(url, { ...opcoes, headers: cabecalhos });
 }
+

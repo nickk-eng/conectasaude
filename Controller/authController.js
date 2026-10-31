@@ -131,24 +131,46 @@ async function verificarTotp(req, res) {
   }
 }
 
-async function recuperarSenha(req, res) {
+const recuperacaoSenhaService = require('../Service/recuperacaoSenhaService');
+async function solicitarRecuperacao(req, res) {
   const email = String(req.body.email || '').trim().toLowerCase();
+  if (email.length > 150 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ mensagem: 'Informe um e-mail válido.' });
+  try {
+    await recuperacaoSenhaService.solicitar(email);
+    res.json({ mensagem: 'Se o e-mail estiver cadastrado e ativo, você receberá um código válido por 10 minutos. Confira o spam. Para reenviar, aguarde 1 minuto.' });
+  } catch (erro) {
+    console.error('Erro ao solicitar recuperação:', erro.code || 'serviço indisponível');
+    res.status(503).json({ mensagem: 'Não foi possível solicitar a recuperação. Tente novamente.' });
+  }
+}
+async function verificarCodigoRecuperacao(req, res) {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const codigo = String(req.body.codigo || '').trim();
+  if (!email || email.length > 150 || !/^\d{6}$/.test(codigo)) return res.status(400).json({ mensagem: 'Informe o e-mail e o código de 6 dígitos.' });
+  try {
+    const token = await recuperacaoSenhaService.verificarCodigo(email, codigo);
+    if (!token) return res.status(400).json({ mensagem: 'Código inválido, expirado ou com limite de tentativas atingido. Solicite outro código.' });
+    res.set('Cache-Control', 'no-store');
+    res.json({ token });
+  } catch (erro) {
+    console.error('Erro ao verificar recuperação:', erro.code || 'serviço indisponível');
+    res.status(503).json({ mensagem: 'Não foi possível verificar o código. Tente novamente.' });
+  }
+}
+async function recuperarSenha(req, res) {
+  const token = String(req.body.token || '');
   const novaSenha = String(req.body.novaSenha || '');
   const confirmarSenha = String(req.body.confirmarSenha || '');
-
-  if (!email) return res.status(400).json({ mensagem: 'Informe o e-mail da conta.' });
-  if (novaSenha.length < 8) return res.status(400).json({ mensagem: 'A senha precisa ter pelo menos 8 caracteres.' });
+  if (!/^[a-f0-9]{64}$/.test(token)) return res.status(400).json({ mensagem: 'Valide o código recebido por e-mail antes de redefinir a senha.' });
+  if (!senhaService.senhaForte(novaSenha) || Buffer.byteLength(novaSenha, 'utf8') > 72) return res.status(400).json({ mensagem: 'Use pelo menos 8 caracteres, uma letra maiúscula, um número e um caractere especial (máximo de 72 bytes).' });
   if (novaSenha !== confirmarSenha) return res.status(400).json({ mensagem: 'As senhas não são iguais.' });
-
   try {
-    const usuario = await usuarioModel.atualizarSenhaPorEmail(email, await senhaService.gerarHash(novaSenha));
-    if (usuario) {
-      await sessaoModel.removerDoUsuario(usuario.id);
-      await registrarAuditoria(req, 'senha_redefinida', 'autenticacao', {}, usuario);
-    }
-    res.json({ mensagem: 'Se o e-mail estiver cadastrado, a senha foi atualizada. Você já pode entrar.' });
+    const usuario = await recuperacaoSenhaService.redefinir(token, novaSenha);
+    if (!usuario) return res.status(400).json({ mensagem: 'Código inválido, expirado ou com limite de tentativas atingido. Solicite outro código.' });
+    await registrarAuditoria(req, 'senha_redefinida', 'autenticacao', {}, usuario);
+    res.json({ mensagem: 'Senha atualizada. Entre com a nova senha e confirme pelo aplicativo autenticador.' });
   } catch (erro) {
-    console.error('Erro ao redefinir senha:', erro.message);
+    console.error('Erro ao redefinir senha:', erro.code || 'serviço indisponível');
     res.status(503).json({ mensagem: 'Não foi possível redefinir a senha. Tente novamente.' });
   }
 }
@@ -180,4 +202,4 @@ function eu(req, res) {
   res.json({ usuario: usuarioModel.paraPublico(req.usuario) });
 }
 
-module.exports = { cadastro, login, verificarTotp, recuperarSenha, encerrarConta, sair, eu };
+module.exports = { cadastro, login, verificarTotp, solicitarRecuperacao, verificarCodigoRecuperacao, recuperarSenha, encerrarConta, sair, eu };

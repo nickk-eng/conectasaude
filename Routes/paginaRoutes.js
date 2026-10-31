@@ -5,6 +5,7 @@ router.get('/', pagina('login.html'));
 router.get('/home', pagina('home.html'));
 router.get('/termos', pagina('termos.html'));
 router.get('/privacidade', pagina('privacidade.html'));
+router.get('/nova-senha', pagina('nova-senha.html'));
 router.get('/alterar-senha', pagina('alterar-senha.html'));
 router.get('/jogo', pagina('jogo.html'));
 router.get('/sala', pagina('sala.html'));

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Criar nova senha | ConectaSaúde</title><link rel="stylesheet" href="/css/style.css"></head>
+<body><main class="container">
+<div class="logo"><img src="/img/coracao.png" alt="Logo do ConectaSaúde"></div>
+<h1>Criar nova senha</h1>
+<p>Escolha sua nova senha e confirme para salvar.</p>
+<form id="form-nova-senha">
+<label for="nova-senha">Nova senha</label>
+<input id="nova-senha" name="novaSenha" type="password" autocomplete="new-password" minlength="8" required aria-describedby="requisitos-senha">
+<p id="requisitos-senha">Use pelo menos 8 caracteres, uma letra maiúscula, um número e um símbolo.</p>
+<label for="confirmar-senha">Confirme a nova senha</label>
+<input id="confirmar-senha" name="confirmarSenha" type="password" autocomplete="new-password" minlength="8" required>
+<button class="botao-enviar" type="submit">Salvar senha</button>
+</form>
+<p id="mensagem-recuperacao" class="mensagem" role="status" aria-live="polite"></p>
+<p><a href="/">Voltar para entrar</a></p>
+</main><script src="/js/nova-senha.js"></script></body></html>

@@ -38,6 +38,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_ativo_idx
     ON usuarios(email)
     WHERE ativo = TRUE;
 
+CREATE TABLE IF NOT EXISTS recuperacoes_senha (
+    id UUID PRIMARY KEY,
+    usuario_id UUID NOT NULL UNIQUE REFERENCES usuarios(id) ON DELETE CASCADE,
+    codigo_hash TEXT NOT NULL,
+    token_hash TEXT,
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expira_em TIMESTAMPTZ NOT NULL,
+    tentativas SMALLINT NOT NULL DEFAULT 0
+);
+
 CREATE TABLE IF NOT EXISTS sessoes (
     id UUID PRIMARY KEY,
     usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,

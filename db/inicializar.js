@@ -5,6 +5,8 @@ const senhaService = require('../Service/senhaService');
 const { MAX_TENTATIVAS_MFA, AUTOR_SEMENTE_ID } = require('../Config/constantes');
 
 const COMANDOS = [
+  'CREATE TABLE IF NOT EXISTS recuperacoes_senha (id UUID PRIMARY KEY, usuario_id UUID NOT NULL UNIQUE REFERENCES usuarios(id) ON DELETE CASCADE, codigo_hash TEXT NOT NULL, criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), expira_em TIMESTAMPTZ NOT NULL, tentativas SMALLINT NOT NULL DEFAULT 0)',
+  'ALTER TABLE recuperacoes_senha ADD COLUMN IF NOT EXISTS token_hash TEXT',
   'ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS ativo BOOLEAN NOT NULL DEFAULT TRUE',
   'ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS encerrada_em TIMESTAMPTZ',
   'ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS termos_aceitos_em TIMESTAMPTZ',

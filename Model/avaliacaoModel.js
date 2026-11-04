@@ -22,7 +22,6 @@ async function criar({ usuarioId, tipo, perguntas }) {
   return { criada: insercao.rowCount > 0, avaliacao: await buscar(usuarioId, tipo) };
 }
 
-// Retorna true se esta chamada foi a que concluiu (evita enviar duas vezes).
 async function concluir(id, respostas, acertos) {
   const resultado = await banco.query(
     `UPDATE avaliacoes
@@ -34,7 +33,6 @@ async function concluir(id, respostas, acertos) {
   return resultado.rowCount > 0;
 }
 
-// Uma linha por aluno ativo, com o resultado do pré e do pós-teste (se concluídos).
 async function resumoPorAluno() {
   const dados = await banco.query(
     `SELECT u.id, u.nome, u.email, u.turma,

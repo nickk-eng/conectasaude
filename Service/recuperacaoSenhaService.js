@@ -32,7 +32,6 @@ async function solicitar(email) {
       await emailService.enviarCodigo(email, envio.codigo);
     } catch (erro) {
       await banco.query('DELETE FROM recuperacoes_senha WHERE id = $1', [envio.id]);
-      // A resposta pública permanece igual para não revelar contas cadastradas.
       console.error('Falha no envio do código de recuperação:', erro.code || 'SMTP indisponível');
     }
   }

@@ -36,7 +36,6 @@ async function buscarSenhaHashAtivo(id) {
   return resultado.rows[0]?.senha_hash || null;
 }
 
-// Retorna o usuário atualizado, ou null se o e-mail não existir/estiver inativo.
 async function atualizarSenhaPorEmail(email, senhaHash) {
   const resultado = await banco.query(
     'UPDATE usuarios SET senha_hash = $1 WHERE email = $2 AND ativo = TRUE RETURNING id, email, perfil',
@@ -128,7 +127,6 @@ async function excluir(id) {
   await banco.query('DELETE FROM usuarios WHERE id = $1', [id]);
 }
 
-// Encerra a conta anonimizando os dados, tudo em uma única transação.
 async function encerrarConta(usuario, { metodo, rota }) {
   const cliente = await banco.connect();
   try {

@@ -23,7 +23,6 @@ async function criar(usuarioId, tipo, segredoTemporario) {
   return resultado.rows[0].id;
 }
 
-// Devolve o desafio válido junto com os dados do usuário (colunas de u.* + desafio_*).
 async function buscarValidoComUsuario(desafioId) {
   const resultado = await banco.query(
     `SELECT d.id AS desafio_id, d.tipo AS desafio_tipo, d.segredo_temporario, d.tentativas, u.*
@@ -38,7 +37,6 @@ async function incrementarTentativas(desafioId) {
   await banco.query('UPDATE desafios_mfa SET tentativas = tentativas + 1 WHERE id = $1', [desafioId]);
 }
 
-// Retorna true se este chamador foi quem consumiu o desafio (evita reuso).
 async function consumir(desafioId) {
   const resultado = await banco.query('DELETE FROM desafios_mfa WHERE id = $1 RETURNING id', [desafioId]);
   return resultado.rowCount > 0;

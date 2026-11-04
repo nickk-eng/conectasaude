@@ -1,5 +1,3 @@
-// Limite por IP para uma instância do servidor. Em múltiplas instâncias,
-// usar armazenamento compartilhado para manter o mesmo limite.
 function limitarTentativas(maximo, janelaMs = 15 * 60 * 1000) {
   const acessos = new Map();
   return (req, res, next) => {

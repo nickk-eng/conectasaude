@@ -1,4 +1,3 @@
-// Limite adicional por IP; o intervalo por conta também é persistido no banco.
 const acessos = new Map();
 function limiteRecuperacao(req, res, next) {
   const agora = Date.now();

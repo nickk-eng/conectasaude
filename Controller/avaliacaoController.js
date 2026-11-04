@@ -6,7 +6,7 @@ function responderErro(res, erro) {
   if (erro instanceof avaliacaoService.ErroRegra) {
     return res.status(erro.status).json({ mensagem: erro.message, codigo: erro.codigo });
   }
-  throw erro; // erro inesperado: vai para o tratador global
+  throw erro;
 }
 
 function tipoDaRota(req, res) {

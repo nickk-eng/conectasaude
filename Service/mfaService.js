@@ -41,7 +41,6 @@ async function verificarCodigo(codigo, segredo) {
   return verificacao.valid;
 }
 
-// Monta o corpo da resposta de um desafio MFA (login ou configuração).
 async function montarRespostaDesafio(usuario, desafio) {
   const resposta = {
     mfaRequerida: true,

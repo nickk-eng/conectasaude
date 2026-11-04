@@ -114,7 +114,6 @@ async function decidirProfessor(req, res) {
   if (req.params.id.toLowerCase() === req.usuario.id.toLowerCase()) return res.status(403).json({ mensagem: 'Você não pode alterar seu próprio perfil administrativo.' });
   const usuario = await usuarioModel.decidirProfessor(req.params.id, decisao);
   if (!usuario) return res.status(409).json({ mensagem: 'Não há uma conta ativa com perfil e solicitação compatíveis. Atualize a lista.' });
-  // O perfil é consultado no banco a cada acesso; a revogação é imediata.
   await registrarAuditoria(req, `professor_${decisao}`, 'usuarios', { usuarioId: usuario.id });
   res.json({ mensagem: 'Permissão atualizada.', usuario: usuarioModel.paraPublico(usuario) });
 }

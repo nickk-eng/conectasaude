@@ -18,7 +18,6 @@ async function listarPerguntas(req, res) {
   });
 }
 
-// Inteiro entre 0 e 1000 (a coluna é SMALLINT e o valor vem do navegador).
 const contagem = (valor) => Math.min(Math.max(Math.trunc(Number(valor)) || 0, 0), 1000);
 
 async function registrarResultado(req, res) {

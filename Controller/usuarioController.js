@@ -3,7 +3,6 @@ const { ANOS_ENSINO_MEDIO } = require('../Config/constantes');
 const auditoriaModel = require('../Model/auditoriaModel');
 const { registrarAuditoria } = require('../Service/auditoriaService');
 
-// PUT /api/usuario/perfil (aluno ou professor)
 async function atualizarPerfil(req, res) {
   const ehAluno = req.usuario.perfil === 'aluno';
   const nome = String(req.body.nome || '').trim().slice(0, 60);
@@ -18,7 +17,6 @@ async function atualizarPerfil(req, res) {
   res.json({ usuario: usuarioModel.paraPublico(usuario) });
 }
 
-// PUT /api/aluno/perfil (usado pela tela do jogo; o nome é opcional)
 async function atualizarPerfilAluno(req, res) {
   const nome = String(req.body.nome || '').trim().slice(0, 60);
   const turma = String(req.body.turma ?? req.usuario.turma ?? '').trim().slice(0, 60);

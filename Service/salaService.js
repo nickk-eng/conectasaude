@@ -78,7 +78,6 @@ function criarServicoSalas({ perguntasModel, salvarResultados, agora = Date.now 
       }
       const perguntas = await perguntasModel.sortearAprovadas(nivel, categoriaIst || null);
       if (!perguntas.length) falhar('Ainda não há perguntas aprovadas nesta dificuldade.');
-      // Revalida após a consulta assíncrona para evitar duas criações simultâneas com o mesmo código/aluno.
       if (salas.size >= 1000) falhar('Há muitas salas abertas. Tente novamente mais tarde.', 503);
       if ([...salas.values()].some((s) => s.status !== 'finalizada' && s.jogadores.some((p) => p.id === usuario.id))) {
         falhar('Você já tem uma sala aberta. Volte à sala ou saia dela antes de criar outra.', 409);

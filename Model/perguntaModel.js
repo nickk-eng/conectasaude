@@ -86,7 +86,6 @@ async function sortearIdsAprovadas(limite) {
   return dados.rows.map((linha) => linha.id);
 }
 
-// O tipo do id (UUID ou inteiro) depende de como a tabela foi criada, então compara como texto.
 async function buscarPorIds(ids) {
   const dados = await banco.query(
     'SELECT id, texto, alternativas, resposta_correta FROM perguntas WHERE id::text = ANY($1::text[])',

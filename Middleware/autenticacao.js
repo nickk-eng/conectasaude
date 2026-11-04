@@ -34,8 +34,6 @@ function permitir(...perfis) {
       : res.status(403).json({ mensagem: 'Você não tem acesso a esta área.' });
 }
 
-// Cookies autenticam apenas navegação HTML. APIs continuam exigindo Bearer,
-// evitando que requisições de outros sites usem automaticamente a sessão.
 function protegerPagina(...perfis) {
   return async (req, res, next) => {
     res.set('Cache-Control', 'no-store');

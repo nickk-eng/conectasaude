@@ -6,7 +6,6 @@ function ipCliente(req) {
     .trim();
 }
 
-// Nunca derruba a requisição: falha de auditoria só vai para o log.
 async function registrarAuditoria(req, acao, recurso, detalhes = {}, usuarioInformado = null) {
   try {
     const usuario = usuarioInformado || req.usuario || null;

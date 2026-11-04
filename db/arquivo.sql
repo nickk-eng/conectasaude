@@ -505,8 +505,6 @@ VALUES
 );
 
 
--- Avaliação diagnóstica (pré e pós-teste) e histórico de partidas.
--- perguntas/respostas guardam ids e escolhas em JSONB (o tipo do id de perguntas pode ser UUID ou inteiro).
 CREATE TABLE IF NOT EXISTS avaliacoes (
     id BIGSERIAL PRIMARY KEY,
     usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,

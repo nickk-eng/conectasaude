@@ -1,4 +1,3 @@
-// Último middleware: garante resposta JSON em vez do HTML padrão do Express.
 function tratarErros(erro, _req, res, next) {
   if (res.headersSent) return next(erro);
 

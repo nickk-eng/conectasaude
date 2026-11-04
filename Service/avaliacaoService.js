@@ -3,7 +3,6 @@ const partidaModel = require('../Model/partidaModel');
 const perguntaModel = require('../Model/perguntaModel');
 const { TOTAL_PERGUNTAS_AVALIACAO, PARTIDAS_PARA_POS_TESTE } = require('../Config/constantes');
 
-// Erro de regra de negócio: o controller o converte em resposta HTTP.
 class ErroRegra extends Error {
   constructor(status, codigo, mensagem) {
     super(mensagem);
@@ -16,7 +15,6 @@ function percentual(acertos, total) {
   return total ? Math.round((acertos / total) * 100) : 0;
 }
 
-// Resultado de uma avaliação concluída (ou null se ainda não foi feita).
 function resumo(avaliacao) {
   if (!avaliacao || !avaliacao.concluida_em) return null;
   return { acertos: avaliacao.acertos, total: avaliacao.total, percentual: percentual(avaliacao.acertos, avaliacao.total) };
@@ -26,7 +24,6 @@ async function preTesteConcluido(usuarioId) {
   return Boolean((await avaliacaoModel.buscar(usuarioId, 'pre'))?.concluida_em);
 }
 
-// Em que etapa o aluno está: pre -> jogar -> pos -> concluida.
 async function status(usuarioId) {
   const [pre, pos] = await Promise.all([
     avaliacaoModel.buscar(usuarioId, 'pre'),
@@ -72,7 +69,6 @@ async function exigirPosTesteLiberado(usuarioId) {
 
 async function escolherPerguntas(usuarioId, tipo) {
   if (tipo === 'pos') {
-    // Mesmas perguntas do pré-teste, para dar para comparar o desempenho.
     return (await avaliacaoModel.buscar(usuarioId, 'pre')).perguntas;
   }
   const ids = await perguntaModel.sortearIdsAprovadas(TOTAL_PERGUNTAS_AVALIACAO);
@@ -82,7 +78,6 @@ async function escolherPerguntas(usuarioId, tipo) {
   return ids;
 }
 
-// Inicia a avaliação (ou retoma a que está em andamento). Nunca envia o gabarito.
 async function iniciar(usuarioId, tipo) {
   let avaliacao = await avaliacaoModel.buscar(usuarioId, tipo);
 
@@ -113,7 +108,6 @@ async function iniciar(usuarioId, tipo) {
   };
 }
 
-// Corrige no servidor e grava o resultado.
 async function responder(usuarioId, tipo, respostas) {
   const avaliacao = await avaliacaoModel.buscar(usuarioId, tipo);
   if (!avaliacao) throw new ErroRegra(404, 'NAO_INICIADA', 'Inicie a avaliação antes de enviar as respostas.');
@@ -144,7 +138,6 @@ async function responder(usuarioId, tipo, respostas) {
   if (tipo === 'pos') {
     resultado.pre = resumo(await avaliacaoModel.buscar(usuarioId, 'pre'));
     resultado.evolucao = resultado.percentual - resultado.pre.percentual;
-    // Só depois de concluído o pós-teste é seguro mostrar o gabarito.
     resultado.revisao = perguntas.map((p) => ({
       texto: p.texto,
       opcoes: perguntaModel.alternativasDe(p),
@@ -155,7 +148,6 @@ async function responder(usuarioId, tipo, respostas) {
   return resultado;
 }
 
-// Visão do professor: resultado por aluno e médias da turma.
 function resumirTurma(linhas) {
   const alunos = linhas.map((linha) => {
     const pre = linha.pre_total != null ? { acertos: linha.pre_acertos, total: linha.pre_total, percentual: percentual(linha.pre_acertos, linha.pre_total) } : null;

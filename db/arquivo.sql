@@ -24,16 +24,113 @@ CREATE TABLE IF NOT EXISTS usuarios (
     perfil perfil_usuario NOT NULL,
     nome VARCHAR(60) NOT NULL DEFAULT '',
     turma VARCHAR(60) NOT NULL DEFAULT '',
+    responsaveis_nome VARCHAR(240) NOT NULL DEFAULT '',
     criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     encerrada_em TIMESTAMPTZ,
     termos_aceitos_em TIMESTAMPTZ,
-    termos_versao VARCHAR(20)
+    termos_versao VARCHAR(20),
+    mfa_totp_segredo TEXT,
+    mfa_totp_ativo BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_ativo_idx
     ON usuarios(email)
     WHERE ativo = TRUE;
+
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS solicitou_professor BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS status_professor VARCHAR(20) NOT NULL DEFAULT 'nao_aplicavel'
+    CHECK (status_professor IN ('nao_aplicavel', 'nao_solicitado', 'pendente', 'aprovado', 'recusado', 'revogado'));
+
+UPDATE usuarios SET status_professor = 'aprovado' WHERE perfil = 'professor' AND status_professor = 'nao_aplicavel';
+UPDATE usuarios SET status_professor = 'pendente' WHERE perfil = 'aluno' AND solicitou_professor = TRUE AND status_professor = 'nao_aplicavel';
+
+CREATE TABLE IF NOT EXISTS professor_alunos (
+    professor_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    aluno_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (professor_id, aluno_id),
+    CHECK (professor_id <> aluno_id)
+);
+
+CREATE INDEX IF NOT EXISTS professor_alunos_aluno_idx ON professor_alunos(aluno_id);
+
+CREATE TABLE IF NOT EXISTS turmas (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    professor_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    ano SMALLINT NOT NULL CHECK (ano BETWEEN 1 AND 3),
+    letra VARCHAR(1) NOT NULL CHECK (letra ~ '^[A-Z]$'),
+    escola VARCHAR(150) NOT NULL CHECK (length(trim(escola)) > 0),
+    descricao VARCHAR(1000) NOT NULL DEFAULT '',
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS turmas_professor_escola_ano_letra_idx
+    ON turmas(professor_id, lower(escola), ano, letra);
+
+CREATE TABLE IF NOT EXISTS turma_alunos (
+    turma_id UUID NOT NULL REFERENCES turmas(id) ON DELETE CASCADE,
+    aluno_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (turma_id, aluno_id)
+);
+
+CREATE INDEX IF NOT EXISTS turma_alunos_aluno_idx ON turma_alunos(aluno_id);
+
+CREATE OR REPLACE VIEW alunos_dos_professores AS
+    SELECT professor_id, aluno_id FROM professor_alunos
+    UNION
+    SELECT t.professor_id, ta.aluno_id
+    FROM turmas t JOIN turma_alunos ta ON ta.turma_id = t.id;
+
+
+CREATE TABLE IF NOT EXISTS escolas (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    professor_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    nome VARCHAR(150) NOT NULL CHECK (length(trim(nome)) > 0),
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (id, professor_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS escolas_professor_nome_idx ON escolas(professor_id, lower(nome));
+
+ALTER TABLE turmas ADD COLUMN IF NOT EXISTS escola_id UUID;
+
+INSERT INTO escolas (professor_id, nome)
+SELECT professor_id, MIN(trim(regexp_replace(escola, '[[:space:]]+', ' ', 'g')))
+FROM turmas
+GROUP BY professor_id, lower(trim(regexp_replace(escola, '[[:space:]]+', ' ', 'g')))
+ON CONFLICT (professor_id, lower(nome)) DO NOTHING;
+
+UPDATE turmas t SET escola_id = e.id
+FROM escolas e
+WHERE t.escola_id IS NULL AND e.professor_id = t.professor_id
+  AND lower(e.nome) = lower(trim(regexp_replace(t.escola, '[[:space:]]+', ' ', 'g')));
+
+ALTER TABLE turmas ALTER COLUMN escola_id SET NOT NULL;
+
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'turmas_escola_professor_fk' AND conrelid = 'turmas'::regclass) THEN
+        ALTER TABLE turmas ADD CONSTRAINT turmas_escola_professor_fk
+            FOREIGN KEY (escola_id, professor_id) REFERENCES escolas(id, professor_id);
+    END IF;
+END $$;
+
+CREATE UNIQUE INDEX IF NOT EXISTS turmas_professor_escola_id_ano_letra_idx ON turmas(professor_id, escola_id, ano, letra);
+
+
+CREATE TABLE IF NOT EXISTS recuperacoes_senha (
+    id UUID PRIMARY KEY,
+    usuario_id UUID NOT NULL UNIQUE REFERENCES usuarios(id) ON DELETE CASCADE,
+    codigo_hash TEXT NOT NULL,
+    token_hash TEXT,
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expira_em TIMESTAMPTZ NOT NULL,
+    tentativas SMALLINT NOT NULL DEFAULT 0
+);
+
+ALTER TABLE recuperacoes_senha ADD COLUMN IF NOT EXISTS token_hash TEXT;
 
 CREATE TABLE IF NOT EXISTS sessoes (
     id UUID PRIMARY KEY,
@@ -50,6 +147,45 @@ ALTER TABLE usuarios
 
 ALTER TABLE usuarios
     ADD COLUMN IF NOT EXISTS termos_versao VARCHAR(20);
+
+ALTER TABLE usuarios
+    ADD COLUMN IF NOT EXISTS mfa_totp_segredo TEXT;
+
+ALTER TABLE usuarios
+    ADD COLUMN IF NOT EXISTS mfa_totp_ativo BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE usuarios
+    DROP COLUMN IF EXISTS telefone;
+
+CREATE TABLE IF NOT EXISTS desafios_mfa (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('login', 'configuracao')),
+    segredo_temporario TEXT,
+    criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expira_em TIMESTAMPTZ NOT NULL,
+    tentativas SMALLINT NOT NULL DEFAULT 0
+);
+
+DELETE FROM desafios_mfa WHERE expira_em <= NOW() OR tentativas >= 5;
+
+ALTER TABLE desafios_mfa
+    DROP COLUMN IF EXISTS telefone;
+
+ALTER TABLE desafios_mfa
+    DROP COLUMN IF EXISTS ultimo_envio_em;
+
+ALTER TABLE desafios_mfa
+    DROP COLUMN IF EXISTS reenvios;
+
+ALTER TABLE desafios_mfa
+    ADD COLUMN IF NOT EXISTS tipo VARCHAR(20) NOT NULL DEFAULT 'login';
+
+ALTER TABLE desafios_mfa
+    ADD COLUMN IF NOT EXISTS segredo_temporario TEXT;
+
+CREATE INDEX IF NOT EXISTS desafios_mfa_usuario_expira_idx
+    ON desafios_mfa(usuario_id, expira_em DESC);
 
 
 CREATE TABLE IF NOT EXISTS auditoria_acessos (
@@ -93,10 +229,12 @@ CREATE TABLE IF NOT EXISTS perguntas (
     alternativas JSONB NOT NULL,
     resposta_correta INT NOT NULL,
     nivel VARCHAR(20) NOT NULL,
+    categoria_ist VARCHAR(30) NOT NULL DEFAULT 'prevencao-geral' CHECK (categoria_ist IN ('hiv-aids', 'sifilis', 'gonorreia', 'clamidia', 'hpv', 'herpes-genital', 'hepatites-virais', 'tricomoniase', 'prevencao-geral')),
     status VARCHAR(20) NOT NULL DEFAULT 'pendente',
     autor_id UUID REFERENCES usuarios(id) ON DELETE SET NULL,
     criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
 
 ALTER TABLE perguntas
     ADD COLUMN IF NOT EXISTS avaliada_por UUID
@@ -447,4 +585,41 @@ VALUES
 );
 
 
+CREATE TABLE IF NOT EXISTS avaliacoes (
+    id BIGSERIAL PRIMARY KEY,
+    usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    tipo VARCHAR(3) NOT NULL CHECK (tipo IN ('pre', 'pos')),
+    perguntas JSONB NOT NULL,
+    respostas JSONB,
+    acertos SMALLINT,
+    total SMALLINT NOT NULL,
+    criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    concluida_em TIMESTAMPTZ,
+    UNIQUE (usuario_id, tipo)
+);
+
+CREATE TABLE IF NOT EXISTS partidas (
+    id BIGSERIAL PRIMARY KEY,
+    usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+    acertos SMALLINT NOT NULL,
+    erros SMALLINT NOT NULL,
+    nivel VARCHAR(10) NOT NULL,
+    modo VARCHAR(12) NOT NULL,
+    resultado VARCHAR(80) NOT NULL DEFAULT '',
+    criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS partidas_usuario_id_idx
+    ON partidas(usuario_id);
+
+ALTER TABLE desafios_mfa DROP CONSTRAINT IF EXISTS desafios_mfa_tipo_check;
+ALTER TABLE desafios_mfa ADD CONSTRAINT desafios_mfa_tipo_check CHECK (tipo IN ('login', 'configuracao', 'email'));
+ALTER TABLE desafios_mfa ADD COLUMN IF NOT EXISTS codigo_hash TEXT;
+ALTER TABLE solicitacoes_privacidade ADD COLUMN IF NOT EXISTS resposta TEXT NOT NULL DEFAULT '';
+ALTER TABLE solicitacoes_privacidade ADD COLUMN IF NOT EXISTS respondida_em TIMESTAMPTZ;
+ALTER TABLE solicitacoes_privacidade ADD COLUMN IF NOT EXISTS respondida_por UUID REFERENCES usuarios(id);
+ALTER TABLE solicitacoes_privacidade ALTER COLUMN usuario_id DROP NOT NULL;
+ALTER TABLE solicitacoes_privacidade ADD COLUMN IF NOT EXISTS providencia TEXT NOT NULL DEFAULT '';
+ALTER TABLE solicitacoes_privacidade ADD COLUMN IF NOT EXISTS comprovante TEXT NOT NULL DEFAULT '';
+ALTER TABLE solicitacoes_privacidade ADD COLUMN IF NOT EXISTS verificada_em TIMESTAMPTZ;
 COMMIT;

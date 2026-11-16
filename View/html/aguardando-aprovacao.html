@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aguardando aprovação | ConectaSaúde</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/aguardando-aprovacao.css" />
+  </head>
+  <body>
+    <main class="espera-aprovacao">
+      <header>
+        <div class="logo">
+          <img src="/img/coracao.png" alt="Logo do ConectaSaúde" />
+        </div>
+        <p>ConectaSaúde · Acesso de professor</p>
+      </header>
+      <section class="secao-formulario" aria-labelledby="titulo-espera">
+        <span class="selo-espera">Acesso em análise</span>
+        <h1 id="titulo-espera">
+          Aguardando o administrador aceitar a sua solicitação, prezado
+          professor
+        </h1>
+        <p>
+          Seu acesso será liberado após a aprovação do administrador. Esta
+          página verifica a aprovação automaticamente.
+        </p>
+        <p>
+          Enquanto isso, você pode
+          <a href="/privacidade"
+            >registrar e acompanhar pedidos sobre seus dados pessoais</a
+          >, mesmo com o acesso de professor pendente, recusado ou revogado.
+        </p>
+        <p id="conta-espera"></p>
+        <p
+          id="status-espera"
+          class="mensagem"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <button id="verificar-aprovacao" type="button">
+          Verificar aprovação
+        </button>
+        <button id="sair-espera" class="link-botao" type="button">
+          Sair da conta
+        </button>
+      </section>
+      <footer class="links-legais">
+        <a href="/termos">Termos de Uso</a
+        ><a href="/privacidade">Política de Privacidade</a>
+      </footer>
+    </main>
+    <script src="/js/auth.js"></script>
+    <script src="/js/aguardando-aprovacao.js"></script>
+  </body>
+</html>

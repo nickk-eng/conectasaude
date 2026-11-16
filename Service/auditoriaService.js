@@ -1,12 +1,18 @@
-const auditoriaModel = require('../Model/auditoriaModel');
+const auditoriaModel = require("../Model/auditoriaModel");
 
 function ipCliente(req) {
-  return String(req.ip || req.socket.remoteAddress || '')
-    .split(',')[0]
+  return String(req.ip || req.socket.remoteAddress || "")
+    .split(",")[0]
     .trim();
 }
 
-async function registrarAuditoria(req, acao, recurso, detalhes = {}, usuarioInformado = null) {
+async function registrarAuditoria(
+  req,
+  acao,
+  recurso,
+  detalhes = {},
+  usuarioInformado = null,
+) {
   try {
     const usuario = usuarioInformado || req.usuario || null;
     await auditoriaModel.registrar({
@@ -19,10 +25,10 @@ async function registrarAuditoria(req, acao, recurso, detalhes = {}, usuarioInfo
       metodo: req.method,
       rota: req.originalUrl,
       ip: ipCliente(req),
-      userAgent: String(req.get('User-Agent') || '').slice(0, 300)
+      userAgent: String(req.get("User-Agent") || "").slice(0, 300),
     });
   } catch (erro) {
-    console.error('Erro ao registrar auditoria:', erro.message);
+    console.error("Erro ao registrar auditoria:", erro.message);
   }
 }
 

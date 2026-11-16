@@ -51,6 +51,8 @@ MFA_ENCRYPTION_KEY=chave_base64_de_32_bytes
 
 - `DATABASE_URL`: conexão com o PostgreSQL. Altere usuário, senha, servidor ou porta quando necessário.
 - `ADMIN_EMAIL` e `ADMIN_SENHA`: credenciais da conta de administrador criada na primeira inicialização.
+- Para trocar o e-mail de um administrador existente, defina o novo endereço em `ADMIN_EMAIL` e o antigo em `ADMIN_EMAIL_ANTERIOR`. Ao iniciar, o sistema atualiza a mesma conta, preservando senha e autenticação em duas etapas. Depois da atualização, `ADMIN_EMAIL_ANTERIOR` pode ser removido. Se o novo endereço já pertencer a outra conta ativa, a alteração será recusada.
+- O banco e as permissões permitem vários administradores, cada um com sua conta. O painel atual não oferece criação ou promoção de administradores; `ADMIN_EMAIL` configura apenas uma conta por inicialização e não remove os outros administradores existentes.
 - `PORT`: porta em que o site será aberto. O valor padrão é `3000`.
 - `MFA_ENCRYPTION_KEY`: chave usada para proteger os segredos do aplicativo autenticador armazenados no banco. Ela deve ter 32 bytes codificados em Base64.
 
@@ -68,7 +70,15 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 Copie o resultado para `MFA_ENCRYPTION_KEY`. Guarde essa chave em segurança: se ela for perdida, os códigos já configurados não poderão ser validados e será necessário configurar o autenticador novamente.
 
-### Recuperação de senha por e-mail
+### Melhorias para a apresentação
+
+- No login, escolha **Aplicativo autenticador** ou **Código por e-mail**. O e-mail usa a mesma configuração SMTP da recuperação de senha; o código expira em 10 minutos, aceita até cinco tentativas e pode ser reenviado após um minuto voltando ao login. A autenticação em duas etapas continua obrigatória.
+- O cadastro exige repetir o e-mail e a senha. Os requisitos da senha são indicados durante a digitação, inclusive o limite de 72 bytes do bcrypt.
+- Em **Política de Privacidade**, usuários autenticados registram e acompanham seus pedidos, inclusive professores com aprovação pendente, recusada ou acesso revogado. Concluir exige resposta, providência, referência de comprovação e confirmação do administrador. Em pedidos de eliminação, uma confirmação adicional executa a exclusão definitiva da conta e dos dados vinculados no banco ativo, preservando um recibo técnico sem vínculo com o titular. Outros tipos exigem que a equipe realize e comprove a providência antes de concluir. Pedidos finalizados não podem ser sobrescritos.
+- Perguntas e auditoria exibem até cinco itens por página, com botões Anterior e Próxima. Os totais de perguntas consideram todas as páginas.
+- Todas as telas têm acesso aos termos e à política de privacidade, inclusive antes do login.
+
+### Configurar o envio de e-mail
 
 Acrescente ao seu `.env` as configurações do seu serviço de e-mail, usando `.env.example` como referência:
 
@@ -84,7 +94,7 @@ Use a senha de aplicativo quando seu provedor exigir. A porta 465 usa TLS direto
 
 O fluxo é **Esqueci minha senha → código recebido por e-mail → nova senha**. O código expira em 10 minutos, tem até cinco tentativas e só pode ser validado uma vez. O reenvio exige um intervalo de um minuto por conta. A troca de senha encerra sessões e desafios de login anteriores, preservando o autenticador já configurado. Perder o autenticador ainda exige atendimento administrativo.
 
-Sem SMTP configurado e funcional, a recuperação por e-mail não entrega códigos. Os testes simulam o envio; não enviam mensagens reais.
+Sem SMTP configurado e funcional, a recuperação por e-mail não entrega códigos.
 
 ## 4. Instale as dependências
 
@@ -117,11 +127,27 @@ Acesse [http://localhost:3000](http://localhost:3000).
 ## Primeiro acesso
 
 - Entre como administrador usando o e-mail e a senha definidos no `.env`.
-- Na tela inicial, todas as contas são criadas como aluno, com seleção de 1º, 2º ou 3º ano do ensino médio. O ano fica fixo após a escolha. Contas antigas com anos fora dessa lista podem definir seu ano no perfil ou antes de jogar.
-- Em **Meu perfil**, o usuário seleciona **Solicitar acesso de professor**. O administrador aprova ou recusa em **Gestão de usuários**, e pode revogar esse acesso depois. O usuário deve atualizar a página após a decisão.
+- Na tela de cadastro, selecione **Professor** ou **Aluno** em **Perfil de Usuário**. Apenas alunos informam o 1º, 2º ou 3º ano do ensino médio. O ano fica fixo após a escolha. Após criar a conta, a tela volta ao login.
+- Quem escolhe **Professor** confirma o login com o código por e-mail ou pelo aplicativo autenticador. Somente depois de validar o segundo fator, o servidor registra a solicitação e direciona para `/aguardando-aprovacao`. Essa sessão permite consultar a aprovação, registrar e acompanhar os próprios pedidos de privacidade e sair. O painel e as demais APIs privadas continuam bloqueados até a aprovação.
+- O administrador aprova ou recusa em **Gestão de usuários**. A página de espera verifica a aprovação a cada dez segundos e abre o painel automaticamente quando o acesso é liberado. Recusa e revogação mantêm a conta bloqueada até uma nova liberação explícita do administrador. Um novo login não recria solicitações recusadas nem reverte uma revogação.
+- Alunos não têm botão nem rota para solicitar o perfil de professor. O perfil escolhido no cadastro não concede permissões administrativas nem de professor: o servidor registra a intenção em `status_professor` e só concede o perfil efetivo após a aprovação.
 - Depois do login, alunos e professores acessam `/home`; administradores acessam `/admin`.
 
 ## Funcionalidades
+
+### Minhas turmas
+
+No painel do professor, clique em **Gerenciar minhas turmas** para abrir `/minha-turma`. Selecione **Criar turma**, escolha o 1º, 2º ou 3º ano do ensino médio e informe uma letra de A a Z. No campo **Escola**, selecione uma das suas escolas cadastradas ou escolha **Cadastrar nova escola** e informe e confirme o nome. Para escolas existentes, não é necessário redigitar o nome. A descrição é opcional e aceita até mil caracteres. A combinação do ano e da letra identifica a turma, por exemplo, **3A**. O mesmo professor não pode criar duas turmas com a mesma identificação na mesma escola.
+
+A página agrupa as turmas pelo nome da escola e exibe um botão por turma. Abra o botão desejado e selecione **Adicionar alunos cadastrados** para pesquisar por nome ou e-mail. A busca apresenta alunos ativos do mesmo ano escolar, ignora maiúsculas e acentos e mostra até vinte alunos por página. Em **Alunos desta turma**, consulte os alunos selecionados e use **Remover da turma** para desfazer apenas esse vínculo.
+
+Cada turma pertence ao professor que a criou. O vínculo não altera o ano escolar nem exclui o cadastro do aluno, que pode participar de outras turmas e de turmas de outros professores. O painel consolida os alunos das turmas do professor sem contar o mesmo aluno duas vezes; médias, avaliações, relatórios e edição dos responsáveis respeitam esses vínculos. A administração mantém sua visão geral dos alunos.
+
+Em **Ver relatórios**, selecione uma escola para consultar os alunos de todas as suas turmas nela. Depois, selecione o ano do ensino médio para restringir a consulta e, se desejar, a letra da turma para visualizar uma sala específica, como **1A**. Os campos seguintes apresentam somente anos e letras cadastrados para a seleção anterior. Os filtros de período continuam disponíveis. Clique em **Aplicar filtros** para atualizar o resultado, que mostra dez alunos por página, a escola e a identificação da turma. O resumo considera todos os alunos filtrados e cada partida é contada uma única vez, mesmo que o aluno esteja em mais de uma turma. Vínculos antigos sem escola definida aparecem somente na consulta geral, até serem organizados em uma turma.
+
+As tabelas `escolas`, `turmas` e `turma_alunos` armazenam as escolas de cada professor, suas turmas e os alunos vinculados. A turma referencia o cadastro da escola por identificador; novas turmas da mesma escola são apresentadas junto às anteriores. A confirmação do nome da escola valida o preenchimento e não comprova vínculo profissional. Os nomes são normalizados para desconsiderar espaços adicionais e diferenças entre maiúsculas e minúsculas na identificação de duplicidades. O SQL de instalação e a atualização automática em `db/inicializar.js` incluem essa estrutura; `db/turmas.sql` e `db/escolas.sql` contêm os ajustes correspondentes. A migração cadastra automaticamente as escolas informadas nas turmas existentes, preservando os vínculos e sem criar cópias de uma mesma escola para o mesmo professor.
+
+Os vínculos antigos de `professor_alunos` são preservados e continuam no painel como alunos ainda sem turma definida. Ao adicionar um desses alunos a uma turma do mesmo professor, o vínculo antigo é substituído pelo vínculo com a turma escolhida. A página informa quantos alunos antigos ainda precisam ser organizados. Nenhuma escola ou turma é criada automaticamente com dados presumidos.
 
 ### Proteção de acesso
 
@@ -131,17 +157,13 @@ Acesse [http://localhost:3000](http://localhost:3000).
 - Cadastro, login, confirmação TOTP e recuperação de senha têm limites de tentativas por IP. Esses limites ficam na memória de uma instância; múltiplas instâncias exigem um armazenamento compartilhado.
 - Recuperar senha exige confirmar o código enviado por e-mail e escolher uma senha forte. Informar apenas o endereço de e-mail não autoriza a troca. O login continua exigindo a confirmação pelo autenticador.
 - Professores que já existiam permanecem com seu perfil. O administrador pode revogar o acesso no painel.
-- Reinicie o servidor para aplicar a coluna de solicitação e a tabela de recuperação automaticamente. Entre novamente para receber o cookie das páginas protegidas.
-
-### Verificação
-
-Execute `npm test` para verificar permissões por HTTP e recuperação com dados simulados. Execute `npm run test:integracao` para verificar solicitações de professor, ano escolar fixo, sessões e recuperação no PostgreSQL configurado no `.env`. A integração usa tabelas temporárias e desfaz a transação, sem alterar contas reais ou enviar e-mails.
+- Reinicie o servidor para aplicar as atualizações do banco automaticamente, incluindo `status_professor`. Professores existentes são preservados, e solicitações antigas pendentes passam pelo bloqueio de aprovação. Entre novamente para receber o cookie das páginas protegidas.
 
 ### Recursos
 
 - Cadastro, login com confirmação por aplicativo autenticador, alteração de senha e encerramento de conta.
 - Perfis de aluno, professor e administrador.
-- Campo no painel do professor para registrar nomes dos responsáveis legais do aluno; o dado fica visível para professores e administração e é removido no encerramento da conta.
+- Campo opcional de nomes dos responsáveis legais: permite cadastrar, editar e remover nomes. O dado é restrito ao professor vinculado e à administração e é excluído com a conta do aluno.
 - Jogo com perguntas por nível de dificuldade.
 - Avaliação diagnóstica: pré-teste obrigatório antes de jogar e pós-teste liberado depois de pelo menos uma partida, com as mesmas perguntas, para medir a evolução. O professor vê o resultado por aluno e as médias da turma.
 - Envio de perguntas por professores e aprovação ou recusa por administradores.
@@ -159,16 +181,16 @@ As salas permanecem na memória de uma única instância do servidor e atualizam
 
 ```text
 conectasaude/
-├── server.js              # só inicializa: prepara o banco e sobe o servidor
-├── app.js                 # configura o Express (JSON, arquivos estáticos, rotas, erros)
-├── Config/                # banco.js (Pool do PostgreSQL) e constantes.js
-├── Routes/                # URL -> controller (+ middlewares de acesso)
-├── Controller/            # recebe a requisição, valida, chama o Model e responde
-├── Model/                 # TODO o SQL do projeto; um arquivo por tabela/assunto
-├── View/                  # html, css e js do navegador
-├── Middleware/            # autenticacao.js (login e perfis) e erros.js
-├── Service/               # regras que não são de uma tabela: senha, MFA/TOTP, auditoria
-├── db/                    # arquivo.sql e inicializar.js (ajustes de esquema + conta admin)
+├── server.js
+├── app.js
+├── Config/
+├── Routes/
+├── Controller/
+├── Model/
+├── View/
+├── Middleware/
+├── Service/
+├── db/
 └── img/
 ```
 
@@ -200,3 +222,23 @@ Endpoints (todos exigem login):
 | `GET /api/professor/avaliacoes` | professor, admin | Resultado por aluno e médias da turma |
 
 Se o banco já existir, as tabelas novas são criadas automaticamente na próxima inicialização do servidor.
+
+## Privacidade e encerramento de contas
+
+O [registro de operações de tratamento](docs/privacidade.md) reúne inventário,
+finalidades, hipóteses legais a validar, retenção e limites. A política pública
+em `/privacidade` está na versão 1.1 de 14/11/2026 e descreve cookie HttpOnly,
+SameSite Strict, Secure em produção e sessionStorage.
+
+Reiniciar aplica a migração idempotente `db/privacidade.sql`, que acrescenta
+providência, comprovação e data de confirmação aos pedidos. Ela não apaga contas
+existentes nem transforma pedidos antigos em comprovados. O fechamento futuro
+remove conta, credenciais, vínculos, avaliações, partidas, pedidos e logs associados
+do banco ativo, em transação. Professores também perdem suas escolas e turmas,
+preservando as contas dos alunos. Perguntas educativas permanecem sem autoria;
+conteúdo identificável e backups exigem procedimento específico.
+
+A instituição ainda precisa validar suas bases legais e responsabilidades,
+procedimentos para menores, descarte de logs e backups. Os relatórios de testes
+anteriores continuam históricos; a nova execução dos ajustes está em
+`entregas/ajustes-privacidade-2026-11-14/resultados.json`.

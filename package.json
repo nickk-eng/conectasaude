@@ -4,8 +4,6 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "node --test",
-    "test:integracao": "node --env-file-if-exists=.env --test test/banco.test.js",
     "start": "node --env-file=.env server.js",
     "dev": "nodemon --exec \"node --env-file-if-exists=.env\" server.js"
   },

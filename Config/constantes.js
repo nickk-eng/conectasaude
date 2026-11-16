@@ -16,7 +16,7 @@ module.exports = {
     { valor: 'tricomoniase', rotulo: 'Tricomoníase' },
     { valor: 'prevencao-geral', rotulo: 'Prevenção e conceitos gerais' }
   ],
-  PERFIS_CADASTRO: ['aluno'],
+  PERFIS_CADASTRO: ['aluno', 'professor'],
   ANOS_ENSINO_MEDIO: ['1º ano do ensino médio', '2º ano do ensino médio', '3º ano do ensino médio'],
   TIPOS_AVALIACAO: ['pre', 'pos'],
   TOTAL_PERGUNTAS_AVALIACAO: 5,

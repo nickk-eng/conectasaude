@@ -27,7 +27,7 @@ body {
   width: min(100%, 400px);
 }
 
-.container>input {
+.container > input {
   position: absolute;
   opacity: 0;
 }
@@ -85,8 +85,8 @@ header p {
   cursor: pointer;
 }
 
-#entrar:checked~.secao-formulario .nav-formulario label[for="entrar"],
-#cadastrar:checked~.secao-formulario .nav-formulario label[for="cadastrar"] {
+#entrar:checked ~ .secao-formulario .nav-formulario label[for="entrar"],
+#cadastrar:checked ~ .secao-formulario .nav-formulario label[for="cadastrar"] {
   color: var(--fundo);
   border-color: var(--fundo);
 }
@@ -96,14 +96,14 @@ header p {
   display: none;
 }
 
-#entrar:checked~.secao-formulario .login,
-#cadastrar:checked~.secao-formulario .formulario-cadastro {
+#entrar:checked ~ .secao-formulario .login,
+#cadastrar:checked ~ .secao-formulario .formulario-cadastro {
   display: grid;
   gap: 16px;
 }
 
-.login>label,
-.formulario-cadastro>label {
+.login > label,
+.formulario-cadastro > label {
   display: grid;
   gap: 6px;
   font-size: 14px;
@@ -235,7 +235,6 @@ button {
   box-sizing: border-box;
 }
 
-
 .campo-senha input[type="text"] {
   color: var(--texto) !important;
   background-color: var(--fundo-inicial) !important;
@@ -317,7 +316,7 @@ button {
   text-decoration: underline;
 }
 
-.formulario-cadastro>label.aceite-termos {
+.formulario-cadastro > label.aceite-termos {
   display: flex;
   align-items: flex-start;
   gap: 9px;
@@ -380,6 +379,60 @@ button {
   color: var(--texto);
   background: transparent;
   border: 1px solid #285062;
+}
+
+[hidden] {
+  display: none !important;
+}
+.links-legais {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px;
+  font-size: 13px;
+  width: 100%;
+}
+.links-legais a {
+  color: var(--fundo);
+  text-decoration: underline;
+}
+.requisitos-senha {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--padrao);
+}
+.requisitos-senha .atendido {
+  color: #63dea2;
+}
+.paginacao {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 20px 0;
+}
+.paginacao button {
+  width: auto;
+  margin: 0;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.solicitacao-privacidade {
+  border: 1px solid #285062;
+  border-radius: 12px;
+  padding: 16px;
+  margin: 16px 0;
+  overflow-wrap: anywhere;
+}
+.solicitacao-privacidade p {
+  white-space: pre-wrap;
 }
 
 .link-botao {

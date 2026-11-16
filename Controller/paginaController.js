@@ -1,6 +1,6 @@
-const path = require('path');
+const path = require("path");
 
-const pastaHtml = path.join(__dirname, '..', 'View', 'html');
+const pastaHtml = path.join(__dirname, "..", "View", "html");
 
 function pagina(arquivo) {
   return (_req, res) => res.sendFile(path.join(pastaHtml, arquivo));

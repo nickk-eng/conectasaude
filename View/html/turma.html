@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minhas turmas | ConectaSaúde</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/home.css" />
+    <link rel="stylesheet" href="/css/turma.css" />
+  </head>
+  <body class="pagina-home">
+    <main class="home">
+      <header class="cabecalho-home">
+        <div class="marca">
+          <div class="logo">
+            <img src="/img/coracao.png" alt="Logo do ConectaSaúde" />
+          </div>
+          <strong>ConectaSaúde</strong>
+        </div>
+        <a href="/home">Voltar ao painel</a>
+      </header>
+      <section class="boas-vindas">
+        <p id="nome-professor">Área do professor</p>
+        <h1>Minhas turmas</h1>
+        <p>
+          Organize suas turmas por escola e selecione os alunos de cada turma.
+        </p>
+      </section>
+      <section id="diretorio-turmas" aria-label="Escolas e turmas">
+        <button id="abrir-criar-turma" type="button" disabled>
+          Criar turma
+        </button>
+        <section
+          id="cadastro-turma"
+          class="gestao-turma"
+          hidden
+          aria-labelledby="titulo-criar-turma"
+        >
+          <h2 id="titulo-criar-turma">Criar turma</h2>
+          <form id="form-criar-turma" class="campos-turma">
+            <label
+              >Ano do ensino médio<select id="ano-turma" name="ano" required>
+                <option value="">Selecione o ano</option>
+                <option value="1">1º ano</option>
+                <option value="2">2º ano</option>
+                <option value="3">3º ano</option>
+              </select></label
+            >
+            <label
+              >Letra da turma<input
+                id="letra-turma"
+                name="letra"
+                maxlength="1"
+                pattern="[A-Za-z]"
+                placeholder="Ex.: A"
+                required
+            /></label>
+            <p id="previa-nome-turma" class="largura-total" role="status">
+              Escolha o ano e a letra para identificar a turma.
+            </p>
+            <label class="largura-total" for="escola-turma">Escola</label>
+            <select
+              id="escola-turma"
+              name="escolaId"
+              class="largura-total"
+              required
+            >
+              <option value="">
+                Selecione uma escola cadastrada ou cadastre uma nova
+              </option>
+              <option value="nova">Cadastrar nova escola</option>
+            </select>
+            <label id="campo-nome-escola" class="largura-total" hidden
+              >Nome da nova escola<input
+                id="nome-nova-escola"
+                name="escola"
+                maxlength="150"
+                placeholder="Digite o nome completo da escola"
+                disabled
+            /></label>
+            <label id="campo-confirmar-escola" class="largura-total" hidden
+              >Confirmar nome da escola<input
+                id="confirmar-nova-escola"
+                name="confirmarEscola"
+                maxlength="150"
+                placeholder="Digite novamente o nome da escola"
+                disabled
+            /></label>
+            <label class="largura-total"
+              >Descrição (opcional)<textarea
+                name="descricao"
+                maxlength="1000"
+                rows="3"
+                placeholder="Informações sobre esta turma"
+              ></textarea>
+            </label>
+            <div class="largura-total acoes-turma">
+              <button type="submit">Criar turma</button
+              ><button
+                id="cancelar-criar-turma"
+                type="button"
+                class="botao-sair"
+              >
+                Cancelar
+              </button>
+            </div>
+          </form>
+          <p
+            id="mensagem-criar-turma"
+            class="mensagem"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </section>
+        <p
+          id="mensagem-diretorio"
+          class="mensagem"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <button id="tentar-diretorio" type="button" hidden>
+          Tentar carregar turmas novamente
+        </button>
+        <p id="aviso-alunos-antigos" class="orientacao-turma" hidden></p>
+        <div id="escolas-turmas"></div>
+      </section>
+      <section
+        id="gestao-alunos"
+        class="gestao-turma"
+        hidden
+        aria-labelledby="titulo-alunos"
+      >
+        <button id="voltar-turmas" class="botao-sair" type="button">
+          Voltar às escolas e turmas
+        </button>
+        <p id="escola-selecionada" class="orientacao-turma"></p>
+        <h2 id="titulo-alunos">Alunos da turma</h2>
+        <p id="descricao-selecionada" class="orientacao-turma" hidden></p>
+        <form id="filtros-turma" class="filtros-turma" role="search">
+          <div>
+            <label for="busca-aluno">Pesquisar por nome ou e-mail</label>
+            <input
+              id="busca-aluno"
+              name="busca"
+              type="search"
+              maxlength="150"
+              placeholder="Ex.: Rafael"
+              autocomplete="off"
+            />
+          </div>
+          <div>
+            <label for="vinculo-aluno">Exibir</label>
+            <select id="vinculo-aluno" name="vinculo">
+              <option value="minha">Alunos desta turma</option>
+              <option value="disponiveis">Adicionar alunos cadastrados</option>
+            </select>
+          </div>
+          <button type="submit">Pesquisar</button>
+        </form>
+        <p id="orientacao-ano" class="orientacao-turma"></p>
+        <p class="orientacao-turma">
+          Remover um aluno desfaz apenas o vínculo com esta turma e preserva seu
+          cadastro e seus outros vínculos.
+        </p>
+        <p
+          id="mensagem-turma"
+          class="mensagem"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <button id="tentar-turma" type="button" hidden>Tentar novamente</button>
+        <div id="resultado-turma" aria-busy="false">
+          <div class="lista-alunos">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Aluno</th>
+                  <th scope="col">E-mail</th>
+                  <th scope="col">Ano escolar</th>
+                  <th scope="col">Ação</th>
+                </tr>
+              </thead>
+              <tbody id="alunos-turma"></tbody>
+            </table>
+            <p id="vazio-turma" hidden></p>
+          </div>
+          <nav class="paginacao-turma" aria-label="Páginas dos alunos">
+            <button id="anterior-turma" type="button" disabled>Anterior</button>
+            <span id="pagina-turma">Página 1</span>
+            <button id="proxima-turma" type="button" disabled>Próxima</button>
+          </nav>
+        </div>
+      </section>
+      <footer class="links-legais">
+        <a href="/termos">Termos de Uso</a><span aria-hidden="true"> · </span
+        ><a href="/privacidade">Política de Privacidade</a>
+      </footer>
+    </main>
+    <script src="/js/auth.js"></script>
+    <script src="/js/turma.js"></script>
+  </body>
+</html>

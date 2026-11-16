@@ -1,0 +1,30 @@
+.espera-aprovacao {
+  width: min(100%, 580px);
+}
+
+.espera-aprovacao h1 {
+  margin: 18px 0;
+  font-size: clamp(21px, 4vw, 28px);
+  line-height: 1.4;
+}
+
+.espera-aprovacao p {
+  margin: 14px 0;
+  line-height: 1.6;
+  color: var(--padrao);
+  overflow-wrap: anywhere;
+}
+
+.selo-espera {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid #285062;
+  border-radius: 24px;
+  color: var(--fundo);
+  font-size: 13px;
+}
+
+.espera-aprovacao button {
+  width: 100%;
+  margin-top: 10px;
+}

@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Política de Privacidade | ConectaSaúde</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/legal.css" />
+  </head>
+
+  <body class="pagina-legal">
+    <main class="documento-legal">
+      <a class="voltar" href="/">← Voltar ao ConectaSaúde</a>
+      <header>
+        <p class="etiqueta">PRIVACIDADE E PROTEÇÃO DE DADOS</p>
+        <h1>Política de Privacidade</h1>
+        <p>Versão 1.1 - 14 de novembro de 2026</p>
+      </header>
+
+      <section>
+        <h2>1. Sobre o ConectaSaúde</h2>
+        <p>
+          O ConectaSaúde é um projeto acadêmico de educação em saúde. Ele
+          oferece um jogo de perguntas e respostas sobre prevenção e saúde; não
+          presta diagnóstico, consulta, triagem ou atendimento médico.
+        </p>
+        <p>
+          Em uma implantação real, o controlador dos dados será a instituição
+          responsável pelo sistema. Para este protótipo de PFC, a equipe do
+          projeto é responsável por receber e encaminhar as solicitações de
+          privacidade registradas no sistema.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Dados que tratamos e por quê</h2>
+        <p>
+          O e-mail é um dado pessoal; por si só, não é dado pessoal sensível.
+          Além dele, tratamos os dados abaixo. Perguntas educativas sobre ISTs
+          não representam diagnóstico ou declaração sobre a saúde ou vida sexual
+          do aluno.
+        </p>
+        <p>
+          As hipóteses abaixo são um mapa para validação pela instituição
+          responsável, considerando a relação com o usuário e o contexto
+          escolar. Não significam aprovação jurídica da implantação. O aceite
+          dos termos não autoriza todas as finalidades. O tratamento de menores
+          exige avaliação do melhor interesse; quando o consentimento for
+          aplicável, deve seguir os requisitos próprios.
+        </p>
+        <div class="tabela-responsiva">
+          <table>
+            <thead>
+              <tr>
+                <th>Categoria</th>
+                <th>Dados e finalidade</th>
+                <th>Hipótese legal a validar</th>
+                <th>Acesso</th>
+                <th>Duração e encerramento</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Conta e aceite</td>
+                <td>
+                  E-mail, nome, perfil, ano escolar, aprovação, data e versão
+                  dos termos. Identificar a conta e aplicar permissões.
+                </td>
+                <td>
+                  Art. 7º, V, se necessário à relação de serviço; escolha
+                  institucional ainda sujeita a validação. Aceite dos termos não
+                  é consentimento geral.
+                </td>
+                <td>
+                  Titular e administração; professores vinculados acessam os
+                  campos educacionais necessários.
+                </td>
+                <td>
+                  Enquanto a conta existir; excluídos do banco ativo no
+                  encerramento.
+                </td>
+              </tr>
+              <tr>
+                <td>Credenciais e segundo fator</td>
+                <td>
+                  Hash bcrypt da senha, segredo TOTP cifrado, códigos protegidos
+                  e tentativas. Autenticar, confirmar acesso e recuperar senha.
+                  O e-mail também recebe códigos.
+                </td>
+                <td>
+                  Mesma finalidade de acesso da conta; não usar para
+                  publicidade.
+                </td>
+                <td>
+                  Serviço de autenticação. O provedor SMTP recebe destinatário e
+                  mensagem quando o envio está configurado. Professores não
+                  acessam segredos.
+                </td>
+                <td>
+                  Credenciais até encerramento; desafios e recuperação têm
+                  validade de 10 minutos. Expiração impede uso e não significa
+                  descarte imediato; encerramento remove os registros.
+                </td>
+              </tr>
+              <tr>
+                <td>Escolas e turmas</td>
+                <td>
+                  Escolas, ano, letra, descrição e vínculos entre professor e
+                  alunos. Organizar acompanhamento.
+                </td>
+                <td>
+                  Art. 7º, V, quando necessário ao serviço educacional
+                  contratado; outro contexto institucional exige análise
+                  específica.
+                </td>
+                <td>Professor proprietário e administração.</td>
+                <td>
+                  Vínculos removidos com a conta; escolas e turmas próprias
+                  removidas ao excluir o professor, sem excluir os alunos.
+                </td>
+              </tr>
+              <tr>
+                <td>Responsáveis legais</td>
+                <td>Nomes opcionais para acompanhamento educacional.</td>
+                <td>
+                  Instituição deve justificar necessidade e escolher hipótese
+                  aplicável ao tratamento. Nome do responsável não comprova
+                  autorização.
+                </td>
+                <td>Professor vinculado e administração.</td>
+                <td>
+                  Até remoção pelo professor ou encerramento da conta do aluno.
+                </td>
+              </tr>
+              <tr>
+                <td>Avaliações e partidas</td>
+                <td>
+                  Respostas de pré e pós-teste, notas, acertos, erros, nível,
+                  modo e datas. Acompanhar aprendizagem.
+                </td>
+                <td>
+                  Art. 7º, V, quando necessário à finalidade educacional
+                  acordada. Pesquisa e outras reutilizações exigem análise
+                  própria.
+                </td>
+                <td>
+                  Aluno, professores vinculados e administração. Outros alunos
+                  não acessam o histórico; colegas da sala veem nome e placar
+                  durante o jogo.
+                </td>
+                <td>
+                  Até encerramento da conta no banco ativo. Salas em memória
+                  encerram após 30 minutos sem atividade ou remoção da conta.
+                </td>
+              </tr>
+              <tr>
+                <td>Perguntas educativas</td>
+                <td>
+                  Textos, alternativas, autoria e revisão. Moderar e oferecer o
+                  conteúdo do jogo.
+                </td>
+                <td>
+                  Art. 7º, V, se necessário ao serviço; não incluir relatos
+                  pessoais ou dados de terceiros.
+                </td>
+                <td>
+                  Autor e administração; conteúdo aprovado acessível aos
+                  jogadores.
+                </td>
+                <td>
+                  Conteúdo permanece após exclusão da conta, sem vínculo de
+                  autoria ou revisão. Textos identificáveis devem ser revisados
+                  em atendimento específico.
+                </td>
+              </tr>
+              <tr>
+                <td>Pedidos de privacidade</td>
+                <td>
+                  Tipo, mensagem, resposta, status, providência, referência de
+                  comprovação, responsável e datas. Atender e comprovar os
+                  pedidos.
+                </td>
+                <td>
+                  Art. 7º, II, quando aplicável ao atendimento dos direitos
+                  previstos na LGPD; hipóteses de conservação precisam de
+                  justificativa.
+                </td>
+                <td>
+                  Titular e administração. Referências registradas devem ser
+                  próprias para exibição ao titular.
+                </td>
+                <td>
+                  Até encerramento da conta. Na eliminação atendida pelo
+                  administrador, conserva-se apenas recibo técnico sem vínculo
+                  com o titular e sem seus textos livres.
+                </td>
+              </tr>
+              <tr>
+                <td>Segurança e sessão</td>
+                <td>
+                  IP, navegador, ação, rota, identificadores e horários; token
+                  de sessão no banco e navegador. Proteger acesso e investigar
+                  falhas.
+                </td>
+                <td>
+                  Art. 7º, IX, sujeito à avaliação institucional de necessidade
+                  e equilíbrio. Não é autorização genérica para vigilância.
+                </td>
+                <td>
+                  Administração para auditoria; autenticação para validar a
+                  sessão.
+                </td>
+                <td>
+                  Sessão válida por até 8 horas, revogável antes disso. Logs têm
+                  prazo-alvo de 30 dias, com descarte a ser comprovado pela
+                  equipe. Registros associados são removidos no encerramento;
+                  retenções excepcionais exigem fundamento.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Não solicitamos CPF, endereço, nascimento, biometria, diagnóstico,
+          exames ou prontuários. Não informe senhas, códigos, diagnósticos,
+          relatos sobre vida sexual nem dados de terceiros nas mensagens,
+          perguntas e descrições. A equipe deve revisar conteúdo identificável
+          inserido indevidamente.
+        </p>
+      </section>
+      <section>
+        <h2>3. Compartilhamento e armazenamento no navegador</h2>
+        <p>
+          Os dados ficam no PostgreSQL configurado para o projeto. O provedor de
+          e-mail configurado recebe o endereço do destinatário e a mensagem dos
+          códigos de autenticação ou recuperação. A tela de perfil usa
+          ui-avatars.com para gerar o avatar, enviando o nome exibido e os dados
+          técnicos da conexão. Não usamos os dados para anúncios ou redes
+          sociais. A instituição deve identificar seus fornecedores, localização
+          e salvaguardas antes da implantação real.
+        </p>
+        <p>
+          Usamos o cookie necessário <strong>conectaSaudeSessao</strong> para
+          validar páginas protegidas. Ele vale por até 8 horas, tem HttpOnly
+          (não acessível ao JavaScript da página), SameSite Strict e caminho /.
+          Em produção é marcado Secure e exige HTTPS. O token também fica em
+          <strong>sessionStorage</strong>, com a chave conectaSaudeToken, para
+          autenticar as chamadas às APIs.
+        </p>
+        <p>
+          O sessionStorage é separado por aba e normalmente termina ao fechar a
+          aba, mas restaurações do navegador podem preservá-lo. A validade real
+          é conferida pelo servidor a cada acesso. Sair remove o token do
+          armazenamento, apaga o cookie e invalida a sessão no servidor. Fechar
+          a aba não equivale a sair.
+        </p>
+        <p>
+          O código da sala multiplayer pode ficar temporariamente em
+          sessionStorage na chave conectaSaudeSala. Não usamos cookies de
+          publicidade ou de análise. Bloquear o armazenamento necessário pode
+          impedir o login e o funcionamento das páginas privadas.
+        </p>
+      </section>
+      <section>
+        <h2>4. Perfis e segurança</h2>
+        <p>
+          Alunos acessam o jogo e os próprios dados de perfil. Professores podem
+          consultar somente alunos vinculados às suas turmas ou vínculos legados
+          e enviar perguntas; não acessam senhas, registros técnicos ou dados de
+          outros professores. Administradores aprovam perguntas e consultam os
+          registros de auditoria. Essas permissões são verificadas pelo
+          servidor, e não apenas pela interface.
+        </p>
+        <p>
+          As senhas são armazenadas somente em formato protegido por hash com
+          bcrypt; elas nunca são gravadas em texto puro. O sistema limita
+          tentativas consecutivas de login, usa sessões temporárias e registra
+          eventos de segurança e acesso administrativo, sem registrar senhas ou
+          tokens. Em caso de incidente, a equipe irá conter o problema, avaliar
+          os dados afetados, corrigir a causa e comunicar os envolvidos e a
+          autoridade competente quando houver risco ou dano relevante.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Seus direitos e canal de atendimento</h2>
+        <p>
+          Você pode pedir confirmação e acesso aos dados, correção, informação
+          sobre compartilhamento, anonimização, bloqueio ou eliminação quando
+          cabível, portabilidade, oposição e revisão de decisão automatizada.
+          Como o sistema não toma decisões exclusivamente automatizadas sobre
+          você, não há classificação ou diagnóstico automático.
+        </p>
+        <p>
+          Para registrar um pedido, entre na sua conta e use o formulário
+          abaixo. Professores podem registrar e acompanhar pedidos mesmo com
+          aprovação pendente, recusada ou acesso de professor revogado. Pedidos
+          concluídos devem indicar a providência realizada e sua comprovação. Um
+          pedido de eliminação concluído pelo administrador executa a exclusão
+          da conta e dos registros vinculados no banco ativo; a confirmação é
+          definitiva. Nos demais tipos, a equipe realiza a providência e
+          registra sua comprovação. A solicitação ficará registrada para a
+          equipe do projeto. Se você não conseguir acessar a conta, procure o
+          professor orientador ou a equipe responsável pela apresentação do
+          projeto, informando o e-mail usado no cadastro.
+        </p>
+        <p id="acesso-privacidade" hidden>
+          Para registrar e acompanhar pedidos,
+          <a href="/">entre na sua conta</a>.
+        </p>
+        <form hidden id="form-privacidade" class="form-privacidade">
+          <label
+            >Tipo de solicitação
+            <select name="tipo" required>
+              <option value="">Selecione</option>
+              <option value="acesso">Acessar meus dados</option>
+              <option value="correcao">Corrigir meus dados</option>
+              <option value="eliminacao">Solicitar eliminação</option>
+              <option value="portabilidade">Solicitar portabilidade</option>
+              <option value="oposicao">Contestar/opor-me ao tratamento</option>
+              <option value="informacoes">Pedir informações</option>
+            </select>
+          </label>
+          <label
+            >Detalhes (opcional)<textarea
+              name="mensagem"
+              maxlength="1000"
+              placeholder="Explique seu pedido sem senhas, códigos, diagnósticos ou dados de terceiros."
+            ></textarea>
+          </label>
+          <button type="submit">Registrar solicitação</button>
+          <p
+            id="mensagem-privacidade"
+            class="mensagem"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+      </section>
+
+      <section id="historico-privacidade" hidden>
+        <h2>Minhas solicitações</h2>
+        <button id="atualizar-minhas-solicitacoes" type="button">
+          Atualizar solicitações
+        </button>
+        <div id="minhas-solicitacoes"></div>
+      </section>
+      <section>
+        <h2>6. Efeitos e limites da exclusão</h2>
+        <p>
+          O encerramento remove a conta, credenciais, sessões, desafios,
+          recuperações, avaliações, partidas, vínculos e pedidos do banco ativo.
+          Se a conta for de professor, remove também suas escolas e turmas,
+          preservando as contas dos alunos. Salas multiplayer que incluam a
+          conta são encerradas na instância atual.
+        </p>
+        <p>
+          Perguntas educativas permanecem sem identificador do autor ou revisor.
+          Isso não garante que um texto escrito pelo usuário esteja livre de
+          informações pessoais: solicite a revisão de conteúdo identificável.
+          Cópias já vistas por outras pessoas e arquivos exportados não são
+          apagados automaticamente.
+        </p>
+        <p>
+          Backups, se existentes, não são alterados por essa operação. A
+          instituição deve definir acesso, prazo de expiração e procedimento
+          para reaplicar exclusões antes de disponibilizar uma restauração. Não
+          há comprovação desses procedimentos neste protótipo; a exclusão
+          descrita refere-se ao banco ativo.
+        </p>
+      </section>
+      <section>
+        <h2>7. Alterações nesta política</h2>
+        <p>
+          Esta política identifica sua versão e data. Mudanças relevantes serão
+          apresentadas antes de novo aceite, quando necessário. Ela deve sempre
+          refletir os dados e funções realmente existentes no sistema.
+        </p>
+      </section>
+      <footer class="rodape-documento">
+        <a href="/termos">Ler os Termos de Uso</a
+        ><a href="/">Voltar ao acesso</a>
+      </footer>
+    </main>
+    <script src="/js/auth.js"></script>
+    <script src="/js/privacidade.js"></script>
+    <footer class="links-legais" aria-label="Informações legais">
+      <a href="/termos">Termos de Uso</a
+      ><a href="/privacidade">Política de Privacidade</a>
+    </footer>
+  </body>
+</html>

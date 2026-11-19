@@ -19,7 +19,9 @@ END $$;
 
 CREATE TABLE IF NOT EXISTS usuarios (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    email VARCHAR(150) NOT NULL,
+    email VARCHAR(200) NOT NULL,
+    email_hash VARCHAR(64) UNIQUE,
+    email_criptografado TEXT,
     senha_hash TEXT NOT NULL,
     perfil perfil_usuario NOT NULL,
     nome VARCHAR(60) NOT NULL DEFAULT '',
@@ -34,9 +36,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     mfa_totp_ativo BOOLEAN NOT NULL DEFAULT FALSE
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_ativo_idx
-    ON usuarios(email)
-    WHERE ativo = TRUE;
+CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_hash_idx
+    ON usuarios(email_hash)
+    WHERE email_hash IS NOT NULL;
 
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS solicitou_professor BOOLEAN NOT NULL DEFAULT FALSE;
 
@@ -191,7 +193,7 @@ CREATE INDEX IF NOT EXISTS desafios_mfa_usuario_expira_idx
 CREATE TABLE IF NOT EXISTS auditoria_acessos (
     id BIGSERIAL PRIMARY KEY,
     usuario_id UUID REFERENCES usuarios(id) ON DELETE SET NULL,
-    usuario_email VARCHAR(150),
+    usuario_email VARCHAR(200),
     perfil VARCHAR(20),
     acao VARCHAR(80) NOT NULL,
     recurso VARCHAR(120) NOT NULL,
@@ -261,7 +263,7 @@ INSERT INTO usuarios (
 )
 VALUES (
     '4cbe19df-8f77-4e17-990f-a84240734ff5',
-    'autor-semente@invalid.local',
+    'aut*******@invalid.local',
     'seed-only-not-a-login',
     'professor',
     'Autor temporário das perguntas de exemplo'

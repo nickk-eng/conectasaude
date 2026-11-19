@@ -264,8 +264,19 @@ async function carregarAuditoria() {
   document.querySelector("#sem-auditoria").hidden = logs.length > 0;
   corpoAuditoria.innerHTML = logs
     .map((log) => {
-      const usuario = log.usuario_email || "Visitante";
-      return `<tr><td>${escapar(formatarData(log.criado_em))}</td><td>${escapar(usuario)}</td><td>${escapar(log.acao)}</td><td>${escapar(log.recurso)}</td><td>${escapar(log.metodo)} ${escapar(log.rota)}</td></tr>`;
+      const detalhes = log.detalhes || {};
+      const usuario = detalhes.solicitanteNome
+        ? `${detalhes.solicitanteNome} (${detalhes.solicitantePerfil || log.perfil || ""})`
+        : log.usuario_email || "Visitante";
+      const acoes = {
+        REVELAR_EMAIL_USUARIO: "Revelou e-mail de usuário",
+        REVELAR_EMAIL_ALUNO: "Revelou e-mail de aluno",
+        REVELAR_EMAIL_ALUNO_NEGADO: "Tentativa negada de revelar e-mail de aluno",
+      };
+      const alvo = detalhes.alvoNome
+        ? `${detalhes.alvoNome} · ${detalhes.alvoEmail || "E-mail mascarado"}`
+        : "—";
+      return `<tr><td>${escapar(formatarData(log.criado_em))}</td><td>${escapar(usuario)}</td><td>${escapar(alvo)}</td><td>${escapar(acoes[log.acao] || log.acao)}</td><td>${escapar(log.recurso)}</td><td>${escapar(log.metodo)} ${escapar(log.rota)}</td></tr>`;
     })
     .join("");
 }
@@ -409,9 +420,57 @@ async function carregarUsuarios() {
       usuario.perfil === "aluno" && situacoesProfessor[usuario.status_professor]
         ? situacoesProfessor[usuario.status_professor]
         : usuario.perfil;
+    [usuario.nome || "—"].forEach((valor) => {
+      const celula = document.createElement("td");
+      celula.textContent = valor;
+      linha.appendChild(celula);
+    });
+    const celulaEmail = document.createElement("td");
+    const emailTexto = document.createElement("span");
+    emailTexto.textContent = usuario.email || "—";
+    const revelar = document.createElement("button");
+    revelar.type = "button";
+    revelar.className = "botao-revelar-email";
+    revelar.textContent = "Revelar";
+    revelar.setAttribute("aria-label", `Revelar e-mail de ${usuario.nome || "usuário"}`);
+    let temporizador;
+    const ocultar = () => {
+      window.clearTimeout(temporizador);
+      emailTexto.textContent = usuario.email || "—";
+      revelar.textContent = "Revelar";
+      revelar.dataset.revelado = "false";
+    };
+    revelar.addEventListener("click", async () => {
+      if (revelar.dataset.revelado === "true") {
+        ocultar();
+        return;
+      }
+      revelar.disabled = true;
+      try {
+        const resposta = await apiFetch(
+          `/api/admin/usuarios/${encodeURIComponent(usuario.id)}/revelar-email`,
+          { method: "POST" },
+        );
+        const dados = await resposta.json();
+        if (!resposta.ok || typeof dados.email !== "string") {
+          revelar.title = dados.mensagem || "Não foi possível revelar o e-mail.";
+          return;
+        }
+        let emailAberto = dados.email;
+        emailTexto.textContent = emailAberto;
+        emailAberto = "";
+        revelar.textContent = "Ocultar";
+        revelar.dataset.revelado = "true";
+        temporizador = window.setTimeout(ocultar, 30000);
+      } catch {
+        revelar.title = "Não foi possível conectar ao servidor.";
+      } finally {
+        revelar.disabled = false;
+      }
+    });
+    celulaEmail.append(emailTexto, revelar);
+    linha.appendChild(celulaEmail);
     [
-      usuario.nome || "—",
-      usuario.email,
       perfilExibido,
       usuario.turma || "—",
       usuario.ativo ? "Ativo" : "Desativado",

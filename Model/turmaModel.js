@@ -116,6 +116,21 @@ async function pesquisar(professorId, { turmaId, busca, vinculo, pagina }) {
   };
 }
 
+async function buscarAlunoParaRevelacao(professorId, alunoId) {
+  const dados = await banco.query(
+    `SELECT u.id, u.nome, u.email, u.email_criptografado,
+            EXISTS (
+              SELECT 1 FROM turma_alunos ta JOIN turmas t ON t.id = ta.turma_id
+               WHERE ta.aluno_id = u.id AND t.professor_id = $1
+            ) AS autorizado
+       FROM usuarios u
+      WHERE u.id = $2 AND u.perfil = 'aluno' AND u.ativo = TRUE
+        AND u.status_professor = 'nao_aplicavel'`,
+    [professorId, alunoId],
+  );
+  return dados.rows[0] || null;
+}
+
 async function adicionar(professorId, turmaId, alunoId) {
   const cliente = await banco.connect();
   try {
@@ -159,6 +174,7 @@ module.exports = {
   criar,
   buscar,
   pesquisar,
+  buscarAlunoParaRevelacao,
   adicionar,
   remover,
 };

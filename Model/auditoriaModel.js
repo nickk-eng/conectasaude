@@ -1,17 +1,27 @@
 const banco = require("../Config/banco");
+const { mascararEmail } = require("../Utils/mascararEmail");
+
+function mascararDetalhes(valor, chave = "") {
+  if (Array.isArray(valor)) return valor.map((item) => mascararDetalhes(item, chave));
+  if (valor && typeof valor === "object")
+    return Object.fromEntries(Object.entries(valor).map(([nome, item]) => [nome, mascararDetalhes(item, nome)]));
+  if (typeof valor !== "string") return valor;
+  if (/email/i.test(chave)) return mascararEmail(valor);
+  return valor.replace(/[^\s<>"']+@[^\s<>"']+\.[^\s<>"']+/gi, mascararEmail);
+}
 
 async function registrar(d) {
   await banco.query(
     `INSERT INTO auditoria_acessos
-      (usuario_id, usuario_email, perfil, acao, recurso, detalhes, metodo, rota, ip, user_agent)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      (usuario_id, usuario_email, perfil, acao, recurso, detalhes, metodo, rota, ip, user_agent, criado_em)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)`,
     [
       d.usuarioId,
-      d.usuarioEmail,
+      mascararEmail(d.usuarioEmail),
       d.perfil,
       d.acao,
       d.recurso,
-      JSON.stringify(d.detalhes || {}),
+      JSON.stringify(mascararDetalhes(d.detalhes || {})),
       d.metodo,
       d.rota,
       d.ip,

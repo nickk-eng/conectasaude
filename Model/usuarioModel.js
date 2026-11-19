@@ -1,6 +1,7 @@
 const banco = require("../Config/banco");
 const { ANOS_ENSINO_MEDIO } = require("../Config/constantes");
 const { aguardaAprovacao } = require("../Service/acessoService");
+const emailUtil = require("../Utils/mascararEmail");
 
 const COLUNAS_PUBLICAS =
   "id, email, nome, perfil, turma, responsaveis_nome, solicitou_professor, status_professor";
@@ -8,7 +9,7 @@ const COLUNAS_PUBLICAS =
 function paraPublico(usuario) {
   return {
     id: usuario.id,
-    email: usuario.email,
+    email: emailUtil.mascararEmail(usuario.email),
     nome: usuario.nome,
     perfil: usuario.perfil,
     turma: usuario.turma,
@@ -19,13 +20,25 @@ function paraPublico(usuario) {
   };
 }
 
+async function paraProprio(usuario, idAutenticado) {
+  if (!usuario || usuario.id !== idAutenticado)
+    throw new Error("Acesso negado aos dados de outro titular.");
+  return {
+    ...paraPublico(usuario),
+    email: await buscarEmailCompletoProprio(idAutenticado, usuario.id),
+  };
+}
+
 async function criar({ email, senhaHash, perfil, versaoTermos, turma = "" }) {
+  const emailNormalizado = String(email).trim().toLowerCase();
   const resultado = await banco.query(
-    `INSERT INTO usuarios (email, senha_hash, perfil, termos_aceitos_em, termos_versao, turma, status_professor)
-     VALUES ($1, $2, 'aluno', NOW(), $3, $4, $5)
+    `INSERT INTO usuarios (email, email_hash, email_criptografado, senha_hash, perfil, termos_aceitos_em, termos_versao, turma, status_professor)
+     VALUES ($1, $2, $3, $4, 'aluno', NOW(), $5, $6, $7)
      RETURNING ${COLUNAS_PUBLICAS}`,
     [
-      email,
+      emailUtil.mascararEmail(emailNormalizado),
+      emailUtil.gerarHashEmail(emailNormalizado),
+      emailUtil.criptografarEmail(emailNormalizado),
       senhaHash,
       versaoTermos,
       perfil === "professor" ? "" : turma,
@@ -37,8 +50,8 @@ async function criar({ email, senhaHash, perfil, versaoTermos, turma = "" }) {
 
 async function buscarAtivoPorEmail(email) {
   const resultado = await banco.query(
-    "SELECT * FROM usuarios WHERE email = $1 AND ativo = TRUE",
-    [email],
+    "SELECT * FROM usuarios WHERE email_hash = $1 AND ativo = TRUE",
+    [emailUtil.gerarHashEmail(email)],
   );
   return resultado.rows[0] || null;
 }
@@ -53,8 +66,8 @@ async function buscarSenhaHashAtivo(id) {
 
 async function atualizarSenhaPorEmail(email, senhaHash) {
   const resultado = await banco.query(
-    "UPDATE usuarios SET senha_hash = $1 WHERE email = $2 AND ativo = TRUE RETURNING id, email, perfil",
-    [senhaHash, email],
+    "UPDATE usuarios SET senha_hash = $1 WHERE email_hash = $2 AND ativo = TRUE RETURNING id, email, perfil",
+    [senhaHash, emailUtil.gerarHashEmail(email)],
   );
   return resultado.rows[0] || null;
 }
@@ -149,28 +162,49 @@ async function ativarMfa(id, segredoCifrado) {
 
 async function buscarIdAtivoPorEmail(email) {
   const resultado = await banco.query(
-    "SELECT id FROM usuarios WHERE email = $1 AND ativo = TRUE",
-    [email],
+    "SELECT id FROM usuarios WHERE email_hash = $1 AND ativo = TRUE",
+    [emailUtil.gerarHashEmail(email)],
   );
   return resultado.rows[0]?.id || null;
 }
 
 async function criarAdmin(email, senhaHash) {
+  const normalizado = String(email).trim().toLowerCase();
   const resultado = await banco.query(
-    "INSERT INTO usuarios (email, senha_hash, perfil, nome) VALUES ($1, $2, 'admin', 'Administrador') RETURNING id",
-    [email, senhaHash],
+    "INSERT INTO usuarios (email, email_hash, email_criptografado, senha_hash, perfil, nome) VALUES ($1, $2, $3, $4, 'admin', 'Administrador') RETURNING id",
+    [emailUtil.mascararEmail(normalizado), emailUtil.gerarHashEmail(normalizado), emailUtil.criptografarEmail(normalizado), senhaHash],
   );
   return resultado.rows[0].id;
 }
 
 async function alterarEmailAdmin(emailAnterior, emailNovo) {
+  const anterior = String(emailAnterior).trim().toLowerCase();
+  const novo = String(emailNovo).trim().toLowerCase();
   const resultado = await banco.query(
-    `UPDATE usuarios SET email = $2
-     WHERE email = $1 AND perfil = 'admin' AND ativo = TRUE
+    `UPDATE usuarios SET email = $1, email_hash = $2, email_criptografado = $3
+     WHERE email_hash = $4 AND perfil = 'admin' AND ativo = TRUE
      RETURNING id`,
-    [emailAnterior, emailNovo],
+    [emailUtil.mascararEmail(novo), emailUtil.gerarHashEmail(novo), emailUtil.criptografarEmail(novo), emailUtil.gerarHashEmail(anterior)],
   );
   return resultado.rows[0]?.id || null;
+}
+
+async function buscarEmailCompletoProprio(idAutenticado, usuarioId) {
+  if (!idAutenticado || idAutenticado !== usuarioId) return null;
+  const resultado = await banco.query(
+    "SELECT email_criptografado FROM usuarios WHERE id = $1 AND ativo = TRUE",
+    [usuarioId],
+  );
+  const cifrado = resultado.rows[0]?.email_criptografado;
+  return cifrado ? emailUtil.descriptografarEmail(cifrado) : null;
+}
+
+async function buscarParaRevelacao(id) {
+  const resultado = await banco.query(
+    "SELECT id, nome, email, email_criptografado FROM usuarios WHERE id = $1",
+    [id],
+  );
+  return resultado.rows[0] || null;
 }
 
 async function excluir(id) {
@@ -261,6 +295,7 @@ module.exports = {
   solicitarProfessor,
   decidirProfessor,
   paraPublico,
+  paraProprio,
   criar,
   buscarAtivoPorEmail,
   buscarSenhaHashAtivo,
@@ -274,6 +309,8 @@ module.exports = {
   buscarIdAtivoPorEmail,
   criarAdmin,
   alterarEmailAdmin,
+  buscarEmailCompletoProprio,
+  buscarParaRevelacao,
   excluir,
   eliminarDadosConta,
   encerrarConta,

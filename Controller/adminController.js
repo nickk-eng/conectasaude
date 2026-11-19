@@ -5,6 +5,8 @@ const { registrarAuditoria } = require("../Service/auditoriaService");
 const usuarioModel = require("../Model/usuarioModel");
 const { NIVEIS, CATEGORIAS_IST } = require("../Config/constantes");
 const sessaoModel = require("../Model/sessaoModel");
+const { registrarRevelacaoEmail } = require("../Service/auditoriaService");
+const { descriptografarEmail } = require("../Utils/mascararEmail");
 
 function validarPergunta(body = {}) {
   const texto = String(body.texto || "")
@@ -44,6 +46,23 @@ async function listarUsuarios(req, res) {
     total: usuarios.length,
   });
   res.json({ usuarios });
+}
+
+async function revelarEmailUsuario(req, res) {
+  res.set("Cache-Control", "no-store");
+  if (!idUsuarioValido(req.params.id))
+    return res.status(400).json({ mensagem: "Usuário inválido." });
+  try {
+    const alvo = await usuarioModel.buscarParaRevelacao(req.params.id);
+    if (!alvo)
+      return res.status(404).json({ mensagem: "Usuário não encontrado." });
+    await registrarRevelacaoEmail(req, "REVELAR_EMAIL_USUARIO", alvo);
+    const email = descriptografarEmail(alvo.email_criptografado);
+    return res.json({ email });
+  } catch (erro) {
+    console.error("Falha ao revelar e-mail de usuário:", erro.message);
+    return res.status(500).json({ mensagem: "Não foi possível revelar o e-mail." });
+  }
 }
 
 async function atualizarUsuario(req, res) {
@@ -238,6 +257,7 @@ module.exports = {
   listarPerguntas,
   avaliarPergunta,
   listarUsuarios,
+  revelarEmailUsuario,
   atualizarUsuario,
   criarPergunta,
   atualizarPergunta,

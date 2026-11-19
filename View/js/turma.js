@@ -263,15 +263,59 @@ async function carregarTurma(pagina = 1, aviso = "") {
     alunosTurma.replaceChildren();
     dados.alunos.forEach((aluno) => {
       const linha = document.createElement("tr");
-      [
-        aluno.nome || "Nome não informado",
-        aluno.email,
-        aluno.turma || "Não informado",
-      ].forEach((valor) => {
+      [aluno.nome || "Nome não informado"].forEach((valor) => {
         const celula = document.createElement("td");
         celula.textContent = valor;
         linha.append(celula);
       });
+      const celulaEmail = document.createElement("td");
+      const emailTexto = document.createElement("span");
+      emailTexto.textContent = aluno.email || "—";
+      const revelar = document.createElement("button");
+      revelar.type = "button";
+      revelar.className = "botao-revelar-email";
+      revelar.textContent = "Revelar";
+      revelar.setAttribute("aria-label", `Revelar e-mail de ${aluno.nome || "aluno"}`);
+      let temporizador;
+      const ocultar = () => {
+        window.clearTimeout(temporizador);
+        emailTexto.textContent = aluno.email || "—";
+        revelar.textContent = "Revelar";
+        revelar.dataset.revelado = "false";
+      };
+      revelar.addEventListener("click", async () => {
+        if (revelar.dataset.revelado === "true") {
+          ocultar();
+          return;
+        }
+        revelar.disabled = true;
+        try {
+          const resposta = await apiFetch(
+            `/api/professor/alunos/${encodeURIComponent(aluno.id)}/revelar-email`,
+            { method: "POST" },
+          );
+          const dados = await resposta.json();
+          if (!resposta.ok || typeof dados.email !== "string") {
+            revelar.title = dados.mensagem || "Não foi possível revelar o e-mail.";
+            return;
+          }
+          let emailAberto = dados.email;
+          emailTexto.textContent = emailAberto;
+          emailAberto = "";
+          revelar.textContent = "Ocultar";
+          revelar.dataset.revelado = "true";
+          temporizador = window.setTimeout(ocultar, 30000);
+        } catch {
+          revelar.title = "Não foi possível conectar ao servidor.";
+        } finally {
+          revelar.disabled = false;
+        }
+      });
+      celulaEmail.append(emailTexto, revelar);
+      linha.append(celulaEmail);
+      const celulaTurma = document.createElement("td");
+      celulaTurma.textContent = aluno.turma || "Não informado";
+      linha.append(celulaTurma);
       const acao = document.createElement("td");
       const botao = document.createElement("button");
       botao.type = "button";

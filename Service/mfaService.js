@@ -122,7 +122,7 @@ async function criarDesafioEmail(usuario) {
     usuario.id,
     id,
     hashCodigoEmail(id, codigo),
-    () => emailService.enviarCodigo(usuario.email, codigo, "login"),
+    () => emailService.enviarCodigo(usuario.email_criptografado, codigo, "login"),
   );
 }
 

@@ -262,6 +262,13 @@
   margin: 0;
 }
 
+.botao-revelar-email {
+  margin: 0 0 0 8px;
+  padding: 4px 8px;
+  min-height: 30px;
+  font-size: 0.85rem;
+}
+
 .tabela-auditoria tr:last-child td {
   border-bottom: 0;
 }

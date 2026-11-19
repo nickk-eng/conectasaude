@@ -4,6 +4,7 @@ const path = require("node:path");
 const usuarioModel = require("../Model/usuarioModel");
 const perguntaModel = require("../Model/perguntaModel");
 const senhaService = require("../Service/senhaService");
+const emailUtil = require("../Utils/mascararEmail");
 const {
   MAX_TENTATIVAS_MFA,
   AUTOR_SEMENTE_ID,
@@ -27,6 +28,9 @@ const COMANDOS = [
   "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS mfa_totp_segredo TEXT",
   "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS mfa_totp_ativo BOOLEAN NOT NULL DEFAULT FALSE",
   "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS responsaveis_nome VARCHAR(240) NOT NULL DEFAULT ''",
+  "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS email_hash VARCHAR(64)",
+  "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS email_criptografado TEXT",
+  "ALTER TABLE usuarios ALTER COLUMN email TYPE VARCHAR(200)",
   "ALTER TABLE usuarios DROP COLUMN IF EXISTS telefone",
   "CREATE TABLE IF NOT EXISTS desafios_mfa (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), usuario_id UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE, tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('login', 'configuracao')), segredo_temporario TEXT, criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), expira_em TIMESTAMPTZ NOT NULL, tentativas SMALLINT NOT NULL DEFAULT 0)",
   "ALTER TABLE desafios_mfa DROP CONSTRAINT IF EXISTS desafios_mfa_tipo_check",
@@ -46,7 +50,8 @@ const COMANDOS = [
   "ALTER TABLE solicitacoes_privacidade ADD COLUMN IF NOT EXISTS respondida_por UUID REFERENCES usuarios(id)",
   fs.readFileSync(path.join(__dirname, "privacidade.sql"), "utf8"),
   "ALTER TABLE usuarios DROP CONSTRAINT IF EXISTS usuarios_email_key",
-  "CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_ativo_idx ON usuarios(email) WHERE ativo = TRUE",
+  "DROP INDEX IF EXISTS usuarios_email_ativo_idx",
+  "CREATE UNIQUE INDEX IF NOT EXISTS usuarios_email_hash_idx ON usuarios(email_hash) WHERE email_hash IS NOT NULL",
   "CREATE TABLE IF NOT EXISTS perguntas (id SERIAL PRIMARY KEY, texto VARCHAR(500) NOT NULL, alternativas JSONB NOT NULL, resposta_correta SMALLINT NOT NULL CHECK (resposta_correta BETWEEN 0 AND 3), nivel VARCHAR(10) NOT NULL DEFAULT 'Fácil', status VARCHAR(10) NOT NULL DEFAULT 'pendente' CHECK (status IN ('pendente', 'aprovada', 'recusada')), autor_id UUID REFERENCES usuarios(id) ON DELETE SET NULL, avaliada_por UUID REFERENCES usuarios(id), criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW(), avaliada_em TIMESTAMPTZ)",
   `DO $$ BEGIN
     ALTER TABLE perguntas DROP CONSTRAINT IF EXISTS perguntas_resposta_correta_check;
@@ -60,7 +65,8 @@ const COMANDOS = [
     END IF;
   END $$`,
   "ALTER TABLE perguntas ALTER COLUMN autor_id DROP NOT NULL",
-  "CREATE TABLE IF NOT EXISTS auditoria_acessos (id BIGSERIAL PRIMARY KEY, usuario_id UUID REFERENCES usuarios(id) ON DELETE SET NULL, usuario_email VARCHAR(150), perfil VARCHAR(20), acao VARCHAR(80) NOT NULL, recurso VARCHAR(120) NOT NULL, detalhes JSONB NOT NULL DEFAULT '{}'::jsonb, metodo VARCHAR(10) NOT NULL, rota TEXT NOT NULL, ip VARCHAR(80), user_agent TEXT, criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW())",
+  "CREATE TABLE IF NOT EXISTS auditoria_acessos (id BIGSERIAL PRIMARY KEY, usuario_id UUID REFERENCES usuarios(id) ON DELETE SET NULL, usuario_email VARCHAR(200), perfil VARCHAR(20), acao VARCHAR(80) NOT NULL, recurso VARCHAR(120) NOT NULL, detalhes JSONB NOT NULL DEFAULT '{}'::jsonb, metodo VARCHAR(10) NOT NULL, rota TEXT NOT NULL, ip VARCHAR(80), user_agent TEXT, criado_em TIMESTAMPTZ NOT NULL DEFAULT NOW())",
+  "ALTER TABLE auditoria_acessos ALTER COLUMN usuario_email TYPE VARCHAR(200)",
   "CREATE INDEX IF NOT EXISTS auditoria_acessos_criado_em_idx ON auditoria_acessos(criado_em DESC)",
   "CREATE INDEX IF NOT EXISTS auditoria_acessos_usuario_id_idx ON auditoria_acessos(usuario_id)",
   `CREATE TABLE IF NOT EXISTS avaliacoes (
@@ -91,6 +97,67 @@ const COMANDOS = [
 async function prepararBanco() {
   for (const comando of COMANDOS) {
     await banco.query(comando);
+  }
+  await migrarEmails();
+}
+
+function mascararDetalhes(valor) {
+  if (Array.isArray(valor)) return valor.map(mascararDetalhes);
+  if (typeof valor === "string")
+    return valor.replace(/[^\s<>"']+@[^\s<>"']+\.[^\s<>"']+/gi, emailUtil.mascararEmail);
+  if (!valor || typeof valor !== "object") return valor;
+  return Object.fromEntries(
+    Object.entries(valor).map(([chave, item]) => [
+      chave,
+      /email/i.test(chave) && typeof item === "string"
+        ? emailUtil.mascararEmail(item)
+        : mascararDetalhes(item),
+    ]),
+  );
+}
+
+async function migrarEmails() {
+  const cliente = await banco.connect();
+  try {
+    await cliente.query("BEGIN");
+    const usuarios = await cliente.query(
+      "SELECT id, email, email_hash, email_criptografado FROM usuarios FOR UPDATE",
+    );
+    for (const usuario of usuarios.rows) {
+      const emailArmazenado = String(usuario.email || "");
+      if (emailArmazenado.includes("*******")) {
+        if (emailArmazenado.endsWith("@invalid.local")) continue;
+        if (usuario.email_hash && usuario.email_criptografado) continue;
+      }
+      let emailOriginal = usuario.email_criptografado
+        ? emailUtil.descriptografarEmail(usuario.email_criptografado)
+        : usuario.email;
+      if (String(emailOriginal || "").includes("*******")) {
+        if (!usuario.email_hash || !usuario.email_criptografado)
+          throw new Error(`Não é possível migrar o e-mail mascarado sem chave original: ${usuario.id}`);
+        continue;
+      }
+      emailOriginal = String(emailOriginal).trim().toLowerCase();
+      await cliente.query(
+        "UPDATE usuarios SET email = $1, email_hash = $2, email_criptografado = $3 WHERE id = $4",
+        [emailUtil.mascararEmail(emailOriginal), emailUtil.gerarHashEmail(emailOriginal), emailUtil.criptografarEmail(emailOriginal), usuario.id],
+      );
+    }
+    const auditorias = await cliente.query(
+      "SELECT id, usuario_email, detalhes FROM auditoria_acessos FOR UPDATE",
+    );
+    for (const registro of auditorias.rows) {
+      await cliente.query(
+        "UPDATE auditoria_acessos SET usuario_email = $1, detalhes = $2 WHERE id = $3",
+        [emailUtil.mascararEmail(registro.usuario_email), JSON.stringify(mascararDetalhes(registro.detalhes)), registro.id],
+      );
+    }
+    await cliente.query("COMMIT");
+  } catch (erro) {
+    await cliente.query("ROLLBACK");
+    throw erro;
+  } finally {
+    cliente.release();
   }
 }
 

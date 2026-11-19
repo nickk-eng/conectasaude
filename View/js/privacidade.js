@@ -1,6 +1,19 @@
 const formPrivacidade = document.querySelector("#form-privacidade");
 const mensagemPrivacidade = document.querySelector("#mensagem-privacidade");
 
+async function carregarEmailTitular() {
+  const elemento = document.querySelector("#email-titular");
+  try {
+    const resposta = await apiFetch("/api/auth/eu");
+    if (!resposta.ok) return;
+    const { usuario } = await resposta.json();
+    elemento.textContent = `Conta autenticada: ${usuario.email}`;
+    elemento.hidden = false;
+  } catch {}
+}
+
+carregarEmailTitular();
+
 const rotulosPrivacidade = {
   recebida: "Recebida",
   em_analise: "Em análise",

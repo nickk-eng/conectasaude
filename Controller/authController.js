@@ -471,9 +471,10 @@ async function sair(req, res) {
   res.status(204).end();
 }
 
-function eu(req, res) {
+async function eu(req, res) {
+  const usuario = await usuarioModel.paraProprio(req.usuario, req.usuario.id);
   res.json({
-    usuario: usuarioModel.paraPublico(req.usuario),
+    usuario,
     destino: destinoUsuario(req.usuario),
   });
 }

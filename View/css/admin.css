@@ -8,6 +8,83 @@
   margin: auto;
 }
 
+.titulo-ferramentas {
+  margin: 30px 0 14px;
+  font-size: 20px;
+}
+
+.grade-ferramentas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.grade-ferramentas .card {
+  width: 100%;
+  min-height: 132px;
+  padding: 20px;
+  text-align: left;
+  color: var(--texto);
+  background: var(--cartao);
+  border: 1px solid #285062;
+  border-radius: 16px;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.grade-ferramentas .card span {
+  color: var(--fundo);
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.grade-ferramentas .card h3 {
+  margin: 12px 0 8px;
+  font-size: 17px;
+}
+
+.grade-ferramentas .card p {
+  color: var(--padrao);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.grade-ferramentas .card:hover {
+  border-color: var(--fundo);
+  transform: translateY(-2px);
+}
+
+.grade-ferramentas .card.ativo {
+  border-color: var(--fundo);
+  background: #19364a;
+  box-shadow: 0 0 0 1px rgb(45 212 168 / 30%), 0 10px 24px rgb(0 0 0 / 18%);
+  transform: translateY(-2px);
+}
+
+.grade-ferramentas .card:focus-visible {
+  outline: 2px solid var(--fundo);
+  outline-offset: 3px;
+}
+
+.painel-ferramenta {
+  margin-top: 14px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.painel-ferramenta.painel-aberto {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grade-ferramentas .card,
+  .painel-ferramenta {
+    transition: none;
+  }
+}
+
 .cabecalho-admin {
   display: flex;
   justify-content: space-between;
@@ -58,7 +135,7 @@
 
 .indicadores-admin {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
   gap: 14px;
 }
 
@@ -168,6 +245,11 @@
   padding: 9px 14px;
 }
 
+.botao-painel-admin {
+  margin: 0 0 18px;
+  padding: 9px 14px;
+}
+
 .pergunta-admin {
   padding: 20px;
   background: var(--cartao);
@@ -262,19 +344,69 @@
   margin: 0;
 }
 
-.botao-revelar-email {
-  margin: 0 0 0 8px;
-  padding: 4px 8px;
-  min-height: 30px;
-  font-size: 0.85rem;
-}
-
 .tabela-auditoria tr:last-child td {
   border-bottom: 0;
 }
 
+.formulario-pergunta {
+  display: grid;
+  gap: 14px;
+  margin-top: 8px;
+  padding: 22px;
+  background: var(--cartao);
+  border: 1px solid #285062;
+  border-radius: 16px;
+}
+
 .formulario-pergunta[hidden] {
-  display: none !important;
+  display: none;
+}
+
+.formulario-pergunta label {
+  display: grid;
+  gap: 6px;
+  color: var(--padrao);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.formulario-pergunta,
+#corpo-solicitacoes form {
+  color-scheme: dark;
+}
+
+.formulario-pergunta :is(input, textarea),
+#corpo-solicitacoes :is(textarea, input[name='comprovante']) {
+  width: 100%;
+  padding: 12px;
+  font: inherit;
+  color: var(--texto);
+  background: var(--fundo-inicial);
+  border: 1px solid #285062;
+  border-radius: 10px;
+}
+
+.formulario-pergunta textarea {
+  min-height: 94px;
+  resize: vertical;
+}
+
+.formulario-pergunta textarea::placeholder,
+#corpo-solicitacoes :is(textarea, input[name='comprovante'])::placeholder {
+  color: var(--padrao);
+  opacity: 1;
+}
+
+.formulario-pergunta textarea:focus,
+#corpo-solicitacoes :is(textarea, input[name='comprovante']):focus {
+  outline: 2px solid var(--fundo);
+  outline-offset: 1px;
+}
+
+.formulario-pergunta .acoes-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 .tabela-auditoria form {
   min-width: 220px;
@@ -285,6 +417,10 @@
   display: grid;
   gap: 6px;
 }
+#corpo-solicitacoes input[name="confirmouAtendimento"] {
+  justify-self: start;
+}
+
 .tabela-auditoria textarea {
   resize: vertical;
   width: 100%;

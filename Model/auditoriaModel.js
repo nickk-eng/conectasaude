@@ -49,14 +49,15 @@ async function historicoAluno(usuarioId, pagina = 1) {
       [usuarioId],
     ),
     banco.query(
-      "SELECT id, acertos, erros, nivel, modo, resultado, criada_em FROM partidas WHERE usuario_id = $1 ORDER BY criada_em DESC, id DESC LIMIT 20 OFFSET $2",
-      [usuarioId, (pagina - 1) * 20],
+      "SELECT id, acertos, erros, nivel, modo, resultado, criada_em FROM partidas WHERE usuario_id = $1 ORDER BY criada_em DESC, id DESC LIMIT 5 OFFSET $2",
+      [usuarioId, (pagina - 1) * 5],
     ),
   ]);
   const resumo = totais.rows[0];
   return {
     pagina,
     totalPartidas: Number(resumo.total_partidas || 0),
+    temMais: pagina * 5 < Number(resumo.total_partidas || 0),
     acertos: Number(resumo.acertos || 0),
     erros: Number(resumo.erros || 0),
     partidas: dados.rows.map(

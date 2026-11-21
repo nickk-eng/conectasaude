@@ -95,7 +95,7 @@ async function pesquisar(professorId, { turmaId, busca, vinculo, pagina }) {
           LIKE '%' || $2 || '%' ESCAPE '!')
         AND (($3 = 'minha' AND EXISTS (SELECT 1 FROM turma_alunos ta WHERE ta.turma_id = $1 AND ta.aluno_id = u.id))
           OR ($3 = 'disponiveis' AND u.turma = $5 AND NOT EXISTS (SELECT 1 FROM turma_alunos ta WHERE ta.turma_id = $1 AND ta.aluno_id = u.id)))
-      ORDER BY u.nome, u.email, u.id LIMIT 21 OFFSET $4`,
+      ORDER BY u.nome, u.email, u.id LIMIT 6 OFFSET $4`,
     [
       turmaId,
       busca
@@ -104,14 +104,14 @@ async function pesquisar(professorId, { turmaId, busca, vinculo, pagina }) {
         .toLowerCase()
         .replace(/[!%_]/g, "!$&"),
       vinculo,
-      (pagina - 1) * 20,
+      (pagina - 1) * 5,
       ANOS_ENSINO_MEDIO[turma.ano - 1],
     ],
   );
   return {
     turma,
-    alunos: dados.rows.slice(0, 20),
-    temMais: dados.rows.length > 20,
+    alunos: dados.rows.slice(0, 5),
+    temMais: dados.rows.length > 5,
     pagina,
   };
 }
@@ -129,6 +129,23 @@ async function buscarAlunoParaRevelacao(professorId, alunoId) {
     [professorId, alunoId],
   );
   return dados.rows[0] || null;
+}
+
+async function resumoDashboard(professorId) {
+  const dados = await banco.query(
+    `WITH alunos AS (
+       SELECT aluno_id FROM alunos_dos_professores WHERE professor_id = $1
+     )
+     SELECT
+       (SELECT COUNT(*)::int FROM turmas WHERE professor_id = $1) AS "totalTurmas",
+       (SELECT COUNT(DISTINCT a.aluno_id)::int FROM alunos a JOIN usuarios u ON u.id = a.aluno_id
+         WHERE u.ativo = TRUE AND u.perfil = 'aluno' AND u.status_professor = 'nao_aplicavel') AS "totalAlunos",
+       (SELECT COUNT(*)::int FROM partidas p JOIN alunos a ON a.aluno_id = p.usuario_id
+         JOIN usuarios u ON u.id = p.usuario_id
+         WHERE u.ativo = TRUE AND u.perfil = 'aluno' AND u.status_professor = 'nao_aplicavel') AS "totalPartidas"`,
+    [professorId],
+  );
+  return dados.rows[0];
 }
 
 async function adicionar(professorId, turmaId, alunoId) {
@@ -175,6 +192,7 @@ module.exports = {
   buscar,
   pesquisar,
   buscarAlunoParaRevelacao,
+  resumoDashboard,
   adicionar,
   remover,
 };

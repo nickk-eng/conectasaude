@@ -221,7 +221,7 @@ formCriarTurma.addEventListener("submit", async (evento) => {
     cadastroTurma.hidden = true;
     mensagem.textContent = "";
     await carregarDiretorio(
-      `Turma ${resultado.turma.nome} criada. Selecione o botão da turma abaixo para adicionar alunos.`,
+      `Turma ${resultado.turma.nome} criada. Clique no botão da turma abaixo para adicionar alunos.`,
     );
   } catch (erro) {
     mensagem.textContent =
@@ -311,7 +311,10 @@ async function carregarTurma(pagina = 1, aviso = "") {
           revelar.disabled = false;
         }
       });
-      celulaEmail.append(emailTexto, revelar);
+      const conteudoEmail = document.createElement("div");
+      conteudoEmail.className = "email-com-revelacao";
+      conteudoEmail.append(revelar, emailTexto);
+      celulaEmail.appendChild(conteudoEmail);
       linha.append(celulaEmail);
       const celulaTurma = document.createElement("td");
       celulaTurma.textContent = aluno.turma || "Não informado";
@@ -409,16 +412,9 @@ tentarTurma.addEventListener("click", () => carregarTurma(paginaTurma));
 
 async function iniciarTurma() {
   try {
-    const resposta = await apiFetch("/api/auth/eu");
-    if (!resposta.ok) {
-      window.location.href = "/";
-      return;
-    }
-    const { usuario } = await resposta.json();
-    if (usuario.perfil !== "professor") {
-      window.location.href = "/home";
-      return;
-    }
+    const sessao = await verificarSessaoPagina();
+    if (!sessao) return;
+    const { usuario } = sessao;
     document.querySelector("#nome-professor").textContent =
       `Professor(a): ${usuario.nome || usuario.email}`;
     await carregarDiretorio();

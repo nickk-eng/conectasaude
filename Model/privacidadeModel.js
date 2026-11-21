@@ -72,7 +72,7 @@ async function responder(
         solicitacaoPreservada: id,
       });
       resposta =
-        "Conta e registros vinculados eliminados do banco ativo. Consulte a política para os limites de conteúdo e backups.";
+        "Conta e registros vinculados eliminados do banco ativo. Consulte a política para conhecer os limites da exclusão de conteúdo e de cópias de segurança.";
       providencia =
         "Exclusão transacional de conta, credenciais, vínculos, resultados, pedidos e registros de acesso associados.";
       comprovante = `Exclusão executada pelo sistema na transação do pedido ${id}.`;

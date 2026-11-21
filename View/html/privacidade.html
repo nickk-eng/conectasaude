@@ -60,7 +60,7 @@
                 <th>Duração e encerramento</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody id="corpo-politica-privacidade">
               <tr>
                 <td>Conta e aceite</td>
                 <td>
@@ -77,8 +77,7 @@
                   campos educacionais necessários.
                 </td>
                 <td>
-                  Enquanto a conta existir; excluídos do banco ativo no
-                  encerramento.
+                  Os dados são mantidos enquanto a conta existir e excluídos do banco ativo no encerramento.
                 </td>
               </tr>
               <tr>
@@ -107,7 +106,7 @@
                 <td>Escolas e turmas</td>
                 <td>
                   Escolas, ano, letra, descrição e vínculos entre professor e
-                  alunos. Organizar acompanhamento.
+                  alunos. Organizar o acompanhamento.
                 </td>
                 <td>
                   Art. 7º, V, quando necessário ao serviço educacional
@@ -137,7 +136,7 @@
                 <td>Avaliações e partidas</td>
                 <td>
                   Respostas de pré e pós-teste, notas, acertos, erros, nível,
-                  modo e datas. Acompanhar aprendizagem.
+                  modo e datas. Acompanhar a aprendizagem.
                 </td>
                 <td>
                   Art. 7º, V, quando necessário à finalidade educacional
@@ -150,8 +149,7 @@
                   durante o jogo.
                 </td>
                 <td>
-                  Até encerramento da conta no banco ativo. Salas em memória
-                  encerram após 30 minutos sem atividade ou remoção da conta.
+                  Até encerramento da conta no banco ativo. As salas mantidas em memória são encerradas após 30 minutos sem atividade ou quando a conta é removida.
                 </td>
               </tr>
               <tr>
@@ -241,18 +239,15 @@
           e salvaguardas antes da implantação real.
         </p>
         <p>
-          Usamos o cookie necessário <strong>conectaSaudeSessao</strong> para
-          validar páginas protegidas. Ele vale por até 8 horas, tem HttpOnly
-          (não acessível ao JavaScript da página), SameSite Strict e caminho /.
-          Em produção é marcado Secure e exige HTTPS. O token também fica em
+          O token de sessão tem validade de até 8 horas e fica no
           <strong>sessionStorage</strong>, com a chave conectaSaudeToken, para
-          autenticar as chamadas às APIs.
+          autenticar as chamadas às APIs. Cada aba usa a própria sessão.
         </p>
         <p>
           O sessionStorage é separado por aba e normalmente termina ao fechar a
           aba, mas restaurações do navegador podem preservá-lo. A validade real
           é conferida pelo servidor a cada acesso. Sair remove o token do
-          armazenamento, apaga o cookie e invalida a sessão no servidor. Fechar
+          armazenamento da aba e invalida essa sessão no servidor. Fechar
           a aba não equivale a sair.
         </p>
         <p>
@@ -266,7 +261,7 @@
         <h2>4. Perfis e segurança</h2>
         <p>
           Alunos acessam o jogo e os próprios dados de perfil. Professores podem
-          consultar somente alunos vinculados às suas turmas ou vínculos legados
+          consultar somente alunos de suas turmas ou com vínculos anteriores
           e enviar perguntas; não acessam senhas, registros técnicos ou dados de
           outros professores. Administradores aprovam perguntas e consultam os
           registros de auditoria. Essas permissões são verificadas pelo
@@ -295,7 +290,7 @@
         <p>
           Para registrar um pedido, entre na sua conta e use o formulário
           abaixo. Professores podem registrar e acompanhar pedidos mesmo com
-          aprovação pendente, recusada ou acesso de professor revogado. Pedidos
+          solicitação pendente ou recusada, ou com acesso de professor revogado. Pedidos
           concluídos devem indicar a providência realizada e sua comprovação. Um
           pedido de eliminação concluído pelo administrador executa a exclusão
           da conta e dos registros vinculados no banco ativo; a confirmação é
@@ -318,7 +313,7 @@
               <option value="correcao">Corrigir meus dados</option>
               <option value="eliminacao">Solicitar eliminação</option>
               <option value="portabilidade">Solicitar portabilidade</option>
-              <option value="oposicao">Contestar/opor-me ao tratamento</option>
+              <option value="oposicao">Opor-me ao tratamento</option>
               <option value="informacoes">Pedir informações</option>
             </select>
           </label>
@@ -384,6 +379,7 @@
       </footer>
     </main>
     <script src="/js/auth.js"></script>
+    <script src="/js/paginarTabela.js"></script>
     <script src="/js/privacidade.js"></script>
     <footer class="links-legais" aria-label="Informações legais">
       <a href="/termos">Termos de Uso</a

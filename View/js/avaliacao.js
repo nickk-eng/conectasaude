@@ -12,7 +12,7 @@ const TEXTOS = {
     chip: "Pós-teste",
     titulo: "Agora é a hora do pós-teste",
     texto:
-      "Você jogou e aprendeu bastante! Responda de novo as mesmas perguntas do pré-teste para ver o quanto evoluiu.",
+      "Você jogou e aprendeu bastante! Responda novamente às mesmas perguntas do pré-teste para ver o quanto evoluiu.",
   },
 };
 
@@ -133,7 +133,7 @@ function mostrarResultado(dados, jaFeita) {
 
   if (!ehPos) {
     document.querySelector("#texto-resultado").textContent =
-      `Você acertou ${dados.acertos} de ${dados.total} perguntas (${dados.percentual}%). Agora é só jogar! Depois de algumas partidas você poderá fazer o pós-teste.`;
+      `Você acertou ${dados.acertos} de ${dados.total} perguntas (${dados.percentual}%). Agora é só jogar! Depois de algumas partidas, você poderá fazer o pós-teste.`;
     document.querySelector("#link-seguir").textContent = "Ir para o jogo";
   } else {
     const ganho = dados.evolucao;
@@ -142,7 +142,7 @@ function mostrarResultado(dados, jaFeita) {
         ? "Parabéns! Você aprendeu mais e melhorou o seu resultado."
         : ganho === 0
           ? "Você manteve o seu resultado. Continue praticando!"
-          : "O resultado ficou abaixo do pré-teste. Que tal jogar mais um pouco e revisar o conteúdo?";
+          : "Seu resultado ficou abaixo do que você obteve no pré-teste. Que tal jogar mais um pouco e revisar o conteúdo?";
     document.querySelector("#nota-pre").textContent = formatarNota(dados.pre);
     document.querySelector("#nota-pos").textContent = formatarNota(dados);
     document.querySelector("#nota-evolucao").textContent =
@@ -208,4 +208,6 @@ document.querySelector("#proxima").addEventListener("click", () => {
   enviar();
 });
 
-carregar().catch(() => mostrarErro("Não foi possível conectar ao servidor."));
+verificarSessaoPagina().then((sessao) => {
+  if (sessao) carregar().catch(() => mostrarErro("Não foi possível conectar ao servidor."));
+});

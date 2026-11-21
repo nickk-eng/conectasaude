@@ -2,12 +2,19 @@ const usuarioModel = require("../Model/usuarioModel");
 const perguntaModel = require("../Model/perguntaModel");
 const avaliacaoModel = require("../Model/avaliacaoModel");
 const avaliacaoService = require("../Service/avaliacaoService");
-const { registrarAuditoria } = require("../Service/auditoriaService");
+const {
+  registrarAuditoria,
+  registrarRevelacaoEmail,
+} = require("../Service/auditoriaService");
 const { NIVEIS, CATEGORIAS_IST } = require("../Config/constantes");
 const auditoriaModel = require("../Model/auditoriaModel");
 const turmaModel = require("../Model/turmaModel");
-const { registrarRevelacaoEmail } = require("../Service/auditoriaService");
 const { descriptografarEmail } = require("../Utils/mascararEmail");
+
+async function resumo(req, res) {
+  const dados = await turmaModel.resumoDashboard(req.usuario.id);
+  res.json({ resumo: dados });
+}
 
 async function revelarEmailAluno(req, res) {
   res.set("Cache-Control", "no-store");
@@ -233,6 +240,7 @@ async function criarPergunta(req, res) {
 }
 
 module.exports = {
+  resumo,
   revelarEmailAluno,
   listarAlunos,
   atualizarResponsaveisAluno,

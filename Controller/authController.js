@@ -4,11 +4,7 @@ const desafioMfaModel = require("../Model/desafioMfaModel");
 const senhaService = require("../Service/senhaService");
 const mfaService = require("../Service/mfaService");
 const { registrarAuditoria } = require("../Service/auditoriaService");
-const {
-  extrairToken,
-  gravarCookieSessao,
-  limparCookieSessao,
-} = require("../Middleware/autenticacao");
+const { extrairToken } = require("../Middleware/autenticacao");
 const {
   VERSAO_TERMOS,
   PERFIS_CADASTRO,
@@ -292,7 +288,6 @@ async function verificarTotp(req, res) {
         .status(401)
         .json({ mensagem: "Esta conta não está disponível para acesso." });
     const token = await sessaoModel.criar(usuario.id);
-    gravarCookieSessao(res, token);
     await registrarAuditoria(
       req,
       "login_realizado",
@@ -325,7 +320,7 @@ async function solicitarRecuperacao(req, res) {
     await recuperacaoSenhaService.solicitar(email);
     res.json({
       mensagem:
-        "Se o e-mail estiver cadastrado e ativo, você receberá um código válido por 10 minutos. Confira o spam. Para reenviar, aguarde 1 minuto.",
+        "Se o e-mail estiver cadastrado e ativo, você receberá um código válido por 10 minutos. Confira a pasta de spam. Para reenviar, aguarde 1 minuto.",
     });
   } catch (erro) {
     console.error(
@@ -410,7 +405,6 @@ async function recuperarSenha(req, res) {
       {},
       usuario,
     );
-    limparCookieSessao(res);
     res.json({
       mensagem:
         "Senha atualizada. Entre com a nova senha e faça a confirmação em duas etapas.",
@@ -457,16 +451,14 @@ async function encerrarConta(req, res) {
         mensagem: "Não foi possível encerrar a conta. Tente novamente.",
       });
   }
-  limparCookieSessao(res);
   res.json({
     mensagem:
-      "Conta excluída do banco ativo, junto com credenciais, vínculos, avaliações, partidas e pedidos. Perguntas educativas permanecem sem vínculo com o autor. Você será desconectado.",
+      "Conta excluída do banco ativo, junto com as credenciais, os vínculos, as avaliações, as partidas e os pedidos. Perguntas educativas permanecem sem vínculo com o autor. Você será desconectado.",
   });
 }
 
 async function sair(req, res) {
   await sessaoModel.remover(extrairToken(req));
-  limparCookieSessao(res);
   await registrarAuditoria(req, "logout_realizado", "autenticacao");
   res.status(204).end();
 }

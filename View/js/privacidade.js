@@ -1,3 +1,5 @@
+paginarTabela(document.querySelector("#corpo-politica-privacidade"), "Páginas dos dados tratados");
+
 const formPrivacidade = document.querySelector("#form-privacidade");
 const mensagemPrivacidade = document.querySelector("#mensagem-privacidade");
 
@@ -9,7 +11,9 @@ async function carregarEmailTitular() {
     const { usuario } = await resposta.json();
     elemento.textContent = `Conta autenticada: ${usuario.email}`;
     elemento.hidden = false;
-  } catch {}
+  } catch {
+    elemento.hidden = true;
+  }
 }
 
 carregarEmailTitular();

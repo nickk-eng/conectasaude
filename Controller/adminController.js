@@ -1,11 +1,14 @@
 const perguntaModel = require("../Model/perguntaModel");
 const privacidadeModel = require("../Model/privacidadeModel");
 const auditoriaModel = require("../Model/auditoriaModel");
-const { registrarAuditoria } = require("../Service/auditoriaService");
+const {
+  registrarAuditoria,
+  registrarRevelacaoEmail,
+} = require("../Service/auditoriaService");
 const usuarioModel = require("../Model/usuarioModel");
 const { NIVEIS, CATEGORIAS_IST } = require("../Config/constantes");
 const sessaoModel = require("../Model/sessaoModel");
-const { registrarRevelacaoEmail } = require("../Service/auditoriaService");
+const adminModel = require("../Model/adminModel");
 const { descriptografarEmail } = require("../Utils/mascararEmail");
 
 function validarPergunta(body = {}) {
@@ -46,6 +49,11 @@ async function listarUsuarios(req, res) {
     total: usuarios.length,
   });
   res.json({ usuarios });
+}
+
+async function resumo(req, res) {
+  const dados = await adminModel.resumo();
+  res.json({ resumo: dados });
 }
 
 async function revelarEmailUsuario(req, res) {
@@ -257,6 +265,7 @@ module.exports = {
   listarPerguntas,
   avaliarPergunta,
   listarUsuarios,
+  resumo,
   revelarEmailUsuario,
   atualizarUsuario,
   criarPergunta,

@@ -1,0 +1,318 @@
+warning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Controller/adminController.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Controller/authController.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Controller/privacidadeController.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Controller/professorController.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Middleware/autenticacao.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Model/auditoriaModel.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Model/privacidadeModel.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Model/turmaModel.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Routes/adminRoutes.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Routes/paginaRoutes.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Routes/professorRoutes.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Service/mfaService.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'Service/salaService.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/css/admin.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/css/home.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/css/style.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/css/turma.css', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/html/admin.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/html/aguardando-aprovacao.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/html/avaliacao.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/html/home.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/html/jogo.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/html/login.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/html/privacidade.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/html/sala.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/html/termos.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/html/turma.html', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/js/admin.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/js/aguardando-aprovacao.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/js/auth.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/js/avaliacao.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/js/home.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/js/jogo.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/js/privacidade.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/js/sala.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'View/js/turma.js', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'db/arquivo.sql', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package-lock.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex 127c051..5bf6824 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -2,3 +2,4 @@[m
+ node_modules/[m
+ .npm-cache/[m
+ acessos-demo.local.json[m
+[32m+[m[32mcoverage/[m
+[1mdiff --git a/Controller/adminController.js b/Controller/adminController.js[m
+[1mindex 1445095..88978ee 100644[m
+[1m--- a/Controller/adminController.js[m
+[1m+++ b/Controller/adminController.js[m
+[36m@@ -1,11 +1,14 @@[m
+ const perguntaModel = require("../Model/perguntaModel");[m
+ const privacidadeModel = require("../Model/privacidadeModel");[m
+ const auditoriaModel = require("../Model/auditoriaModel");[m
+[31m-const { registrarAuditoria } = require("../Service/auditoriaService");[m
+[32m+[m[32mconst {[m
+[32m+[m[32m  registrarAuditoria,[m
+[32m+[m[32m  registrarRevelacaoEmail,[m
+[32m+[m[32m} = require("../Service/auditoriaService");[m
+ const usuarioModel = require("../Model/usuarioModel");[m
+ const { NIVEIS, CATEGORIAS_IST } = require("../Config/constantes");[m
+ const sessaoModel = require("../Model/sessaoModel");[m
+[31m-const { registrarRevelacaoEmail } = require("../Service/auditoriaService");[m
+[32m+[m[32mconst adminModel = require("../Model/adminModel");[m
+ const { descriptografarEmail } = require("../Utils/mascararEmail");[m
+ [m
+ function validarPergunta(body = {}) {[m
+[36m@@ -48,6 +51,11 @@[m [masync function listarUsuarios(req, res) {[m
+   res.json({ usuarios });[m
+ }[m
+ [m
+[32m+[m[32masync function resumo(req, res) {[m
+[32m+[m[32m  const dados = await adminModel.resumo();[m
+[32m+[m[32m  res.json({ resumo: dados });[m
+[32m+[m[32m}[m
+[32m+[m
+ async function revelarEmailUsuario(req, res) {[m
+   res.set("Cache-Control", "no-store");[m
+   if (!idUsuarioValido(req.params.id))[m
+[36m@@ -257,6 +265,7 @@[m [mmodule.exports = {[m
+   listarPerguntas,[m
+   avaliarPergunta,[m
+   listarUsuarios,[m
+[32m+[m[32m  resumo,[m
+   revelarEmailUsuario,[m
+   atualizarUsuario,[m
+   criarPergunta,[m
+[1mdiff --git a/Controller/authController.js b/Controller/authController.js[m
+[1mindex 4ba2999..7493cd1 100644[m
+[1m--- a/Controller/authController.js[m
+[1m+++ b/Controller/authController.js[m
+[36m@@ -4,11 +4,7 @@[m [mconst desafioMfaModel = require("../Model/desafioMfaModel");[m
+ const senhaService = require("../Service/senhaService");[m
+ const mfaService = require("../Service/mfaService");[m
+ const { registrarAuditoria } = require("../Service/auditoriaService");[m
+[31m-const {[m
+[31m-  extrairToken,[m
+[31m-  gravarCookieSessao,[m
+[31m-  limparCookieSessao,[m
+[31m-} = require("../Middleware/autenticacao");[m
+[32m+[m[32mconst { extrairToken } = require("../Middleware/autenticacao");[m
+ const {[m
+   VERSAO_TERMOS,[m
+   PERFIS_CADASTRO,[m
+[36m@@ -292,7 +288,6 @@[m [masync function verificarTotp(req, res) {[m
+         .status(401)[m
+         .json({ mensagem: "Esta conta não está disponível para acesso." });[m
+     const token = await sessaoModel.criar(usuario.id);[m
+[31m-    gravarCookieSessao(res, token);[m
+     await registrarAuditoria([m
+       req,[m
+       "login_realizado",[m
+[36m@@ -325,7 +320,7 @@[m [masync function solicitarRecuperacao(req, res) {[m
+     await recuperacaoSenhaService.solicitar(email);[m
+     res.json({[m
+       mensagem:[m
+[31m-        "Se o e-mail estiver cadastrado e ativo, você receberá um código válido por 10 minutos. Confira o spam. Para reenviar, aguarde 1 minuto.",[m
+[32m+[m[32m        "Se o e-mail estiver cadastrado e ativo, você receberá um código válido por 10 minutos. Confira a pasta de spam. Para reenviar, aguarde 1 minuto.",[m
+     });[m
+   } catch (erro) {[m
+     console.error([m
+[36m@@ -410,7 +405,6 @@[m [masync function recuperarSenha(req, res) {[m
+       {},[m
+       usuario,[m
+     );[m
+[31m-    limparCookieSessao(res);[m
+     res.json({[m
+       mensagem:[m
+         "Senha atualizada. Entre com a nova senha e faça a confirmação em duas etapas.",[m
+[36m@@ -457,16 +451,14 @@[m [masync function encerrarConta(req, res) {[m
+         mensagem: "Não foi possível encerrar a conta. Tente novamente.",[m
+       });[m
+   }[m
+[31m-  limparCookieSessao(res);[m
+   res.json({[m
+     mensagem:[m
+[31m-      "Conta excluída do banco ativo, junto com credenciais, vínculos, avaliações, partidas e pedidos. Perguntas educativas permanecem sem vínculo com o autor. Você será desconectado.",[m
+[32m+[m[32m      "Conta excluída do banco ativo, junto com as credenciais, os vínculos, as avaliações, as partidas e os pedidos. Perguntas educativas permanecem sem vínculo com o autor. Você será desconectado.",[m
+   });[m
+ }[m
+ [m
+ async function sair(req, res) {[m
+   await sessaoModel.remover(extrairToken(req));[m
+[31m-  limparCookieSessao(res);[m
+   await registrarAuditoria(req, "logout_realizado", "autenticacao");[m
+   res.status(204).end();[m
+ }[m
+[1mdiff --git a/Controller/privacidadeController.js b/Controller/privacidadeController.js[m
+[1mindex 4df3cf0..aec600d 100644[m
+[1m--- a/Controller/privacidadeController.js[m
+[1m+++ b/Controller/privacidadeController.js[m
+[36m@@ -72,7 +72,7 @@[m [masync function responderSolicitacao(req, res) {[m
+       .status(400)[m
+       .json({[m
+         mensagem:[m
+[31m-          "Para concluir ou recusar, escreva uma resposta de até 2000 caracteres.",[m
+[32m+[m[32m          "Para concluir ou recusar, escreva uma resposta de até 2.000 caracteres.",[m
+       });[m
+   }[m
+   if ([m
+[36m@@ -87,7 +87,7 @@[m [masync function responderSolicitacao(req, res) {[m
+       .status(400)[m
+       .json({[m
+         mensagem:[m
+[31m-          "Para concluir, descreva a providência (20 a 2000 caracteres), informe a referência de comprovação (8 a 500 caracteres) e confirme o atendimento. Não inclua senhas, códigos ou dados de terceiros.",[m
+[32m+[m[32m          "Para concluir, descreva a providência (20 a 2.000 caracteres), informe a referência de comprovação (8 a 500 caracteres) e confirme o atendimento. Não inclua senhas, códigos ou dados de terceiros.",[m
+       });[m
+   }[m
+   let pedido;[m
+[1mdiff --git a/Controller/professorController.js b/Controller/professorController.js[m
+[1mindex bf20d48..0e32b1f 100644[m
+[1m--- a/Controller/professorController.js[m
+[1m+++ b/Controller/professorController.js[m
+[36m@@ -2,13 +2,20 @@[m [mconst usuarioModel = require("../Model/usuarioModel");[m
+ const perguntaModel = require("../Model/perguntaModel");[m
+ const avaliacaoModel = require("../Model/avaliacaoModel");[m
+ const avaliacaoService = require("../Service/avaliacaoService");[m
+[31m-const { registrarAuditoria } = require("../Service/auditoriaService");[m
+[32m+[m[32mconst {[m
+[32m+[m[32m  registrarAuditoria,[m
+[32m+[m[32m  registrarRevelacaoEmail,[m
+[32m+[m[32m} = require("../Service/auditoriaService");[m
+ const { NIVEIS, CATEGORIAS_IST } = require("../Config/constantes");[m
+ const auditoriaModel = require("../Model/auditoriaModel");[m
+ const turmaModel = require("../Model/turmaModel");[m
+[31m-const { registrarRevelacaoEmail } = require("../Service/auditoriaService");[m
+ const { descriptografarEmail } = require("../Utils/mascararEmail");[m
+ [m
+[32m+[m[32masync function resumo(req, res) {[m
+[32m+[m[32m  const dados = await turmaModel.resumoDashboard(req.usuario.id);[m
+[32m+[m[32m  res.json({ resumo: dados });[m
+[32m+[m[32m}[m
+[32m+[m
+ async function revelarEmailAluno(req, res) {[m
+   res.set("Cache-Control", "no-store");[m
+   const id = String(req.params.id || "");[m
+[36m@@ -233,6 +240,7 @@[m [masync function criarPergunta(req, res) {[m
+ }[m
+ [m
+ module.exports = {[m
+[32m+[m[32m  resumo,[m
+   revelarEmailAluno,[m
+   listarAlunos,[m
+   atualizarResponsaveisAluno,[m
+[1mdiff --git a/Middleware/autenticacao.js b/Middleware/autenticacao.js[m
+[1mindex bd10e14..16b01f5 100644[m
+[1m--- a/Middleware/autenticacao.js[m
+[1m+++ b/Middleware/autenticacao.js[m
+[36m@@ -1,29 +1,9 @@[m
+ const sessaoModel = require("../Model/sessaoModel");[m
+ const {[m
+   aguardaAprovacao,[m
+[31m-  destinoUsuario,[m
+ } = require("../Service/acessoService");[m
+ const TOKEN_VALIDO =[m
+   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;[m
+[31m-const COOKIE_SESSAO = "conectaSaudeSessao";[m
+[31m-const opcoesCookie = {[m
+[31m-  httpOnly: true,[m
+[31m-  sameSite: "strict",[m
+[31m-  secure: process.env.NODE_ENV === "production",[m
+[31m-  path: "/",[m
+[31m-};[m
+[31m-[m
+[31m-function gravarCookieSessao(res, token) {[m
+[31m-  res.cookie(COOKIE_SESSAO, token, {[m
+[31m-    ...opcoesCookie,[m
+[31m-    maxAge: 8 * 60 * 60 * 1000,[m
+[31m-  });[m
+[31m-}[m
+[31m-[m
+[31m-function limparCookieSessao(res) {[m
+[31m-  res.clearCookie(COOKIE_SESSAO, opcoesCookie);[m
+[31m-}[m
+[31m-[m
+ function extrairToken(req) {[m
+   const [tipo, token] = String(req.get("Authorization") || "")[m
+     .trim()[m
+[36m@@ -51,7 +31,7 @@[m [mfunction autenticar(req, res, next) {[m
+         .status(403)[m
+         .json({[m
+           mensagem:[m
+[31m-            "Aguardando o administrador aceitar a sua solicitação, prezado professor",[m
+[32m+[m[32m            "Sua solicitação de acesso está em análise.",[m
+           codigo: "APROVACAO_PROFESSOR_PENDENTE",[m
+           destino: "/aguardando-aprovacao",[m
+         });[m
+[36m@@ -67,44 +47,9 @@[m [mfunction permitir(...perfis) {[m
+       : res.status(403).json({ mensagem: "Você não tem acesso a esta área." });[m
+ }[m
+ [m
+[31m-function protegerPaginaComSessao(perfis, espera = false) {[m
+[31m-  return async (req, res, next) => {[m
+[31m-    res.set("Cache-Control", "no-store");[m
+[31m-    const cookie = String(req.headers.cookie || "")[m
+[31m-      .split(";")[m
+[31m-      .map((parte) => parte.trim())[m
+[31m-      .find((parte) => parte.startsWith(`${COOKIE_SESSAO}=`));[m
+[31m-    const token = cookie?.slice(COOKIE_SESSAO.length + 1);[m
+[31m-    const usuario = TOKEN_VALIDO.test(token || "")[m
+[31m-      ? await sessaoModel.buscarUsuarioPorToken(token)[m
+[31m-      : null;[m
+[31m-    if (!usuario) {[m
+[31m-      limparCookieSessao(res);[m
+[31m-      return res.redirect("/");[m
+[31m-    }[m
+[31m-    if (aguardaAprovacao(usuario)) {[m
+[31m-      if (!espera) return res.redirect("/aguardando-aprovacao");[m
+[31m-    } else if (espera || !perfis.includes(usuario.perfil)) {[m
+[31m-      return res.redirect(destinoUsuario(usuario));[m
+[31m-    }[m
+[31m-    req.usuario = usuario;[m
+[31m-    next();[m
+[31m-  };[m
+[31m-}[m
+[31m-[m
+[31m-function protegerPagina(...perfis) {[m
+[31m-  return protegerPaginaComSessao(perfis);[m
+[31m-}[m
+[31m-[m
+[31m-const protegerEspera = protegerPaginaComSessao([], true);[m
+[31m-[m
+ module.exports = {[m
+   autenticar,[m
+   autenticarSessao,[m
+   permitir,[m
+   extrairToken,[m
+[31m-  protegerPagina,[m
+[31m-  protegerEspera,[m
+[31m-  gravarCookieSessao,[m
+[31m-  limparCookieSessao,[m
+ };[m
+[1mdiff --git a/Model/auditoriaModel.js b/Model/auditoriaModel.js[m
+[1mindex 61f15bd..f0af5ed 100644[m
+[1m--- a/Model/auditoriaModel.js[m
+[1m+++ b/Model/auditoriaModel.js[m
+[36m@@ -49,14 +49,15 @@[m [masync function historicoAluno(usuarioId, pagina = 1) {[m
+       [usuarioId],[m
+     ),[m
+     banco.query([m
+[31m-      "SELECT id, acertos, erros, nivel, modo, resultado, criada_em FROM partidas WHERE usuario_id = $1 ORDER BY criada_em DESC, id DESC LIMIT 20 OFFSET $2",[m
+[31m-      [usuarioId, (pagina - 1) * 20],[m
+[32m+[m[32m      "SELECT id, acertos, erros, nivel, modo, resultado, criada_em FROM partidas WHERE usuario_id = $1 ORDER BY criada_em DESC, id DESC LIMIT 5 OFFSET $2",[m
+[32m+[m[32m      [usuarioId, (pagina - 1) * 5],[m
+     ),[m
+   ]);[m
+   const resumo = totais.rows[0];[m
+   return {[m
+     pagina,[m
+     totalPartidas: Number(resumo.total_partidas || 0),[m
+[32m+[m[32m    temMais: pagina * 5 < Number(resumo.total_partidas || 0),[m
+     acertos: Number(resumo.acertos || 0),[m
+     erros: Number(resumo.erros || 0),[m
+     partidas: dados.rows.map([m
+[1mdiff --git a/Model/privacidade

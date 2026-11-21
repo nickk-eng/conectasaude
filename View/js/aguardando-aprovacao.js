@@ -3,20 +3,18 @@ const verificarAprovacao = document.querySelector("#verificar-aprovacao");
 let verificando = false;
 let saindo = false;
 
-async function consultarAprovacao() {
+async function consultarAprovacao(sessaoInicial) {
   if (verificando || saindo) return;
   verificando = true;
   verificarAprovacao.disabled = true;
   try {
-    const resposta = await apiFetch("/api/auth/eu");
-    if (saindo) return;
-    if (resposta.status === 401) {
-      removerToken();
-      window.location.replace("/");
-      return;
+    let dados = sessaoInicial;
+    if (!dados) {
+      const resposta = await apiFetch("/api/auth/eu");
+      if (saindo || resposta.status === 401) return;
+      if (!resposta.ok) throw new Error();
+      dados = await resposta.json();
     }
-    const dados = await resposta.json();
-    if (!resposta.ok) throw new Error();
     if (!dados.usuario.aguardandoAprovacao) {
       window.location.replace(dados.destino);
       return;
@@ -41,7 +39,7 @@ async function consultarAprovacao() {
   }
 }
 
-verificarAprovacao.addEventListener("click", consultarAprovacao);
+verificarAprovacao.addEventListener("click", () => consultarAprovacao());
 document.querySelector("#sair-espera").addEventListener("click", async () => {
   saindo = true;
   try {
@@ -51,10 +49,13 @@ document.querySelector("#sair-espera").addEventListener("click", async () => {
     window.location.replace("/");
   }
 });
-document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) consultarAprovacao();
+verificarSessaoPagina().then((sessao) => {
+  if (!sessao) return;
+  consultarAprovacao(sessao);
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden) consultarAprovacao();
+  });
+  setInterval(() => {
+    if (!document.hidden) consultarAprovacao();
+  }, 10000);
 });
-setInterval(() => {
-  if (!document.hidden) consultarAprovacao();
-}, 10000);
-consultarAprovacao();

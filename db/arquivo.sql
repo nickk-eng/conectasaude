@@ -327,7 +327,7 @@ VALUES
 
 (
     'No Brasil, o adolescente tem direito a ser atendido sozinho em uma unidade de saúde?',
-    '["Somente em clínicas particulares, no SUS é proibido", "Apenas se tiver autorização por escrito dos responsáveis", "Sim, desde que tenha maturidade para entender sua saúde e não corra risco de vida", "Não é obrigatória a presença dos pais até os 18 anos"]',
+    '["Somente em clínicas particulares, mas não no SUS", "Apenas se tiver autorização por escrito dos responsáveis", "Sim, desde que tenha maturidade para entender sua saúde e não corra risco de vida", "Não é obrigatória a presença dos pais até os 18 anos"]',
     2,
     'Médio',
     'aprovada',
@@ -381,7 +381,7 @@ VALUES
 
 (
     'Qual é a função do lubrificante à base de água no uso da camisinha?',
-    '["Aumentar as chances de a camisinha estourar", "Matar os espermatozoides e vírus", "Diminuir o atrito e o risco de rompimento do preservativo", "Nenhuma, serve apenas para conforto"]',
+    '["Aumentar as chances de a camisinha estourar", "Matar espermatozoides e vírus", "Diminuir o atrito e o risco de rompimento do preservativo", "Nenhuma. Serve apenas para dar conforto"]',
     2,
     'Fácil',
     'aprovada',
@@ -416,7 +416,7 @@ VALUES
 ),
 
 (
-    'Qual hepatite pode ser transmitida por contato com sangue contaminado e relação sexual?',
+    'Qual hepatite pode ser transmitida pelo contato com sangue contaminado e pela relação sexual?',
     '["Hepatite A", "Hepatite B", "Hepatite E"]',
     1,
     'Fácil',
@@ -471,7 +471,7 @@ VALUES
 
 (
     'Uma pessoa que já tomou a vacina contra HPV ainda precisa usar preservativo?',
-    '["Sim, porque a vacina não protege contra todas as IST", "Não precisa mais", "Apenas em algumas situações"]',
+    '["Sim, porque a vacina não protege contra todas as ISTs", "Não precisa mais", "Apenas em algumas situações"]',
     0,
     'Difícil',
     'aprovada',
@@ -497,7 +497,7 @@ VALUES
 ),
 
 (
-    'Uma pessoa que já teve sífilis pode pegar novamente?',
+    'Uma pessoa que já teve sífilis pode contrair a infecção novamente?',
     '["Não", "Sim, se tiver nova exposição", "Apenas depois de muitos anos"]',
     1,
     'Fácil',
@@ -506,7 +506,7 @@ VALUES
 ),
 
 (
-    'Qual hepatite pode ser transmitida por contato com sangue contaminado e relação sexual?',
+    'Qual hepatite pode ser transmitida pelo contato com sangue contaminado e pela relação sexual?',
     '["Hepatite A", "Hepatite B", "Hepatite E"]',
     1,
     'Fácil',

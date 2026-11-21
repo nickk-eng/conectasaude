@@ -5,12 +5,13 @@ const tipoUsuario = document.querySelector("#tipo-usuario");
 const tituloHome = document.querySelector("#titulo-home");
 const telaPerfil = document.querySelector("#tela-perfil");
 let usuarioAtual = null;
+configurarNavegacaoFerramentas("navegacao-professor");
 
 let nivelEscolhido = "";
 async function iniciarPagina() {
-  const resposta = await apiFetch("/api/auth/eu");
-  if (!resposta.ok) return (window.location.href = "/");
-  const { usuario } = await resposta.json();
+  const sessao = await verificarSessaoPagina();
+  if (!sessao) return;
+  const { usuario } = sessao;
   usuarioAtual = usuario;
   preencherPerfil(usuario);
   tipoUsuario.textContent = `Olá, ${usuario.nome || usuario.email}!`;
@@ -19,6 +20,7 @@ async function iniciarPagina() {
     areaProfessor.hidden = false;
     tituloHome.textContent = "Painel do professor";
     mostrarAlunos();
+    mostrarResumoDashboardProfessor();
     mostrarAvaliacoesDaTurma();
     mostrarIndicadoresIsts();
   } else if (usuario.perfil === "aluno") {
@@ -81,7 +83,7 @@ async function carregarHistorico(pagina = 1) {
     document.querySelector("#historico-taxa").textContent =
       `${totalQuestoes ? Math.round((historico.acertos / totalQuestoes) * 100) : 0}%`;
     document.querySelector("#historico-total").textContent =
-      `${historico.totalPartidas} partida(s) · ${totalQuestoes} questão(ões)`;
+      `${historico.totalPartidas} ${historico.totalPartidas === 1 ? "partida" : "partidas"} · ${totalQuestoes} ${totalQuestoes === 1 ? "questão" : "questões"}`;
     const corpo = document.querySelector("#partidas-historico");
     corpo.replaceChildren();
     historico.partidas.forEach((partida) => {
@@ -109,7 +111,7 @@ async function carregarHistorico(pagina = 1) {
       : "Você ainda não tem partidas concluídas.";
     document.querySelector("#historico-anterior").disabled = pagina <= 1;
     document.querySelector("#historico-proxima").disabled =
-      pagina * 20 >= historico.totalPartidas;
+      !historico.temMais;
     document.querySelector("#historico-pagina").textContent =
       `Página ${pagina}`;
     dados.hidden = false;
@@ -183,7 +185,7 @@ document
     }
   });
 
-const ALUNOS_POR_PAGINA = 10;
+const ALUNOS_POR_PAGINA = 5;
 let alunosProfessor = [];
 let paginaAlunosProfessor = 1;
 
@@ -202,6 +204,23 @@ async function mostrarAlunos() {
       erro.message || "Não foi possível conectar ao servidor.";
     document.querySelector("#sem-alunos").hidden = false;
     document.querySelector("#paginacao-alunos").hidden = true;
+  }
+}
+
+async function mostrarResumoDashboardProfessor() {
+  const totalTurmas = document.querySelector("#total-turmas");
+  const totalPartidas = document.querySelector("#total-partidas-prof");
+  try {
+    const resposta = await apiFetch("/api/professor/resumo");
+    if (!resposta.ok) throw new Error("resumo indisponível");
+    const { resumo } = await resposta.json();
+    totalTurmas.textContent = String(resumo.totalTurmas);
+    totalPartidas.textContent = String(resumo.totalPartidas);
+    document.querySelector("#total-alunos").textContent =
+      String(resumo.totalAlunos);
+  } catch {
+    totalTurmas.textContent = "—";
+    totalPartidas.textContent = "—";
   }
 }
 
@@ -324,14 +343,14 @@ async function mostrarEtapaAvaliacao() {
       passo: "Etapa 1 de 3",
       titulo: "Pré-teste",
       texto:
-        "Antes de jogar, responda algumas perguntas para descobrirmos o que você já sabe.",
+        "Antes de jogar, responda a algumas perguntas para descobrirmos o que você já sabe.",
       botao: "Fazer o pré-teste",
       link: "/avaliacao?tipo=pre",
     },
     jogar: {
       passo: "Etapa 2 de 3",
       titulo: "Hora de jogar",
-      texto: `Pré-teste concluído: ${formatarNota(etapa.pre)}. Jogue ${faltam} partida(s) para liberar o pós-teste.`,
+      texto: `Pré-teste concluído: ${formatarNota(etapa.pre)}. Jogue ${faltam} ${faltam === 1 ? "partida" : "partidas"} para liberar o pós-teste.`,
     },
     pos: {
       passo: "Etapa 3 de 3",
@@ -497,6 +516,7 @@ async function mostrarIndicadoresIsts() {
     });
     corpo.appendChild(linha);
   });
+  paginarTabela(corpo, "Páginas dos indicadores por tema");
 }
 
 function renderizarGraficoIsts(indicadores) {
@@ -732,6 +752,7 @@ document.querySelector("#relatorio-proxima").addEventListener("click", () => {
 document
   .querySelector("#abrir-relatorios")
   ?.addEventListener("click", async () => {
+    if (document.querySelector("#abrir-relatorios").getAttribute("aria-expanded") !== "true") return;
     const secao = document.querySelector("#relatorios-professor");
     secao.hidden = false;
     secao.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -797,6 +818,7 @@ const mensagemProfessor = document.querySelector("#mensagem-professor");
 document
   .querySelector("#abrir-criar-pergunta")
   ?.addEventListener("click", () => {
+    if (document.querySelector("#abrir-criar-pergunta").getAttribute("aria-expanded") !== "true") return;
     formularioPergunta.hidden = false;
     mensagemProfessor.textContent = "";
     formularioPergunta.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -880,8 +902,8 @@ document.querySelector("#sair").addEventListener("click", async () => {
     await apiFetch("/api/auth/sair", { method: "POST" });
   } finally {
     removerToken();
+    window.location.replace("/");
   }
-  window.location.href = "/";
 });
 iniciarPagina();
 

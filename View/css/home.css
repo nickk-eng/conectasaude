@@ -18,6 +18,71 @@
   margin: auto;
 }
 
+.titulo-ferramentas {
+  margin: 32px 0 14px;
+}
+
+.grade-ferramentas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.grade-ferramentas .card {
+  width: 100%;
+  min-height: 132px;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.grade-ferramentas .card.ativo {
+  border-color: var(--fundo);
+  background: #19364a;
+  box-shadow: 0 0 0 1px rgb(45 212 168 / 30%), 0 10px 24px rgb(0 0 0 / 18%);
+  transform: translateY(-2px);
+}
+
+.grade-ferramentas .card:focus-visible {
+  outline: 2px solid var(--fundo);
+  outline-offset: 3px;
+}
+
+.painel-ferramenta {
+  margin-top: 14px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.painel-ferramenta.painel-aberto {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.grade-indicadores-prof {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr));
+  gap: 12px;
+}
+
+.grade-indicadores-prof .card {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+}
+
+#painel-prof-turmas > p {
+  margin-bottom: 16px;
+  color: var(--padrao);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grade-ferramentas .card,
+  .painel-ferramenta {
+    transition: none;
+  }
+}
+
 .cabecalho-home,
 .marca,
 .cards {

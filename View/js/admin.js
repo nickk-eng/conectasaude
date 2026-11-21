@@ -1,9 +1,13 @@
 const lista = document.querySelector("#lista-perguntas");
 const mensagem = document.querySelector("#mensagem-admin");
 const corpoAuditoria = document.querySelector("#corpo-auditoria");
+configurarNavegacaoFerramentas("navegacao-admin");
 let adminAtualId = null;
 let paginaPerguntas = 0;
 let perguntasAtuais = [];
+let consultaPerguntas = 0;
+let ultimaConsultaAplicada = 0;
+let versaoPerguntas;
 let cursoresAuditoria = [null];
 let paginaAuditoria = 0;
 const categoriasIst = {
@@ -110,9 +114,20 @@ function formatarData(data) {
 }
 
 async function carregarPerguntas() {
-  const resposta = await apiFetch("/api/admin/perguntas");
-  if (!resposta.ok) return (window.location.href = "/");
-  const { perguntas } = await resposta.json();
+  const consulta = ++consultaPerguntas;
+  let perguntas;
+  try {
+    const resposta = await apiFetch("/api/admin/perguntas");
+    if (!resposta.ok) return;
+    ({ perguntas } = await resposta.json());
+  } catch {
+    return;
+  }
+  if (consulta < ultimaConsultaAplicada) return;
+  ultimaConsultaAplicada = consulta;
+  const versao = JSON.stringify(perguntas);
+  if (versao === versaoPerguntas) return;
+  versaoPerguntas = versao;
   atualizarResumoPerguntas(perguntas);
   document.querySelector("#sem-perguntas").hidden = perguntas.length > 0;
   perguntasAtuais = perguntas;
@@ -164,6 +179,8 @@ function atualizarResumoPerguntas(perguntas) {
       porCategoria[pergunta.categoria_ist] += 1;
   });
   document.querySelector("#pendentes-admin").textContent = porStatus.pendente;
+  document.querySelector("#perguntas-aprovadas-admin").textContent =
+    porStatus.aprovada;
   renderizarBarrasAdmin(
     "#grafico-status-perguntas",
     Object.entries(porStatus).map(([chave, total]) => ({
@@ -233,12 +250,13 @@ async function carregarSolicitacoesPrivacidade() {
       <label>Resposta ao titular<textarea name="resposta" maxlength="2000" rows="3">${escapar(item.resposta || "")}</textarea></label>
       <label>Providência realizada<textarea name="providencia" maxlength="2000" rows="3" placeholder="Para concluir, descreva a ação realizada com pelo menos 20 caracteres.">${escapar(item.providencia || "")}</textarea></label>
       <label>Referência de comprovação<input name="comprovante" maxlength="500" placeholder="Protocolo ou referência verificável, sem senhas ou dados de terceiros." value="${escapar(item.comprovante || "")}"></label>
-      <label><input type="checkbox" name="confirmouAtendimento">Confirmo que conferi o atendimento e sua comprovação. Em eliminação, autorizo a execução da exclusão pelo sistema.</label>
-      ${item.tipo === "eliminacao" ? "<p>Concluir executa a exclusão definitiva da conta e seus dados vinculados no banco ativo. O recibo permanece sem identificação do titular.</p>" : ""}
+      <label><input type="checkbox" name="confirmouAtendimento">Confirmo que conferi o atendimento e sua comprovação.${item.tipo === "eliminacao" ? " Autorizo a execução da exclusão pelo sistema." : ""}</label>
+      ${item.tipo === "eliminacao" ? "<p>Concluir este pedido exclui definitivamente a conta e os dados vinculados do banco ativo. O recibo permanece sem identificação do titular.</p>" : ""}
       <button type="submit">Salvar atendimento</button></form>`;
       return `<tr><td>${escapar(formatarData(item.criado_em))}</td><td>${escapar(item.solicitante)}</td><td>${escapar(item.tipo)}</td><td>${escapar(item.mensagem || "—")}</td><td>${finalizado ? registro : formulario}</td></tr>`;
     })
     .join("");
+  paginarTabela(corpo, "Páginas das solicitações de privacidade");
 }
 async function carregarAuditoria() {
   const cursor = cursoresAuditoria[paginaAuditoria];
@@ -264,8 +282,19 @@ async function carregarAuditoria() {
   document.querySelector("#sem-auditoria").hidden = logs.length > 0;
   corpoAuditoria.innerHTML = logs
     .map((log) => {
-      const usuario = log.usuario_email || "Visitante";
-      return `<tr><td>${escapar(formatarData(log.criado_em))}</td><td>${escapar(usuario)}</td><td>${escapar(log.acao)}</td><td>${escapar(log.recurso)}</td><td>${escapar(log.metodo)} ${escapar(log.rota)}</td></tr>`;
+      const detalhes = log.detalhes || {};
+      const usuario = detalhes.solicitanteNome
+        ? `${detalhes.solicitanteNome} (${detalhes.solicitantePerfil || log.perfil || ""})`
+        : log.usuario_email || "Visitante";
+      const acoes = {
+        REVELAR_EMAIL_USUARIO: "Revelou e-mail de usuário",
+        REVELAR_EMAIL_ALUNO: "Revelou e-mail de aluno",
+        REVELAR_EMAIL_ALUNO_NEGADO: "Tentativa negada de revelar e-mail de aluno",
+      };
+      const alvo = detalhes.alvoNome
+        ? `${detalhes.alvoNome} · ${detalhes.alvoEmail || "E-mail mascarado"}`
+        : "—";
+      return `<tr><td>${escapar(formatarData(log.criado_em))}</td><td>${escapar(usuario)}</td><td>${escapar(alvo)}</td><td>${escapar(acoes[log.acao] || log.acao)}</td><td>${escapar(log.recurso)}</td><td>${escapar(log.metodo)} ${escapar(log.rota)}</td></tr>`;
     })
     .join("");
 }
@@ -280,6 +309,9 @@ lista.addEventListener("click", async (evento) => {
     );
     if (!pergunta) return;
     const formulario = document.querySelector("#form-pergunta-admin");
+    document
+      .querySelector('[data-painel-target="painel-admin-perguntas"]')
+      .click();
     formulario.dataset.id = pergunta.id;
     formulario.elements.texto.value = pergunta.texto;
     formulario.elements.alternativas.value = (
@@ -394,6 +426,8 @@ async function carregarUsuarios() {
   const { usuarios } = await resposta.json();
   document.querySelector("#usuarios-ativos-admin").textContent =
     usuarios.filter((usuario) => usuario.ativo).length;
+  document.querySelector("#cadastros-pendentes-admin").textContent =
+    usuarios.filter((usuario) => usuario.ativo && usuario.status_professor === "pendente").length;
   const corpo = document.querySelector("#corpo-usuarios");
   corpo.replaceChildren();
   document.querySelector("#sem-usuarios").hidden = usuarios.length > 0;
@@ -409,9 +443,60 @@ async function carregarUsuarios() {
       usuario.perfil === "aluno" && situacoesProfessor[usuario.status_professor]
         ? situacoesProfessor[usuario.status_professor]
         : usuario.perfil;
+    [usuario.nome || "—"].forEach((valor) => {
+      const celula = document.createElement("td");
+      celula.textContent = valor;
+      linha.appendChild(celula);
+    });
+    const celulaEmail = document.createElement("td");
+    const emailTexto = document.createElement("span");
+    emailTexto.textContent = usuario.email || "—";
+    const revelar = document.createElement("button");
+    revelar.type = "button";
+    revelar.className = "botao-revelar-email";
+    revelar.textContent = "Revelar";
+    revelar.setAttribute("aria-label", `Revelar e-mail de ${usuario.nome || "usuário"}`);
+    let temporizador;
+    const ocultar = () => {
+      window.clearTimeout(temporizador);
+      emailTexto.textContent = usuario.email || "—";
+      revelar.textContent = "Revelar";
+      revelar.dataset.revelado = "false";
+    };
+    revelar.addEventListener("click", async () => {
+      if (revelar.dataset.revelado === "true") {
+        ocultar();
+        return;
+      }
+      revelar.disabled = true;
+      try {
+        const resposta = await apiFetch(
+          `/api/admin/usuarios/${encodeURIComponent(usuario.id)}/revelar-email`,
+          { method: "POST" },
+        );
+        const dados = await resposta.json();
+        if (!resposta.ok || typeof dados.email !== "string") {
+          revelar.title = dados.mensagem || "Não foi possível revelar o e-mail.";
+          return;
+        }
+        let emailAberto = dados.email;
+        emailTexto.textContent = emailAberto;
+        emailAberto = "";
+        revelar.textContent = "Ocultar";
+        revelar.dataset.revelado = "true";
+        temporizador = window.setTimeout(ocultar, 30000);
+      } catch {
+        revelar.title = "Não foi possível conectar ao servidor.";
+      } finally {
+        revelar.disabled = false;
+      }
+    });
+    const conteudoEmail = document.createElement("div");
+    conteudoEmail.className = "email-com-revelacao";
+    conteudoEmail.append(revelar, emailTexto);
+    celulaEmail.appendChild(conteudoEmail);
+    linha.appendChild(celulaEmail);
     [
-      usuario.nome || "—",
-      usuario.email,
       perfilExibido,
       usuario.turma || "—",
       usuario.ativo ? "Ativo" : "Desativado",
@@ -458,6 +543,16 @@ async function carregarUsuarios() {
     linha.appendChild(celula);
     corpo.appendChild(linha);
   });
+  paginarTabela(corpo, "Páginas dos usuários");
+}
+
+async function carregarResumoAdmin() {
+  const resposta = await apiFetch("/api/admin/resumo");
+  if (!resposta.ok) return;
+  const { resumo } = await resposta.json();
+  document.querySelector("#turmas-admin").textContent = resumo.turmas;
+  document.querySelector("#escolas-admin").textContent = resumo.escolas;
+  document.querySelector("#partidas-admin").textContent = resumo.partidas;
 }
 
 document
@@ -502,6 +597,20 @@ document
 document
   .querySelector("#atualizar-usuarios")
   .addEventListener("click", carregarUsuarios);
+document
+  .querySelector("#abrir-usuarios-aprovacoes")
+  .addEventListener("click", () => {
+    document
+      .querySelector('[data-painel-target="painel-admin-usuarios"]')
+      .click();
+  });
+document
+  .querySelector("#abrir-lista-perguntas-admin")
+  .addEventListener("click", () => {
+    document
+      .querySelector('[data-painel-target="painel-admin-aprovacoes"]')
+      .click();
+  });
 
 document.querySelector("#atualizar-auditoria").addEventListener("click", () => {
   paginaAuditoria = 0;
@@ -516,17 +625,25 @@ document.querySelector("#sair").addEventListener("click", async () => {
     await apiFetch("/api/auth/sair", { method: "POST" });
   } finally {
     removerToken();
+    window.location.replace("/");
   }
-  window.location.href = "/";
 });
+function atualizarPerguntasVisiveis() {
+  if (!document.hidden) carregarPerguntas();
+}
+
 async function iniciarAdmin() {
-  const resposta = await apiFetch("/api/auth/eu");
-  if (!resposta.ok) return (window.location.href = "/");
-  const { usuario } = await resposta.json();
-  if (usuario.perfil !== "admin") return (window.location.href = "/home");
+  const sessao = await verificarSessaoPagina();
+  if (!sessao) return;
+  const { usuario } = sessao;
   adminAtualId = usuario.id;
   carregarPerguntas();
+  document.querySelector("#atualizar-perguntas").addEventListener("click", carregarPerguntas);
+  document.addEventListener("visibilitychange", atualizarPerguntasVisiveis);
+  window.addEventListener("focus", atualizarPerguntasVisiveis);
+  window.setInterval(atualizarPerguntasVisiveis, 10000);
   carregarUsuarios();
+  carregarResumoAdmin();
   carregarAuditoria();
   carregarSolicitacoesPrivacidade();
 }

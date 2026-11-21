@@ -35,7 +35,7 @@ async function atualizarPerfil(req, res) {
     informouNome: true,
     informouTurma: Boolean(turma),
   });
-  res.json({ usuario: usuarioModel.paraPublico(usuario) });
+  res.json({ usuario: await usuarioModel.paraProprio(usuario, req.usuario.id) });
 }
 
 async function atualizarPerfilAluno(req, res) {
@@ -66,7 +66,7 @@ async function atualizarPerfilAluno(req, res) {
     turma,
     informouNome: Boolean(nome),
   });
-  res.json({ usuario: usuarioModel.paraPublico(usuario) });
+  res.json({ usuario: await usuarioModel.paraProprio(usuario, req.usuario.id) });
 }
 
 async function historico(req, res) {

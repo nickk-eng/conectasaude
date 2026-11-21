@@ -7,6 +7,7 @@ const {
 const banco = require("../Config/banco");
 const senhaService = require("./senhaService");
 const emailService = require("./emailService");
+const emailUtil = require("../Utils/mascararEmail");
 
 async function solicitar(email) {
   const cliente = await banco.connect();
@@ -14,8 +15,8 @@ async function solicitar(email) {
   try {
     await cliente.query("BEGIN");
     const { rows } = await cliente.query(
-      "SELECT id FROM usuarios WHERE email = $1 AND ativo = TRUE FOR UPDATE",
-      [email],
+      "SELECT id, email_criptografado FROM usuarios WHERE email_hash = $1 AND ativo = TRUE FOR UPDATE",
+      [emailUtil.gerarHashEmail(email)],
     );
     if (rows[0]) {
       const usuarioId = rows[0].id;
@@ -34,7 +35,7 @@ async function solicitar(email) {
           "INSERT INTO recuperacoes_senha (id, usuario_id, codigo_hash, expira_em) VALUES ($1, $2, $3, NOW() + INTERVAL '10 minutes')",
           [id, usuarioId, await senhaService.gerarHash(codigo)],
         );
-        envio = { id, codigo };
+        envio = { id, codigo, email: rows[0].email_criptografado };
       }
     }
     await cliente.query("COMMIT");
@@ -46,7 +47,7 @@ async function solicitar(email) {
   }
   if (envio) {
     try {
-      await emailService.enviarCodigo(email, envio.codigo);
+      await emailService.enviarCodigo(envio.email, envio.codigo);
     } catch (erro) {
       await banco.query("DELETE FROM recuperacoes_senha WHERE id = $1", [
         envio.id,
@@ -64,8 +65,8 @@ async function verificarCodigo(email, codigo) {
   try {
     await cliente.query("BEGIN");
     const usuario = await cliente.query(
-      "SELECT id, email, perfil FROM usuarios WHERE email = $1 AND ativo = TRUE FOR UPDATE",
-      [email],
+      "SELECT id, email, perfil FROM usuarios WHERE email_hash = $1 AND ativo = TRUE FOR UPDATE",
+      [emailUtil.gerarHashEmail(email)],
     );
     const conta = usuario.rows[0];
     const resultado = conta

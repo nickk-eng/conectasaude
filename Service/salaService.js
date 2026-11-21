@@ -136,7 +136,7 @@ function criarServicoSalas({
       limpar();
       const codigo = String(codigoEscolhido || "").trim();
       if (!/^[0-9]{1,8}$/.test(codigo))
-        falhar("Escolha um código com 1 a 8 números.");
+        falhar("Escolha um código com 1 a 8 dígitos.");
       if (
         salas.has(codigo) &&
         !(salas.get(codigo).status === "finalizada" && salas.get(codigo).salva)

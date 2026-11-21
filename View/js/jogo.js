@@ -80,12 +80,9 @@ document.querySelector("#categoria-ists-chip").textContent = categoriaIst
 async function carregarPerfilInicial() {
   const status = document.querySelector("#status-perfil-inicio");
   try {
-    const resposta = await apiFetch("/api/auth/eu");
-    if (!resposta.ok)
-      throw new Error(
-        "Não foi possível carregar seu perfil. Recarregue a página.",
-      );
-    const { usuario } = await resposta.json();
+    const sessao = await verificarSessaoPagina();
+    if (!sessao) return;
+    const { usuario } = sessao;
     const campoAno = document.querySelector("#ano");
     campoAno.value = usuario.turma || "";
     campoAno.disabled = Boolean(campoAno.value);
@@ -117,7 +114,7 @@ document
     document.querySelector("#inicio").classList.add("escondido");
     document.querySelector("#partida").classList.remove("escondido");
     document.querySelector("#vez").textContent =
-      "Responda a pergunta para começar a jogar.";
+      "Responda à pergunta para começar a jogar.";
     try {
       await carregarPerguntasAprovadas();
       if (!perguntas.length) {
@@ -170,7 +167,7 @@ function mostrarPergunta() {
 }
 
 function mostrarAvisoSemPerguntas(
-  mensagem = `Ainda não há perguntas aprovadas ${nivel}${categoriaIst ? ` no tema ${rotulosCategoriaIst[categoriaIst] || "selecionado"}` : ""}.`,
+  mensagem = `Ainda não há perguntas aprovadas no nível ${nivel}${categoriaIst ? ` no tema ${rotulosCategoriaIst[categoriaIst] || "selecionado"}` : ""}.`,
 ) {
   clearInterval(tempo);
   document.querySelector("#pergunta").textContent = mensagem;
@@ -324,10 +321,9 @@ function atualizarTabuleiro() {
 function verificarFim() {
   const vitoria = verificarVencedor(tabuleiro);
   if (vitoria) {
+    const casas = document.querySelectorAll(".tabuleiro button");
     vitoria.linha.forEach((indice) => {
-      document
-        .querySelectorAll(".tabuleiro button")
-        [indice].classList.add("vencedora");
+      casas[indice].classList.add("vencedora");
     });
 
     finalizar("Jogador " + vitoria.vencedor.toUpperCase() + " venceu!");
@@ -434,7 +430,7 @@ function finalizar(titulo) {
   document.querySelector("#fim").classList.remove("escondido");
   document.querySelector("#titulo-final").textContent = titulo;
   document.querySelector("#texto-final").textContent =
-    `Você acertou ${acertos} pergunta(s) e errou ${erros}.`;
+    `Você acertou ${acertos} ${acertos === 1 ? "pergunta" : "perguntas"} e errou ${erros}.`;
   registrarFimDeJogo(titulo);
 }
 

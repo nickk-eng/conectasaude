@@ -36,6 +36,13 @@ router.get(
   permitir("professor", "admin"),
   professor.listarAlunos,
 );
+router.get("/resumo", autenticar, permitir("professor"), professor.resumo);
+router.post(
+  "/alunos/:id/revelar-email",
+  autenticar,
+  permitir("professor"),
+  professor.revelarEmailAluno,
+);
 router.put(
   "/alunos/:id/responsaveis",
   autenticar,

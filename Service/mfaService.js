@@ -91,7 +91,7 @@ async function montarRespostaDesafio(usuario, desafio) {
     resposta.qrCode = await QRCode.toDataURL(uri, { width: 220, margin: 1 });
     resposta.chaveManual = segredo;
     resposta.mensagem =
-      "Escaneie o QR Code no seu aplicativo autenticador e informe o código gerado.";
+      "Escaneie o código QR com o aplicativo autenticador e informe o código gerado.";
   } else {
     resposta.mensagem =
       "Abra seu aplicativo autenticador e informe o código de 6 dígitos.";
@@ -122,7 +122,7 @@ async function criarDesafioEmail(usuario) {
     usuario.id,
     id,
     hashCodigoEmail(id, codigo),
-    () => emailService.enviarCodigo(usuario.email, codigo, "login"),
+    () => emailService.enviarCodigo(usuario.email_criptografado, codigo, "login"),
   );
 }
 

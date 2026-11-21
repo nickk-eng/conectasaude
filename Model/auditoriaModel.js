@@ -1,17 +1,27 @@
 const banco = require("../Config/banco");
+const { mascararEmail } = require("../Utils/mascararEmail");
+
+function mascararDetalhes(valor, chave = "") {
+  if (Array.isArray(valor)) return valor.map((item) => mascararDetalhes(item, chave));
+  if (valor && typeof valor === "object")
+    return Object.fromEntries(Object.entries(valor).map(([nome, item]) => [nome, mascararDetalhes(item, nome)]));
+  if (typeof valor !== "string") return valor;
+  if (/email/i.test(chave)) return mascararEmail(valor);
+  return valor.replace(/[^\s<>"']+@[^\s<>"']+\.[^\s<>"']+/gi, mascararEmail);
+}
 
 async function registrar(d) {
   await banco.query(
     `INSERT INTO auditoria_acessos
-      (usuario_id, usuario_email, perfil, acao, recurso, detalhes, metodo, rota, ip, user_agent)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      (usuario_id, usuario_email, perfil, acao, recurso, detalhes, metodo, rota, ip, user_agent, criado_em)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, CURRENT_TIMESTAMP)`,
     [
       d.usuarioId,
-      d.usuarioEmail,
+      mascararEmail(d.usuarioEmail),
       d.perfil,
       d.acao,
       d.recurso,
-      JSON.stringify(d.detalhes || {}),
+      JSON.stringify(mascararDetalhes(d.detalhes || {})),
       d.metodo,
       d.rota,
       d.ip,
@@ -39,14 +49,15 @@ async function historicoAluno(usuarioId, pagina = 1) {
       [usuarioId],
     ),
     banco.query(
-      "SELECT id, acertos, erros, nivel, modo, resultado, criada_em FROM partidas WHERE usuario_id = $1 ORDER BY criada_em DESC, id DESC LIMIT 20 OFFSET $2",
-      [usuarioId, (pagina - 1) * 20],
+      "SELECT id, acertos, erros, nivel, modo, resultado, criada_em FROM partidas WHERE usuario_id = $1 ORDER BY criada_em DESC, id DESC LIMIT 5 OFFSET $2",
+      [usuarioId, (pagina - 1) * 5],
     ),
   ]);
   const resumo = totais.rows[0];
   return {
     pagina,
     totalPartidas: Number(resumo.total_partidas || 0),
+    temMais: pagina * 5 < Number(resumo.total_partidas || 0),
     acertos: Number(resumo.acertos || 0),
     erros: Number(resumo.erros || 0),
     partidas: dados.rows.map(

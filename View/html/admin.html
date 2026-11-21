@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/admin.css" />
   </head>
 
-  <body class="pagina-admin">
+  <body data-perfis="admin" class="pagina-admin">
     <main class="admin">
       <header class="cabecalho-admin">
         <div>
@@ -17,11 +17,16 @@
         </div>
         <button id="sair" class="botao-sair" type="button">Sair</button>
       </header>
-      <section class="introducao">
-        <h2>Questões enviadas pelos professores</h2>
-        <p>Revise o conteúdo antes de disponibilizá-lo aos alunos.</p>
-      </section>
-      <p id="mensagem-admin" class="mensagem" role="status"></p>
+      <h2 class="titulo-ferramentas">Ferramentas do administrador</h2>
+      <div id="navegacao-admin" class="grade-ferramentas" role="group" aria-label="Ferramentas do administrador">
+        <button class="card ferramenta ativo" type="button" data-painel-target="painel-admin-dashboard" aria-controls="painel-admin-dashboard" aria-expanded="true"><span>Visão geral</span><h3>Dashboard</h3><p>Métricas de usuários, perguntas, turmas e partidas.</p></button>
+        <button class="card ferramenta" type="button" data-painel-target="painel-admin-aprovacoes" aria-controls="painel-admin-aprovacoes" aria-expanded="false"><span>Revisão</span><h3>Aprovações pendentes</h3><p>Revise perguntas enviadas pelos professores.</p></button>
+        <button class="card ferramenta" type="button" data-painel-target="painel-admin-perguntas" aria-controls="painel-admin-perguntas" aria-expanded="false"><span>Conteúdo</span><h3>Gerenciar perguntas</h3><p>Crie, edite e remova questões do jogo.</p></button>
+        <button class="card ferramenta" type="button" data-painel-target="painel-admin-usuarios" aria-controls="painel-admin-usuarios" aria-expanded="false"><span>Contas</span><h3>Gerenciar usuários</h3><p>Consulte e atualize contas e permissões.</p></button>
+        <button class="card ferramenta" type="button" data-painel-target="painel-admin-privacidade" aria-controls="painel-admin-privacidade" aria-expanded="false"><span>LGPD</span><h3>Solicitações de privacidade</h3><p>Atenda pedidos de acesso e outros direitos.</p></button>
+        <button class="card ferramenta" type="button" data-painel-target="painel-admin-auditoria" aria-controls="painel-admin-auditoria" aria-expanded="false"><span>Segurança</span><h3>Logs de auditoria</h3><p>Consulte atividades e revelações de e-mail.</p></button>
+      </div>
+      <section id="painel-admin-dashboard" class="painel-ferramenta painel-aberto" aria-labelledby="titulo-resumo-admin">
       <section class="resumo-admin" aria-labelledby="titulo-resumo-admin">
         <h2 id="titulo-resumo-admin">Visão geral</h2>
         <div class="indicadores-admin">
@@ -36,6 +41,23 @@
           <article class="indicador-admin">
             <span>Usuários ativos</span
             ><strong id="usuarios-ativos-admin">0</strong>
+          </article>
+          <article class="indicador-admin">
+            <span>Solicitações de professor</span
+            ><strong id="cadastros-pendentes-admin">0</strong>
+          </article>
+          <article class="indicador-admin">
+            <span>Perguntas aprovadas</span
+            ><strong id="perguntas-aprovadas-admin">0</strong>
+          </article>
+          <article class="indicador-admin">
+            <span>Turmas</span><strong id="turmas-admin">—</strong>
+          </article>
+          <article class="indicador-admin">
+            <span>Escolas</span><strong id="escolas-admin">—</strong>
+          </article>
+          <article class="indicador-admin">
+            <span>Partidas</span><strong id="partidas-admin">—</strong>
           </article>
         </div>
         <div class="graficos-admin">
@@ -62,6 +84,15 @@
           </section>
         </div>
       </section>
+      </section>
+      <section id="painel-admin-aprovacoes" class="painel-ferramenta" hidden aria-labelledby="titulo-aprovacoes-admin">
+      <section class="introducao">
+        <h2 id="titulo-aprovacoes-admin">Aprovações pendentes</h2>
+        <p>Revise as perguntas enviadas pelos professores antes de disponibilizá-las aos alunos.</p>
+      </section>
+      <p>Solicitações de acesso ao perfil de professor podem ser revisadas na gestão de usuários.</p>
+      <button id="abrir-usuarios-aprovacoes" class="botao-painel-admin" type="button">Ver solicitações de professor</button>
+      <button id="atualizar-perguntas" class="botao-painel-admin" type="button">Atualizar perguntas</button>
       <div id="lista-perguntas" class="lista-perguntas"></div>
       <nav
         id="paginas-perguntas"
@@ -69,6 +100,8 @@
         aria-label="Páginas de perguntas"
       ></nav>
       <p id="sem-perguntas" hidden>Nenhuma pergunta foi enviada até agora.</p>
+      </section>
+      <section id="painel-admin-perguntas" class="painel-ferramenta" hidden aria-labelledby="titulo-gestao-perguntas">
       <section class="auditoria" aria-labelledby="titulo-gestao-perguntas">
         <div class="cabecalho-secao">
           <div>
@@ -77,6 +110,8 @@
           </div>
           <button id="nova-pergunta-admin" type="button">Nova pergunta</button>
         </div>
+        <p>Para editar ou excluir uma pergunta existente, abra a lista de perguntas e selecione a ação desejada.</p>
+        <button id="abrir-lista-perguntas-admin" class="botao-painel-admin" type="button">Ver perguntas existentes</button>
         <form id="form-pergunta-admin" class="formulario-pergunta" hidden>
           <h3 id="titulo-form-pergunta-admin">Nova pergunta</h3>
           <label
@@ -141,6 +176,8 @@
         </form>
         <p id="mensagem-pergunta-admin" class="mensagem" role="status"></p>
       </section>
+      </section>
+      <section id="painel-admin-usuarios" class="painel-ferramenta" hidden aria-labelledby="titulo-usuarios">
       <section class="auditoria" aria-labelledby="titulo-usuarios">
         <div class="cabecalho-secao">
           <div>
@@ -170,6 +207,9 @@
         <p id="sem-usuarios" hidden>Nenhum usuário encontrado.</p>
         <p id="mensagem-usuarios" class="mensagem" role="status"></p>
       </section>
+      </section>
+      <section id="painel-admin-privacidade" class="painel-ferramenta" hidden aria-labelledby="titulo-solicitacoes">
+      <p id="mensagem-admin" class="mensagem" role="status"></p>
       <section class="auditoria" aria-labelledby="titulo-solicitacoes">
         <div class="cabecalho-secao">
           <div>
@@ -194,6 +234,8 @@
         </div>
         <p id="sem-solicitacoes" hidden>Nenhuma solicitação recebida.</p>
       </section>
+      </section>
+      <section id="painel-admin-auditoria" class="painel-ferramenta" hidden aria-labelledby="titulo-auditoria">
       <section class="auditoria" aria-labelledby="titulo-auditoria">
         <div class="cabecalho-secao">
           <div>
@@ -207,7 +249,8 @@
             <thead>
               <tr>
                 <th>Data</th>
-                <th>Usuário</th>
+                <th>Acessado por</th>
+                <th>Usuário-alvo</th>
                 <th>Ação</th>
                 <th>Recurso</th>
                 <th>Rota</th>
@@ -225,8 +268,11 @@
           Nenhum registro de auditoria encontrado.
         </p>
       </section>
+      </section>
     </main>
     <script src="/js/auth.js"></script>
+    <script src="/js/navegacaoFerramentas.js"></script>
+    <script src="/js/paginarTabela.js"></script>
     <script src="/js/admin.js"></script>
     <footer class="links-legais" aria-label="Informações legais">
       <a href="/termos">Termos de Uso</a

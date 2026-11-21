@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const { descriptografarEmail } = require("../Utils/mascararEmail");
 
 let transporte;
 function obterTransporte() {
@@ -31,9 +32,10 @@ function obterTransporte() {
 
 async function enviarCodigo(email, codigo, finalidade = "recuperacao") {
   const login = finalidade === "login";
+  const destinatario = descriptografarEmail(email);
   const resultado = await obterTransporte().sendMail({
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
-    to: email,
+    to: destinatario,
     subject: login
       ? "ConectaSaúde — Código para entrar"
       : "ConectaSaúde — Código para recuperar sua senha",

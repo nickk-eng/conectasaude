@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/home.css" />
   </head>
 
-  <body class="pagina-home">
+  <body data-perfis="aluno professor" class="pagina-home">
     <main class="home">
       <header class="cabecalho-home">
         <div class="marca">
@@ -339,148 +339,62 @@
       </section>
 
       <section id="area-professor" hidden>
-        <a class="botao-gerenciar-turma" href="/minha-turma"
-          >Gerenciar minhas turmas</a
-        >
-        <h2>Resumo das minhas turmas</h2>
-        <div class="cards tres-colunas">
-          <div class="card numero">
-            <span>Alunos das minhas turmas</span
-            ><strong id="total-alunos">0</strong>
+        <h2 class="titulo-ferramentas">Ferramentas do professor</h2>
+        <div id="navegacao-professor" class="grade-ferramentas" role="group" aria-label="Ferramentas do professor">
+          <button class="card ferramenta ativo" type="button" data-painel-target="painel-prof-dashboard" aria-controls="painel-prof-dashboard" aria-expanded="true"><span>Início</span><h3>Dashboard</h3><p>Resumo das turmas, alunos e desempenho.</p></button>
+          <button class="card ferramenta" type="button" data-painel-target="painel-prof-turmas" aria-controls="painel-prof-turmas" aria-expanded="false"><span>Organização</span><h3>Minhas turmas e alunos</h3><p>Gerencie turmas, escolas e vínculos.</p></button>
+          <button class="card ferramenta" type="button" data-painel-target="painel-prof-alunos" aria-controls="painel-prof-alunos" aria-expanded="false"><span>Turma</span><h3>Alunos e responsáveis</h3><p>Consulte alunos vinculados e atualize responsáveis.</p></button>
+          <button class="card ferramenta" type="button" data-painel-target="painel-prof-indicadores" aria-controls="painel-prof-indicadores" aria-expanded="false"><span>Conteúdo</span><h3>Indicadores de ISTs</h3><p>Acompanhe perguntas por tema e revisão.</p></button>
+          <button class="card ferramenta" type="button" data-painel-target="painel-prof-avaliacoes" aria-controls="painel-prof-avaliacoes" aria-expanded="false"><span>Aprendizagem</span><h3>Avaliação diagnóstica</h3><p>Compare pré-teste, pós-teste e evolução.</p></button>
+          <button id="abrir-relatorios" class="card ferramenta" type="button" data-painel-target="painel-prof-relatorios" aria-controls="painel-prof-relatorios" aria-expanded="false"><span>Desempenho</span><h3>Ver relatórios</h3><p>Acompanhe acertos, erros e partidas.</p></button>
+          <button id="abrir-criar-pergunta" class="card ferramenta" type="button" data-painel-target="painel-prof-pergunta" aria-controls="painel-prof-pergunta" aria-expanded="false"><span>Contribuição</span><h3>Criar pergunta</h3><p>Envie perguntas para aprovação.</p></button>
+        </div>
+
+        <section id="painel-prof-dashboard" class="painel-ferramenta painel-aberto" aria-labelledby="titulo-dashboard-prof">
+          <h2 id="titulo-dashboard-prof">Resumo das minhas turmas</h2>
+          <div class="grade-indicadores-prof">
+            <div class="card numero"><span>Turmas</span><strong id="total-turmas">0</strong></div>
+            <div class="card numero"><span>Alunos das minhas turmas</span><strong id="total-alunos">0</strong></div>
+            <div class="card numero"><span>Partidas concluídas</span><strong id="total-partidas-prof">—</strong></div>
+            <div class="card numero"><span>Média no pré-teste</span><strong id="media-pre">—</strong></div>
+            <div class="card numero"><span>Média no pós-teste</span><strong id="media-pos" class="verde">—</strong></div>
           </div>
-          <div class="card numero">
-            <span>Média no pré-teste</span><strong id="media-pre">—</strong>
+          <h2>Desempenho da turma</h2>
+          <p>Comparação das médias dos alunos que já fizeram cada avaliação.</p>
+          <div id="grafico-avaliacoes" class="painel-grafico" role="group" aria-label="Gráfico de comparação entre as médias do pré-teste e do pós-teste"><p class="grafico-vazio">Carregando dados das avaliações…</p></div>
+        </section>
+
+        <section id="painel-prof-turmas" class="painel-ferramenta" hidden aria-labelledby="titulo-turmas-prof">
+          <h2 id="titulo-turmas-prof">Minhas turmas e alunos</h2>
+          <p>Crie turmas por escola e gerencie os alunos vinculados.</p>
+          <a class="botao-gerenciar-turma" href="/minha-turma">Gerenciar minhas turmas</a>
+        </section>
+
+        <section id="painel-prof-alunos" class="painel-ferramenta" hidden aria-labelledby="titulo-alunos-prof">
+          <h2 id="titulo-alunos-prof">Alunos das minhas turmas</h2>
+          <div class="lista-alunos">
+            <table><thead><tr><th>Aluno</th><th>E-mail</th><th>Turma / ano</th><th>Responsáveis legais</th></tr></thead><tbody id="corpo-alunos"></tbody></table>
+            <p id="sem-alunos">Você ainda não tem alunos vinculados. Selecione “Gerenciar minhas turmas” para criar uma turma e adicionar alunos.</p>
           </div>
-          <div class="card numero">
-            <span>Média no pós-teste</span
-            ><strong id="media-pos" class="verde">—</strong>
-          </div>
-        </div>
+          <nav id="paginacao-alunos" class="paginacao" aria-label="Páginas dos alunos das minhas turmas" hidden><button id="alunos-anterior" type="button" disabled>← Anterior</button><span id="alunos-pagina" aria-live="polite">Página 1</span><button id="alunos-proxima" type="button" disabled>Próxima →</button></nav>
+        </section>
 
-        <h2>Desempenho da turma</h2>
-        <p>Comparação das médias dos alunos que já fizeram cada avaliação.</p>
-        <div
-          id="grafico-avaliacoes"
-          class="painel-grafico"
-          role="group"
-          aria-label="Gráfico de comparação entre as médias do pré-teste e do pós-teste"
-        >
-          <p class="grafico-vazio">Carregando dados das avaliações…</p>
-        </div>
+        <section id="painel-prof-indicadores" class="painel-ferramenta" hidden aria-labelledby="titulo-indicadores-prof">
+          <h2 id="titulo-indicadores-prof">Indicadores por tema de ISTs</h2>
+          <p>Distribuição do banco de perguntas por tema e situação de revisão.</p>
+          <div id="grafico-ists" class="painel-grafico grafico-ists" role="group" aria-label="Gráfico do total de perguntas por tema de IST"><p class="grafico-vazio">Carregando indicadores…</p></div>
+          <div class="lista-alunos"><table><thead><tr><th>Tema</th><th>Total</th><th>Aprovadas</th><th>Pendentes</th><th>Recusadas</th></tr></thead><tbody id="corpo-indicadores-ists"></tbody></table></div>
+        </section>
 
-        <h2>Alunos das minhas turmas</h2>
-        <div class="lista-alunos">
-          <table>
-            <thead>
-              <tr>
-                <th>Aluno</th>
-                <th>E-mail</th>
-                <th>Turma / ano</th>
-                <th>Responsáveis legais</th>
-              </tr>
-            </thead>
-            <tbody id="corpo-alunos"></tbody>
-          </table>
-          <p id="sem-alunos">
-            Você ainda não tem alunos vinculados. Selecione “Gerenciar minhas
-            turmas” para criar uma turma e adicionar alunos.
-          </p>
-        </div>
-        <nav
-          id="paginacao-alunos"
-          class="paginacao"
-          aria-label="Páginas dos alunos das minhas turmas"
-          hidden
-        >
-          <button id="alunos-anterior" type="button" disabled>
-            ← Anterior
-          </button>
-          <span id="alunos-pagina" aria-live="polite">Página 1</span>
-          <button id="alunos-proxima" type="button" disabled>Próxima →</button>
-        </nav>
+        <section id="painel-prof-avaliacoes" class="painel-ferramenta" hidden aria-labelledby="titulo-avaliacoes-prof">
+          <h2 id="titulo-avaliacoes-prof">Avaliação diagnóstica</h2>
+          <div class="lista-alunos"><table><thead><tr><th>Aluno</th><th>Turma / ano</th><th>Pré-teste</th><th>Pós-teste</th><th>Evolução</th></tr></thead><tbody id="corpo-avaliacoes"></tbody></table><p id="sem-avaliacoes">Nenhum aluno concluiu o pré-teste ainda.</p></div>
+          <nav id="paginacao-avaliacoes" class="paginacao" aria-label="Páginas da avaliação diagnóstica" hidden><button id="avaliacoes-anterior" type="button" disabled>← Anterior</button><span id="avaliacoes-pagina" aria-live="polite">Página 1</span><button id="avaliacoes-proxima" type="button" disabled>Próxima →</button></nav>
+          <p id="resumo-evolucao" class="mensagem" role="status"></p>
+        </section>
 
-        <h2>Indicadores por tema de ISTs</h2>
-        <p>
-          Distribuição do banco de perguntas por tema e situação de revisão.
-        </p>
-        <div
-          id="grafico-ists"
-          class="painel-grafico grafico-ists"
-          role="group"
-          aria-label="Gráfico do total de perguntas por tema de IST"
-        >
-          <p class="grafico-vazio">Carregando indicadores…</p>
-        </div>
-        <div class="lista-alunos">
-          <table>
-            <thead>
-              <tr>
-                <th>Tema</th>
-                <th>Total</th>
-                <th>Aprovadas</th>
-                <th>Pendentes</th>
-                <th>Recusadas</th>
-              </tr>
-            </thead>
-            <tbody id="corpo-indicadores-ists"></tbody>
-          </table>
-        </div>
-
-        <h2>Avaliação diagnóstica</h2>
-        <div class="lista-alunos">
-          <table>
-            <thead>
-              <tr>
-                <th>Aluno</th>
-                <th>Turma / ano</th>
-                <th>Pré-teste</th>
-                <th>Pós-teste</th>
-                <th>Evolução</th>
-              </tr>
-            </thead>
-            <tbody id="corpo-avaliacoes"></tbody>
-          </table>
-          <p id="sem-avaliacoes">Nenhum aluno concluiu o pré-teste ainda.</p>
-        </div>
-        <nav
-          id="paginacao-avaliacoes"
-          class="paginacao"
-          aria-label="Páginas da avaliação diagnóstica"
-          hidden
-        >
-          <button id="avaliacoes-anterior" type="button" disabled>
-            ← Anterior
-          </button>
-          <span id="avaliacoes-pagina" aria-live="polite">Página 1</span>
-          <button id="avaliacoes-proxima" type="button" disabled>
-            Próxima →
-          </button>
-        </nav>
-        <p id="resumo-evolucao" class="mensagem" role="status"></p>
-
-        <h2>Ferramentas</h2>
-        <div class="cards duas-colunas">
-          <button id="abrir-relatorios" class="card ferramenta" type="button">
-            <h3>Ver relatórios</h3>
-            <p>Acompanhe os acertos e erros dos alunos.</p>
-          </button>
-          <button
-            id="abrir-criar-pergunta"
-            class="card ferramenta"
-            type="button"
-          >
-            <h3>Criar pergunta</h3>
-            <p>Envie perguntas para aprovação do administrador.</p>
-          </button>
-        </div>
-        <p id="mensagem-professor" class="mensagem" role="status"></p>
-
-        <section
-          id="relatorios-professor"
-          class="formulario-pergunta"
-          hidden
-          aria-labelledby="titulo-relatorios"
-        >
+        <section id="painel-prof-relatorios" class="painel-ferramenta" hidden aria-labelledby="titulo-relatorios">
+          <section id="relatorios-professor" class="formulario-pergunta" aria-labelledby="titulo-relatorios">
           <h2 id="titulo-relatorios">Relatórios das partidas</h2>
           <form id="filtros-relatorio" class="filtros-relatorio">
             <label for="escola-relatorio"
@@ -540,8 +454,11 @@
               Próxima →
             </button>
           </nav>
+          </section>
         </section>
 
+        <section id="painel-prof-pergunta" class="painel-ferramenta" hidden aria-labelledby="titulo-formulario-pergunta">
+          <p id="mensagem-professor" class="mensagem" role="status"></p>
         <section
           id="formulario-pergunta"
           class="formulario-pergunta"
@@ -619,6 +536,7 @@
             </div>
           </form>
         </section>
+        </section>
       </section>
       <footer class="links-legais-home" aria-label="Informações legais">
         <a href="/termos">Termos de Uso</a>
@@ -626,6 +544,8 @@
       </footer>
     </main>
     <script src="/js/auth.js"></script>
+    <script src="/js/navegacaoFerramentas.js"></script>
+    <script src="/js/paginarTabela.js"></script>
     <script src="/js/home.js"></script>
   </body>
 </html>

@@ -1,0 +1,396 @@
+{
+  "info": {
+    "name": "ConectaSaúde — testes manuais",
+    "description": "Execute em um banco de teste com contas fictícias. Preencha credenciais, códigos e tokens no ambiente local e compare a resposta com a descrição de cada solicitação.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "senha",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "desafio_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "codigo_mfa",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "token_aluno",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "token_professor",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "token_admin",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pedido_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Autenticação",
+      "item": [
+        {
+          "name": "Login válido",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/login",
+            "description": "200 e desafioId. Copie desafioId para desafio_id e use o código recebido.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"senha\": \"{{senha}}\",\n  \"metodoMfa\": \"email\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validar segundo fator",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/verificar-totp",
+            "description": "200 com token e destino. Copie token para a variável do perfil correspondente.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"desafioId\": \"{{desafio_id}}\",\n  \"codigo\": \"{{codigo_mfa}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sessão sem credenciais",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/auth/eu",
+            "description": "401 e mensagem de autenticação.",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Aluno",
+      "item": [
+        {
+          "name": "Status da avaliação",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/avaliacao/status",
+            "description": "200. Em uma conta nova, proximaEtapa deve ser pre.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_aluno}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Jogo antes de concluir o pré-teste",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/jogo/perguntas",
+            "description": "403 com PRE_TESTE_PENDENTE. Execute com uma conta nova.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_aluno}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Iniciar pré-teste",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/avaliacao/pre",
+            "description": "200 com perguntas e opções, sem gabarito.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_aluno}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar avaliação incompleta",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/avaliacao/pre/respostas",
+            "description": "400 com RESPOSTAS_INCOMPLETAS depois de iniciar o pré-teste.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_aluno}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"respostas\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar perguntas após pré-teste",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/jogo/perguntas?categoriaIst=hpv",
+            "description": "200 com perguntas após concluir o pré-teste.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_aluno}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Criar sala",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/salas",
+            "description": "201 com o código da sala após concluir o pré-teste. Use um código ainda livre.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_aluno}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nivel\": \"Fácil\",\n  \"codigo\": \"340175\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Professor",
+      "item": [
+        {
+          "name": "Indicadores por IST",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/professor/indicadores-ists",
+            "description": "200 com indicadores para professor aprovado.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_professor}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Relatórios",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/professor/relatorios",
+            "description": "200 com dados do professor aprovado.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_professor}}"
+              }
+            ]
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Privacidade e administração",
+      "item": [
+        {
+          "name": "Registrar pedido de acesso",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/privacidade/solicitacoes",
+            "description": "201 e mensagem de registro.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_aluno}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipo\": \"acesso\",\n  \"mensagem\": \"Pedido fictício de acesso aos dados.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar pedidos próprios",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/privacidade/solicitacoes",
+            "description": "200. Deve aparecer somente o histórico do titular autenticado.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_aluno}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Acessar painel com perfil de aluno",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/admin/resumo",
+            "description": "403 para conta com perfil de aluno.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_aluno}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar painel administrativo",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/admin/resumo",
+            "description": "200 para conta administradora.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar pedidos para atendimento",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/admin/solicitacoes-privacidade",
+            "description": "200. Copie o identificador de um pedido de teste para pedido_id.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ]
+          },
+          "response": []
+        },
+        {
+          "name": "Concluir sem comprovação",
+          "request": {
+            "method": "PATCH",
+            "url": "{{base_url}}/api/admin/solicitacoes-privacidade/{{pedido_id}}",
+            "description": "400. O status do pedido deve permanecer o mesmo.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"concluida\",\n  \"resposta\": \"Resposta de teste.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

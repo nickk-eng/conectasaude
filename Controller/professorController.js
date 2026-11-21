@@ -2,10 +2,39 @@ const usuarioModel = require("../Model/usuarioModel");
 const perguntaModel = require("../Model/perguntaModel");
 const avaliacaoModel = require("../Model/avaliacaoModel");
 const avaliacaoService = require("../Service/avaliacaoService");
-const { registrarAuditoria } = require("../Service/auditoriaService");
+const {
+  registrarAuditoria,
+  registrarRevelacaoEmail,
+} = require("../Service/auditoriaService");
 const { NIVEIS, CATEGORIAS_IST } = require("../Config/constantes");
 const auditoriaModel = require("../Model/auditoriaModel");
 const turmaModel = require("../Model/turmaModel");
+const { descriptografarEmail } = require("../Utils/mascararEmail");
+
+async function resumo(req, res) {
+  const dados = await turmaModel.resumoDashboard(req.usuario.id);
+  res.json({ resumo: dados });
+}
+
+async function revelarEmailAluno(req, res) {
+  res.set("Cache-Control", "no-store");
+  const id = String(req.params.id || "");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))
+    return res.status(400).json({ mensagem: "Aluno inválido." });
+  try {
+    const alvo = await turmaModel.buscarAlunoParaRevelacao(req.usuario.id, id);
+    if (!alvo || !alvo.autorizado) {
+      await registrarRevelacaoEmail(req, "REVELAR_EMAIL_ALUNO_NEGADO", alvo);
+      return res.status(403).json({ mensagem: "Você não tem acesso a este e-mail." });
+    }
+    await registrarRevelacaoEmail(req, "REVELAR_EMAIL_ALUNO", alvo);
+    const email = descriptografarEmail(alvo.email_criptografado);
+    return res.json({ email });
+  } catch (erro) {
+    console.error("Falha ao revelar e-mail de aluno:", erro.message);
+    return res.status(500).json({ mensagem: "Não foi possível revelar o e-mail." });
+  }
+}
 
 async function listarAlunos(req, res) {
   const alunos = await usuarioModel.listarAlunos(
@@ -211,6 +240,8 @@ async function criarPergunta(req, res) {
 }
 
 module.exports = {
+  resumo,
+  revelarEmailAluno,
   listarAlunos,
   atualizarResponsaveisAluno,
   listarAvaliacoes,

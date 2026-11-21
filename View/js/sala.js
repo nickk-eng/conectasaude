@@ -199,12 +199,15 @@ document
   .forEach((botao, casa) =>
     botao.addEventListener("click", () => agir("jogar", { casa })),
   );
-if (!/^[0-9]{1,8}$/.test(codigo)) {
-  encerrado = true;
-  selecionar("erro-sala").textContent =
-    "Código inválido. Volte ao início para criar ou entrar em uma sala.";
-} else {
-  sessionStorage.setItem("conectaSaudeSala", codigo);
-  atualizar();
-  window.setInterval(atualizar, 1000);
-}
+verificarSessaoPagina().then((sessao) => {
+  if (!sessao) return;
+  if (!/^[0-9]{1,8}$/.test(codigo)) {
+    encerrado = true;
+    selecionar("erro-sala").textContent =
+      "Código inválido. Volte ao início para criar ou entrar em uma sala.";
+  } else {
+    sessionStorage.setItem("conectaSaudeSala", codigo);
+    atualizar();
+    window.setInterval(atualizar, 1000);
+  }
+});

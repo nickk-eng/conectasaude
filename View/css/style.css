@@ -408,6 +408,26 @@ button {
 .requisitos-senha .atendido {
   color: #63dea2;
 }
+.email-com-revelacao {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  width: 280px;
+}
+
+.email-com-revelacao span {
+  overflow-wrap: anywhere;
+}
+
+.email-com-revelacao .botao-revelar-email {
+  width: 76px;
+  min-height: 32px;
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+}
+
 .paginacao {
   display: flex;
   justify-content: center;
@@ -415,6 +435,10 @@ button {
   flex-wrap: wrap;
   gap: 16px;
   margin: 20px 0;
+}
+.paginacao[hidden],
+tbody tr[hidden] {
+  display: none;
 }
 .paginacao button {
   width: auto;
@@ -438,4 +462,13 @@ button:disabled {
 .link-botao {
   border: 0;
   color: var(--fundo);
+}
+
+body[data-perfis]:not([data-sessao-validada]) > :not(.aviso-sessao) {
+  display: none;
+}
+
+.aviso-sessao {
+  padding: 16px;
+  text-align: center;
 }

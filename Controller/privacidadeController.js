@@ -72,7 +72,7 @@ async function responderSolicitacao(req, res) {
       .status(400)
       .json({
         mensagem:
-          "Para concluir ou recusar, escreva uma resposta de até 2000 caracteres.",
+          "Para concluir ou recusar, escreva uma resposta de até 2.000 caracteres.",
       });
   }
   if (
@@ -87,7 +87,7 @@ async function responderSolicitacao(req, res) {
       .status(400)
       .json({
         mensagem:
-          "Para concluir, descreva a providência (20 a 2000 caracteres), informe a referência de comprovação (8 a 500 caracteres) e confirme o atendimento. Não inclua senhas, códigos ou dados de terceiros.",
+          "Para concluir, descreva a providência (20 a 2.000 caracteres), informe a referência de comprovação (8 a 500 caracteres) e confirme o atendimento. Não inclua senhas, códigos ou dados de terceiros.",
       });
   }
   let pedido;

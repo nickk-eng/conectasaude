@@ -4,7 +4,6 @@ const senhaService = require("../Service/senhaService");
 const { AUTOR_SEMENTE_ID } = require("../Config/constantes");
 
 async function prepararBanco() {
-  // Estrutura e tabelas agora são criadas manualmente via arquivo .sql único no PostgreSQL
 }
 
 async function criarAdmin() {

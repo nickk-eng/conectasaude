@@ -165,6 +165,10 @@ async function excluirPergunta(req, res) {
   res.json({ mensagem: "Pergunta excluída com sucesso." });
 }
 
+async function sincronizarPerguntas(_req, res) {
+  res.json({ perguntas: await perguntaModel.listarParaAdmin() });
+}
+
 async function listarPerguntas(req, res) {
   const perguntas = await perguntaModel.listarParaAdmin();
   await registrarAuditoria(req, "perguntas_consultadas", "admin", {
@@ -263,6 +267,7 @@ async function decidirProfessor(req, res) {
 module.exports = {
   decidirProfessor,
   listarPerguntas,
+  sincronizarPerguntas,
   avaliarPergunta,
   listarUsuarios,
   resumo,

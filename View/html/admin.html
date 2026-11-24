@@ -6,6 +6,7 @@
     <title>Administração | ConectaSaúde</title>
     <link rel="stylesheet" href="../css/style.css" />
     <link rel="stylesheet" href="../css/admin.css" />
+    <link rel="stylesheet" href="../css/formulario-pergunta.css" />
   </head>
 
   <body data-perfis="admin" class="pagina-admin">
@@ -20,7 +21,7 @@
       <h2 class="titulo-ferramentas">Ferramentas do administrador</h2>
       <div id="navegacao-admin" class="grade-ferramentas" role="group" aria-label="Ferramentas do administrador">
         <button class="card ferramenta ativo" type="button" data-painel-target="painel-admin-dashboard" aria-controls="painel-admin-dashboard" aria-expanded="true"><span>Visão geral</span><h3>Dashboard</h3><p>Métricas de usuários, perguntas, turmas e partidas.</p></button>
-        <button class="card ferramenta" type="button" data-painel-target="painel-admin-aprovacoes" aria-controls="painel-admin-aprovacoes" aria-expanded="false"><span>Revisão</span><h3>Aprovações pendentes</h3><p>Revise perguntas enviadas pelos professores.</p></button>
+          <button class="card ferramenta" type="button" data-painel-target="painel-admin-aprovacoes" aria-controls="painel-admin-aprovacoes" aria-expanded="false"><span>Revisão</span><h3>Aprovações pendentes</h3><p>Aprove ou recuse perguntas em revisão.</p></button>
         <button class="card ferramenta" type="button" data-painel-target="painel-admin-perguntas" aria-controls="painel-admin-perguntas" aria-expanded="false"><span>Conteúdo</span><h3>Gerenciar perguntas</h3><p>Crie, edite e remova questões do jogo.</p></button>
         <button class="card ferramenta" type="button" data-painel-target="painel-admin-usuarios" aria-controls="painel-admin-usuarios" aria-expanded="false"><span>Contas</span><h3>Gerenciar usuários</h3><p>Consulte e atualize contas e permissões.</p></button>
         <button class="card ferramenta" type="button" data-painel-target="painel-admin-privacidade" aria-controls="painel-admin-privacidade" aria-expanded="false"><span>LGPD</span><h3>Solicitações de privacidade</h3><p>Atenda pedidos de acesso e outros direitos.</p></button>
@@ -86,96 +87,107 @@
       </section>
       </section>
       <section id="painel-admin-aprovacoes" class="painel-ferramenta" hidden aria-labelledby="titulo-aprovacoes-admin">
-      <section class="introducao">
-        <h2 id="titulo-aprovacoes-admin">Aprovações pendentes</h2>
-        <p>Revise as perguntas enviadas pelos professores antes de disponibilizá-las aos alunos.</p>
-      </section>
-      <p>Solicitações de acesso ao perfil de professor podem ser revisadas na gestão de usuários.</p>
-      <button id="abrir-usuarios-aprovacoes" class="botao-painel-admin" type="button">Ver solicitações de professor</button>
-      <button id="atualizar-perguntas" class="botao-painel-admin" type="button">Atualizar perguntas</button>
-      <div id="lista-perguntas" class="lista-perguntas"></div>
-      <nav
-        id="paginas-perguntas"
-        class="paginacao"
-        aria-label="Páginas de perguntas"
-      ></nav>
-      <p id="sem-perguntas" hidden>Nenhuma pergunta foi enviada até agora.</p>
+        <section class="introducao">
+          <h2 id="titulo-aprovacoes-admin">Aprovações pendentes</h2>
+          <p>Revise as perguntas pendentes antes de disponibilizá-las aos alunos.</p>
+        </section>
+        <button id="atualizar-perguntas" class="botao-painel-admin" type="button">Atualizar perguntas</button>
+        <div id="lista-pendentes" class="lista-perguntas"></div>
+        <nav
+          id="paginas-pendentes"
+          class="paginacao"
+          aria-label="Páginas de perguntas pendentes"
+        ></nav>
+        <p id="sem-pendentes" class="sem-perguntas" hidden>Nenhuma pergunta pendente de aprovação.</p>
       </section>
       <section id="painel-admin-perguntas" class="painel-ferramenta" hidden aria-labelledby="titulo-gestao-perguntas">
-      <section class="auditoria" aria-labelledby="titulo-gestao-perguntas">
         <div class="cabecalho-secao">
           <div>
-            <h2 id="titulo-gestao-perguntas">Banco de perguntas</h2>
+            <h2 id="titulo-gestao-perguntas">Gerenciar perguntas</h2>
             <p>Cadastre, edite ou remova perguntas do jogo.</p>
           </div>
           <button id="nova-pergunta-admin" type="button">Nova pergunta</button>
         </div>
-        <p>Para editar ou excluir uma pergunta existente, abra a lista de perguntas e selecione a ação desejada.</p>
-        <button id="abrir-lista-perguntas-admin" class="botao-painel-admin" type="button">Ver perguntas existentes</button>
-        <form id="form-pergunta-admin" class="formulario-pergunta" hidden>
+        <section id="editor-pergunta-admin" class="formulario-pergunta" hidden aria-labelledby="titulo-form-pergunta-admin">
           <h3 id="titulo-form-pergunta-admin">Nova pergunta</h3>
-          <label
-            >Pergunta<textarea
-              name="texto"
-              maxlength="500"
-              minlength="10"
-              required
-            ></textarea>
-          </label>
-          <label
-            >Alternativas (uma por linha)<textarea
-              name="alternativas"
-              required
-              placeholder="Informe quatro alternativas, uma por linha. Perguntas antigas com três alternativas também podem ser editadas."
-            ></textarea>
-          </label>
-          <label
-            >Índice da resposta correta (começa em 0)<input
-              name="respostaCorreta"
-              type="number"
-              min="0"
-              max="3"
-              required
-          /></label>
-          <label
-            >Nível<select name="nivel">
-              <option>Fácil</option>
-              <option>Médio</option>
-              <option>Difícil</option>
-            </select></label
-          >
-          <label
-            >Categoria<select name="categoriaIst" required>
-              <option value="">Selecione</option>
-              <option value="hiv-aids">HIV e aids</option>
-              <option value="sifilis">Sífilis</option>
-              <option value="gonorreia">Gonorreia</option>
-              <option value="clamidia">Clamídia</option>
-              <option value="hpv">HPV</option>
-              <option value="herpes-genital">Herpes genital</option>
-              <option value="hepatites-virais">Hepatites virais</option>
-              <option value="tricomoniase">Tricomoníase</option>
-              <option value="prevencao-geral">
-                Prevenção e conceitos gerais
-              </option>
-            </select></label
-          >
-          <label
-            >Status<select name="status">
-              <option value="aprovada">Aprovada</option>
-              <option value="pendente">Pendente</option>
-              <option value="recusada">Recusada</option>
-            </select></label
-          >
-          <div class="acoes-formulario">
-            <button type="submit">Salvar pergunta</button
-            ><button id="cancelar-pergunta-admin" type="button">
-              Cancelar
-            </button>
-          </div>
-        </form>
+          <form id="form-pergunta-admin">
+            <label
+              >Pergunta<textarea
+                name="texto"
+                maxlength="500"
+                minlength="10"
+                required
+                placeholder="Ex.: Qual hábito ajuda a manter uma boa saúde?"
+              ></textarea>
+            </label>
+            <label
+              >Alternativa 1<input name="alternativa1" maxlength="200" required
+            /></label>
+            <label
+              >Alternativa 2<input name="alternativa2" maxlength="200" required
+            /></label>
+            <label
+              >Alternativa 3<input name="alternativa3" maxlength="200" required
+            /></label>
+            <label>
+              <span id="rotulo-alternativa4-admin">Alternativa 4</span>
+              <input name="alternativa4" maxlength="200" required />
+            </label>
+            <label
+              >Resposta correta<select name="respostaCorreta" required>
+                <option value="">Selecione uma alternativa</option>
+                <option value="0">Alternativa 1</option>
+                <option value="1">Alternativa 2</option>
+                <option value="2">Alternativa 3</option>
+                <option value="3">Alternativa 4</option>
+              </select></label
+            >
+            <label
+              >Nível<select name="nivel">
+                <option>Fácil</option>
+                <option>Médio</option>
+                <option>Difícil</option>
+              </select></label
+            >
+            <label
+              >Categoria da IST<select name="categoriaIst" required>
+                <option value="">Selecione uma categoria</option>
+                <option value="hiv-aids">HIV e aids</option>
+                <option value="sifilis">Sífilis</option>
+                <option value="gonorreia">Gonorreia</option>
+                <option value="clamidia">Clamídia</option>
+                <option value="hpv">HPV</option>
+                <option value="herpes-genital">Herpes genital</option>
+                <option value="hepatites-virais">Hepatites virais</option>
+                <option value="tricomoniase">Tricomoníase</option>
+                <option value="prevencao-geral">
+                  Prevenção e conceitos gerais
+                </option>
+              </select></label
+            >
+            <label
+              >Status<select name="status">
+                <option value="aprovada">Aprovada</option>
+                <option value="pendente">Pendente</option>
+                <option value="recusada">Recusada</option>
+              </select></label
+            >
+            <div class="acoes-formulario">
+              <button type="submit">Salvar pergunta</button
+              ><button id="cancelar-pergunta-admin" class="botao-secundario" type="button">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </section>
         <p id="mensagem-pergunta-admin" class="mensagem" role="status"></p>
-      </section>
+        <div id="lista-perguntas" class="lista-perguntas"></div>
+        <nav
+          id="paginas-perguntas"
+          class="paginacao"
+          aria-label="Páginas de perguntas cadastradas"
+        ></nav>
+        <p id="sem-perguntas" class="sem-perguntas" hidden>Nenhuma pergunta aprovada ou recusada.</p>
       </section>
       <section id="painel-admin-usuarios" class="painel-ferramenta" hidden aria-labelledby="titulo-usuarios">
       <section class="auditoria" aria-labelledby="titulo-usuarios">

@@ -1,9 +1,11 @@
-const lista = document.querySelector("#lista-perguntas");
+const listaPendentes = document.querySelector("#lista-pendentes");
+const listaPerguntas = document.querySelector("#lista-perguntas");
 const mensagem = document.querySelector("#mensagem-admin");
 const corpoAuditoria = document.querySelector("#corpo-auditoria");
 configurarNavegacaoFerramentas("navegacao-admin");
 let adminAtualId = null;
-let paginaPerguntas = 0;
+const paginasPerguntas = { pendentes: 0, perguntas: 0 };
+const perguntasPorPagina = 5;
 let perguntasAtuais = [];
 let consultaPerguntas = 0;
 let ultimaConsultaAplicada = 0;
@@ -113,11 +115,14 @@ function formatarData(data) {
   return new Date(data).toLocaleString("pt-BR");
 }
 
-async function carregarPerguntas() {
+async function carregarPerguntas({ registrarConsulta = false } = {}) {
   const consulta = ++consultaPerguntas;
   let perguntas;
   try {
-    const resposta = await apiFetch("/api/admin/perguntas");
+    const rota = registrarConsulta
+      ? "/api/admin/perguntas"
+      : "/api/admin/perguntas/sincronizacao";
+    const resposta = await apiFetch(rota);
     if (!resposta.ok) return;
     ({ perguntas } = await resposta.json());
   } catch {
@@ -129,36 +134,71 @@ async function carregarPerguntas() {
   if (versao === versaoPerguntas) return;
   versaoPerguntas = versao;
   atualizarResumoPerguntas(perguntas);
-  document.querySelector("#sem-perguntas").hidden = perguntas.length > 0;
   perguntasAtuais = perguntas;
-  paginaPerguntas = Math.min(
-    paginaPerguntas,
-    Math.max(0, Math.ceil(perguntas.length / 5) - 1),
-  );
   renderizarPerguntas();
 }
 
 function renderizarPerguntas() {
-  const perguntas = perguntasAtuais;
+  renderizarListaPerguntas(
+    "pendentes",
+    listaPendentes,
+    perguntasAtuais.filter((pergunta) => pergunta.status === "pendente"),
+  );
+  renderizarListaPerguntas(
+    "perguntas",
+    listaPerguntas,
+    perguntasAtuais.filter((pergunta) => pergunta.status !== "pendente"),
+  );
+}
+
+function alternativasDaPergunta(pergunta) {
+  return typeof pergunta.alternativas === "string"
+    ? JSON.parse(pergunta.alternativas)
+    : pergunta.alternativas;
+}
+
+function renderizarListaPerguntas(grupo, lista, perguntas) {
+  const seletorPaginacao = `#paginas-${grupo}`;
+  const totalPaginas = Math.ceil(perguntas.length / perguntasPorPagina);
+  const pagina = Math.min(paginasPerguntas[grupo], Math.max(0, totalPaginas - 1));
+  paginasPerguntas[grupo] = pagina;
+  document.querySelector(`#sem-${grupo}`).hidden = perguntas.length > 0;
+  document.querySelector(seletorPaginacao).hidden = totalPaginas <= 1;
   controlesPaginas(
-    "#paginas-perguntas",
-    paginaPerguntas,
-    paginaPerguntas > 0,
-    (paginaPerguntas + 1) * 5 < perguntas.length,
+    seletorPaginacao,
+    pagina,
+    pagina > 0,
+    pagina + 1 < totalPaginas,
     (passo) => {
-      paginaPerguntas += passo;
-      renderizarPerguntas();
+      paginasPerguntas[grupo] += passo;
+      renderizarListaPerguntas(grupo, lista, perguntas);
     },
   );
+  const inicio = pagina * perguntasPorPagina;
   lista.innerHTML = perguntas
-    .slice(paginaPerguntas * 5, paginaPerguntas * 5 + 5)
+    .slice(inicio, inicio + perguntasPorPagina)
     .map((pergunta) => {
-      const alternativas =
-        typeof pergunta.alternativas === "string"
-          ? JSON.parse(pergunta.alternativas)
-          : pergunta.alternativas;
+      const alternativas = alternativasDaPergunta(pergunta);
       const autor = pergunta.nome || pergunta.email;
-      return `<article class="pergunta-admin"><div class="metadados"><span class="status ${escapar(pergunta.status)}">${escapar(pergunta.status)}</span><span>Categoria: ${escapar(categoriasIst[pergunta.categoria_ist] || "Prevenção e conceitos gerais")}</span><span>Nível: ${escapar(pergunta.nivel)}</span><span>Enviada por: ${escapar(autor)}</span></div><h3>${escapar(pergunta.texto)}</h3><ol class="alternativas">${alternativas.map((alternativa, indice) => `<li class="${indice === pergunta.resposta_correta ? "correta" : ""}">${escapar(alternativa)}${indice === pergunta.resposta_correta ? " (correta)" : ""}</li>`).join("")}</ol><div class="acoes-admin">${pergunta.status === "pendente" ? `<button data-id="${pergunta.id}" data-status="aprovada" type="button">Aprovar</button><button class="recusar" data-id="${pergunta.id}" data-status="recusada" type="button">Recusar</button>` : ""}<button data-editar="${pergunta.id}" type="button">Editar</button><button class="recusar" data-excluir="${pergunta.id}" type="button">Excluir</button></div></article>`;
+      const acoes = grupo === "pendentes"
+        ? `<button data-id="${pergunta.id}" data-status="aprovada" type="button">Aprovar</button>
+           <button class="recusar" data-id="${pergunta.id}" data-status="recusada" type="button">Recusar</button>`
+        : `<button data-editar="${pergunta.id}" type="button">Editar</button>
+           <button class="recusar" data-excluir="${pergunta.id}" type="button">Excluir</button>`;
+      return `<article class="pergunta-admin">
+        <div class="metadados">
+          <span class="status ${escapar(pergunta.status)}">${escapar(pergunta.status)}</span>
+          <span>Categoria: ${escapar(categoriasIst[pergunta.categoria_ist] || "Prevenção e conceitos gerais")}</span>
+          <span>Nível: ${escapar(pergunta.nivel)}</span>
+          <span>Enviada por: ${escapar(autor)}</span>
+        </div>
+        <h3>${escapar(pergunta.texto)}</h3>
+        <ol class="alternativas">${alternativas.map((alternativa, indice) => {
+          const correta = indice === pergunta.resposta_correta;
+          return `<li class="${correta ? "correta" : ""}">${escapar(alternativa)}${correta ? " (correta)" : ""}</li>`;
+        }).join("")}</ol>
+        <div class="acoes-admin">${acoes}</div>
+      </article>`;
     })
     .join("");
 }
@@ -299,35 +339,13 @@ async function carregarAuditoria() {
     .join("");
 }
 
-lista.addEventListener("click", async (evento) => {
+listaPerguntas.addEventListener("click", async (evento) => {
   const editar = evento.target.closest("button[data-editar]");
   if (editar) {
-    const resposta = await apiFetch("/api/admin/perguntas");
-    const { perguntas } = await resposta.json();
-    const pergunta = perguntas.find(
+    const pergunta = perguntasAtuais.find(
       (item) => String(item.id) === editar.dataset.editar,
     );
-    if (!pergunta) return;
-    const formulario = document.querySelector("#form-pergunta-admin");
-    document
-      .querySelector('[data-painel-target="painel-admin-perguntas"]')
-      .click();
-    formulario.dataset.id = pergunta.id;
-    formulario.elements.texto.value = pergunta.texto;
-    formulario.elements.alternativas.value = (
-      typeof pergunta.alternativas === "string"
-        ? JSON.parse(pergunta.alternativas)
-        : pergunta.alternativas
-    ).join("\n");
-    formulario.elements.respostaCorreta.value = pergunta.resposta_correta;
-    formulario.elements.nivel.value = pergunta.nivel;
-    formulario.elements.categoriaIst.value =
-      pergunta.categoria_ist || "prevencao-geral";
-    formulario.elements.status.value = pergunta.status;
-    document.querySelector("#titulo-form-pergunta-admin").textContent =
-      "Editar pergunta";
-    formulario.hidden = false;
-    formulario.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (pergunta) abrirEditorPergunta(pergunta);
     return;
   }
   const excluir = evento.target.closest("button[data-excluir]");
@@ -343,8 +361,10 @@ lista.addEventListener("click", async (evento) => {
       carregarPerguntas();
       carregarAuditoria();
     }
-    return;
   }
+});
+
+listaPendentes.addEventListener("click", async (evento) => {
   const botao = evento.target.closest("button[data-id]");
   if (!botao) return;
   botao.disabled = true;
@@ -359,37 +379,61 @@ lista.addEventListener("click", async (evento) => {
   if (resposta.ok) {
     carregarPerguntas();
     carregarAuditoria();
-    carregarSolicitacoesPrivacidade();
   } else botao.disabled = false;
 });
 
+const editorPerguntaAdmin = document.querySelector("#editor-pergunta-admin");
 const formularioPerguntaAdmin = document.querySelector("#form-pergunta-admin");
-document.querySelector("#nova-pergunta-admin").addEventListener("click", () => {
-  formularioPerguntaAdmin.reset();
-  delete formularioPerguntaAdmin.dataset.id;
-  formularioPerguntaAdmin.elements.status.value = "aprovada";
+const mensagemPerguntaAdmin = document.querySelector("#mensagem-pergunta-admin");
+const nomesAlternativas = ["alternativa1", "alternativa2", "alternativa3", "alternativa4"];
+
+function abrirEditorPergunta(pergunta) {
+  const formulario = formularioPerguntaAdmin;
+  formulario.reset();
+  delete formulario.dataset.id;
+  mensagemPerguntaAdmin.textContent = "";
+  const alternativas = pergunta ? alternativasDaPergunta(pergunta) : [];
+  const permiteTresAlternativas = alternativas.length === 3;
+  formulario.elements.alternativa4.required = !permiteTresAlternativas;
+  document.querySelector("#rotulo-alternativa4-admin").textContent =
+    permiteTresAlternativas ? "Alternativa 4 (opcional)" : "Alternativa 4";
+  if (pergunta) {
+    formulario.dataset.id = pergunta.id;
+    formulario.elements.texto.value = pergunta.texto;
+    alternativas.forEach((alternativa, indice) => {
+      formulario.elements[nomesAlternativas[indice]].value = alternativa;
+    });
+    formulario.elements.respostaCorreta.value = pergunta.resposta_correta;
+    formulario.elements.nivel.value = pergunta.nivel;
+    formulario.elements.categoriaIst.value =
+      pergunta.categoria_ist || "prevencao-geral";
+    formulario.elements.status.value = pergunta.status;
+  }
   document.querySelector("#titulo-form-pergunta-admin").textContent =
-    "Nova pergunta";
-  formularioPerguntaAdmin.hidden = false;
-  formularioPerguntaAdmin.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
+    pergunta ? "Editar pergunta" : "Nova pergunta";
+  editorPerguntaAdmin.hidden = false;
+  editorPerguntaAdmin.scrollIntoView({ behavior: "smooth", block: "start" });
+  formulario.elements.texto.focus({ preventScroll: true });
+}
+
+document.querySelector("#nova-pergunta-admin").addEventListener("click", () => {
+  abrirEditorPergunta();
 });
 document
   .querySelector("#cancelar-pergunta-admin")
   .addEventListener("click", () => {
-    formularioPerguntaAdmin.hidden = true;
+    editorPerguntaAdmin.hidden = true;
     formularioPerguntaAdmin.reset();
     delete formularioPerguntaAdmin.dataset.id;
+    mensagemPerguntaAdmin.textContent = "";
   });
 formularioPerguntaAdmin.addEventListener("submit", async (evento) => {
   evento.preventDefault();
   const dados = new FormData(formularioPerguntaAdmin);
-  const alternativas = String(dados.get("alternativas"))
-    .split(/\r?\n/)
-    .map((item) => item.trim())
-    .filter(Boolean);
+  const alternativas = nomesAlternativas.map((nome) => dados.get(nome).trim());
+  if (!formularioPerguntaAdmin.elements.alternativa4.required && !alternativas[3]) {
+    alternativas.pop();
+  }
   const corpo = {
     texto: dados.get("texto"),
     alternativas,
@@ -408,11 +452,10 @@ formularioPerguntaAdmin.addEventListener("submit", async (evento) => {
     },
   );
   const resultado = await resposta.json();
-  const status = document.querySelector("#mensagem-pergunta-admin");
-  status.textContent = resultado.mensagem;
-  status.className = `mensagem ${resposta.ok ? "sucesso" : "erro"}`;
+  mensagemPerguntaAdmin.textContent = resultado.mensagem;
+  mensagemPerguntaAdmin.className = `mensagem ${resposta.ok ? "sucesso" : "erro"}`;
   if (resposta.ok) {
-    formularioPerguntaAdmin.hidden = true;
+    editorPerguntaAdmin.hidden = true;
     formularioPerguntaAdmin.reset();
     delete formularioPerguntaAdmin.dataset.id;
     carregarPerguntas();
@@ -597,21 +640,6 @@ document
 document
   .querySelector("#atualizar-usuarios")
   .addEventListener("click", carregarUsuarios);
-document
-  .querySelector("#abrir-usuarios-aprovacoes")
-  .addEventListener("click", () => {
-    document
-      .querySelector('[data-painel-target="painel-admin-usuarios"]')
-      .click();
-  });
-document
-  .querySelector("#abrir-lista-perguntas-admin")
-  .addEventListener("click", () => {
-    document
-      .querySelector('[data-painel-target="painel-admin-aprovacoes"]')
-      .click();
-  });
-
 document.querySelector("#atualizar-auditoria").addEventListener("click", () => {
   paginaAuditoria = 0;
   cursoresAuditoria = [null];
@@ -638,7 +666,17 @@ async function iniciarAdmin() {
   const { usuario } = sessao;
   adminAtualId = usuario.id;
   carregarPerguntas();
-  document.querySelector("#atualizar-perguntas").addEventListener("click", carregarPerguntas);
+  document.querySelector("#atualizar-perguntas").addEventListener("click", () => {
+    carregarPerguntas({ registrarConsulta: true });
+  });
+  for (const painel of ["painel-admin-aprovacoes", "painel-admin-perguntas"]) {
+    const botao = document.querySelector(`[data-painel-target="${painel}"]`);
+    botao.addEventListener("click", () => {
+      if (botao.getAttribute("aria-expanded") === "true") {
+        carregarPerguntas({ registrarConsulta: true });
+      }
+    });
+  }
   document.addEventListener("visibilitychange", atualizarPerguntasVisiveis);
   window.addEventListener("focus", atualizarPerguntasVisiveis);
   window.setInterval(atualizarPerguntasVisiveis, 10000);

@@ -119,7 +119,7 @@
 }
 
 .introducao p,
-#sem-perguntas {
+.sem-perguntas {
   margin-top: 8px;
   color: var(--padrao);
 }
@@ -348,34 +348,10 @@
   border-bottom: 0;
 }
 
-.formulario-pergunta {
-  display: grid;
-  gap: 14px;
-  margin-top: 8px;
-  padding: 22px;
-  background: var(--cartao);
-  border: 1px solid #285062;
-  border-radius: 16px;
-}
-
-.formulario-pergunta[hidden] {
-  display: none;
-}
-
-.formulario-pergunta label {
-  display: grid;
-  gap: 6px;
-  color: var(--padrao);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.formulario-pergunta,
 #corpo-solicitacoes form {
   color-scheme: dark;
 }
 
-.formulario-pergunta :is(input, textarea),
 #corpo-solicitacoes :is(textarea, input[name='comprovante']) {
   width: 100%;
   padding: 12px;
@@ -386,28 +362,17 @@
   border-radius: 10px;
 }
 
-.formulario-pergunta textarea {
-  min-height: 94px;
-  resize: vertical;
-}
-
-.formulario-pergunta textarea::placeholder,
 #corpo-solicitacoes :is(textarea, input[name='comprovante'])::placeholder {
   color: var(--padrao);
   opacity: 1;
 }
 
-.formulario-pergunta textarea:focus,
 #corpo-solicitacoes :is(textarea, input[name='comprovante']):focus {
   outline: 2px solid var(--fundo);
   outline-offset: 1px;
 }
 
-.formulario-pergunta .acoes-formulario {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
+
 .tabela-auditoria form {
   min-width: 220px;
   display: grid;

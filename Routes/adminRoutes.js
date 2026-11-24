@@ -5,6 +5,7 @@ const { autenticar, permitir } = require("../Middleware/autenticacao");
 router.use(autenticar, permitir("admin"));
 
 router.get("/perguntas", admin.listarPerguntas);
+router.get("/perguntas/sincronizacao", admin.sincronizarPerguntas);
 router.get("/resumo", admin.resumo);
 router.post("/perguntas", admin.criarPergunta);
 router.put("/perguntas/:id", admin.atualizarPergunta);

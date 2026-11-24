@@ -29,6 +29,7 @@ module.exports = [
     files: ["View/js/auth.js"],
     languageOptions: { globals: { apiFetch: "off", verificarSessaoPagina: "off", salvarToken: "off", removerToken: "off" } },
   },
+  { files: ["View/js/sala.js"], languageOptions: { globals: { CHAVE_SESSAO: "readonly" } } },
   {
     files: ["View/js/navegacaoFerramentas.js"],
     languageOptions: { globals: { configurarNavegacaoFerramentas: "off" } },

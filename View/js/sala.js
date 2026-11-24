@@ -4,13 +4,31 @@ const codigo = (
   ""
 ).toUpperCase();
 let estado = null;
-let ocupado = false;
+let consultando = false;
+let enviandoAcao = false;
+let atualizacaoPendente = false;
+let revisaoLocal = 0;
 let encerrado = false;
 let ultimaVersao = -1;
+let fimDoTurno = 0;
+let socket = null;
+let tempoReal = false;
+let reconectarApos = 0;
+let proximaConsulta = 0;
+let consultaFalhou = false;
+let relogio;
 const selecionar = (id) => document.getElementById(id);
+
+function encerrar() {
+  encerrado = true;
+  window.clearInterval(relogio);
+  socket?.close();
+  sessionStorage.removeItem("conectaSaudeSala");
+}
 
 function renderizar(sala) {
   estado = sala;
+  fimDoTurno = performance.now() + sala.prazoRestanteMs;
   selecionar("codigo-sala").textContent = `Código: ${sala.codigo}`;
   selecionar("nivel-sala").textContent = `Dificuldade: ${sala.nivel}`;
   const categorias = {
@@ -90,8 +108,7 @@ function renderizar(sala) {
     });
   }
   if (sala.status === "finalizada" && sala.salva) {
-    encerrado = true;
-    sessionStorage.removeItem("conectaSaudeSala");
+    encerrar();
   }
 }
 
@@ -108,26 +125,35 @@ async function requisitar(url, dados) {
   );
   const corpo = await resposta.json();
   if (!resposta.ok) {
-    if ([401, 403, 404].includes(resposta.status)) {
-      encerrado = true;
-      sessionStorage.removeItem("conectaSaudeSala");
-    }
-    throw new Error(corpo.mensagem || "Não foi possível atualizar a sala.");
+    throw Object.assign(
+      new Error(corpo.mensagem || "Não foi possível atualizar a sala."),
+      { status: resposta.status },
+    );
   }
   return corpo;
 }
 
 async function atualizar() {
-  if (ocupado || encerrado) return;
-  ocupado = true;
+  if (encerrado) return;
+  if (consultando || enviandoAcao) {
+    atualizacaoPendente = true;
+    return;
+  }
+  consultando = true;
+  atualizacaoPendente = false;
+  const revisao = revisaoLocal;
   try {
-    renderizar(
-      await requisitar(
-        `/api/salas/${encodeURIComponent(codigo)}${estado ? `?partida=${encodeURIComponent(estado.id)}` : ""}`,
-      ),
+    const sala = await requisitar(
+      `/api/salas/${encodeURIComponent(codigo)}${estado ? `?partida=${encodeURIComponent(estado.id)}` : ""}`,
     );
+    if (revisao !== revisaoLocal || encerrado) return;
+    consultaFalhou = false;
+    renderizar(sala);
     selecionar("erro-sala").textContent = "";
   } catch (erro) {
+    if (revisao !== revisaoLocal || encerrado) return;
+    consultaFalhou = true;
+    if ([401, 403, 404].includes(erro.status)) encerrar();
     selecionar("erro-sala").textContent =
       erro.message || "Conexão interrompida. Tentando reconectar…";
     document
@@ -139,13 +165,57 @@ async function atualizar() {
       });
     ultimaVersao = -1;
   } finally {
-    ocupado = false;
+    consultando = false;
+    if (atualizacaoPendente && !enviandoAcao) atualizar();
+  }
+}
+
+function conectarTempoReal() {
+  if (!estado || socket || encerrado || performance.now() < reconectarApos) return;
+  const protocolo = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const conexao = new WebSocket(`${protocolo}//${window.location.host}/api/salas/tempo-real`);
+  socket = conexao;
+  conexao.addEventListener("open", () => {
+    conexao.send(JSON.stringify({
+      token: sessionStorage.getItem(CHAVE_SESSAO),
+      codigo,
+      partida: estado.id,
+    }));
+  });
+  conexao.addEventListener("message", (evento) => {
+    if (evento.data !== "atualizar") return;
+    tempoReal = true;
+    atualizar();
+  });
+  conexao.addEventListener("close", () => {
+    socket = null;
+    tempoReal = false;
+    reconectarApos = performance.now() + 3000;
+    atualizar();
+  });
+}
+
+function atualizarRelogio() {
+  if (encerrado) return;
+  const agora = performance.now();
+  let turnoExpirado = false;
+  if (estado?.status === "jogando") {
+    const segundos = Math.max(0, Math.ceil((fimDoTurno - agora) / 1000));
+    selecionar("tempo-sala").textContent = `Tempo: ${segundos}s`;
+    turnoExpirado = segundos === 0;
+  }
+  conectarTempoReal();
+  if (consultando || enviandoAcao || agora < proximaConsulta) return;
+  if (!tempoReal || consultaFalhou || turnoExpirado || (estado?.status === "finalizada" && !estado.salva)) {
+    proximaConsulta = agora + 1000;
+    atualizar();
   }
 }
 
 async function agir(acao, dados = {}) {
-  if (ocupado || !estado) return;
-  ocupado = true;
+  if (enviandoAcao || encerrado || !estado) return;
+  enviandoAcao = true;
+  revisaoLocal++;
   document
     .querySelectorAll(
       "#tabuleiro-sala button, #alternativas-sala button, #iniciar-sala, #sair-sala",
@@ -159,7 +229,7 @@ async function agir(acao, dados = {}) {
       { ...dados, acao, versao: estado.versao, partida: estado.id },
     );
     if (sala.saiu || acao === "sair") {
-      sessionStorage.removeItem("conectaSaudeSala");
+      encerrar();
       window.location.href = "/home";
       return;
     }
@@ -167,12 +237,15 @@ async function agir(acao, dados = {}) {
     renderizar(sala);
     selecionar("erro-sala").textContent = "";
   } catch (erro) {
+    if ([401, 403, 404].includes(erro.status)) encerrar();
     selecionar("erro-sala").textContent =
       erro.message || "Não foi possível enviar a jogada.";
     ultimaVersao = -1;
+    atualizacaoPendente = true;
   } finally {
-    ocupado = false;
+    enviandoAcao = false;
     selecionar("sair-sala").disabled = false;
+    if (atualizacaoPendente) atualizar();
   }
 }
 
@@ -208,6 +281,6 @@ verificarSessaoPagina().then((sessao) => {
   } else {
     sessionStorage.setItem("conectaSaudeSala", codigo);
     atualizar();
-    window.setInterval(atualizar, 1000);
+    relogio = window.setInterval(atualizarRelogio, 200);
   }
 });

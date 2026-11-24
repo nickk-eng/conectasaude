@@ -23,8 +23,12 @@ function criarServicoSalas({
   }
   function limpar() {
     for (const [codigo, sala] of salas) {
-      if (agora() - sala.atualizada > 30 * 60 * 1000) salas.delete(codigo);
+      if (!sala.assinantes.size && agora() - sala.atualizada > 30 * 60 * 1000)
+        salas.delete(codigo);
     }
+  }
+  function notificar(sala) {
+    for (const atualizar of sala.assinantes) atualizar();
   }
   function jogador(usuario, simbolo) {
     return {
@@ -73,6 +77,7 @@ function criarServicoSalas({
     if (sala.status !== "jogando" || agora() < sala.prazo) return;
     if (sala.fase === "pergunta") sala.jogadores[sala.vez].erros++;
     passar(sala, "O tempo acabou. A vez passou.");
+    notificar(sala);
   }
   async function persistir(sala) {
     if (sala.status !== "finalizada" || sala.salva) return;
@@ -80,6 +85,7 @@ function criarServicoSalas({
       sala.gravando = salvarResultados(sala)
         .then(() => {
           sala.salva = true;
+          notificar(sala);
         })
         .finally(() => {
           sala.gravando = null;
@@ -89,6 +95,7 @@ function criarServicoSalas({
   }
   function publico(sala, usuario) {
     const pergunta = sala.perguntas[sala.indice % sala.perguntas.length];
+    const prazoRestanteMs = Math.max(0, sala.prazo - agora());
     return {
       id: sala.id,
       codigo: sala.codigo,
@@ -109,7 +116,8 @@ function criarServicoSalas({
       vez: sala.jogadores[sala.vez].simbolo,
       tabuleiro: [...sala.tabuleiro],
       versao: sala.versao,
-      segundos: Math.max(0, Math.ceil((sala.prazo - agora()) / 1000)),
+      segundos: Math.ceil(prazoRestanteMs / 1000),
+      prazoRestanteMs,
       mensagem: sala.mensagem,
       resultado: sala.resultado || "",
       salva: sala.salva,
@@ -122,6 +130,11 @@ function criarServicoSalas({
     };
   }
   return {
+    assinar(usuario, codigo, partida, atualizar) {
+      const sala = buscar(codigo, usuario, partida);
+      sala.assinantes.add(atualizar);
+      return () => sala.assinantes.delete(atualizar);
+    },
     removerDoUsuario(usuarioId) {
       for (const [codigo, sala] of salas) {
         if (sala.jogadores.some((p) => p.id === usuarioId)) {
@@ -129,6 +142,7 @@ function criarServicoSalas({
             if (p.id === usuarioId) p.nome = "Conta encerrada";
           });
           salas.delete(codigo);
+          notificar(sala);
         }
       }
     },
@@ -200,6 +214,7 @@ function criarServicoSalas({
               ? JSON.parse(p.alternativas)
               : p.alternativas,
         })),
+        assinantes: new Set(),
         status: "aguardando",
         fase: "pergunta",
         vez: 0,
@@ -237,6 +252,7 @@ function criarServicoSalas({
       sala.jogadores.push(jogador(usuario, "O"));
       sala.atualizada = agora();
       sala.versao++;
+      notificar(sala);
       return publico(sala, usuario);
     },
     async consultar(usuario, codigo, partida) {
@@ -248,6 +264,7 @@ function criarServicoSalas({
     async agir(usuario, codigo, dados) {
       const sala = buscar(codigo, usuario, dados.partida);
       expirarTurno(sala);
+      const versaoAnterior = sala.versao;
       if (dados.acao === "iniciar") {
         if (
           sala.jogadores[0].id !== usuario.id ||
@@ -269,6 +286,7 @@ function criarServicoSalas({
             sala.jogadores.pop();
             sala.versao++;
           }
+          notificar(sala);
           return { saiu: true };
         }
         if (sala.status === "jogando") {
@@ -324,6 +342,7 @@ function criarServicoSalas({
           } else passar(sala, "Jogada realizada. A vez passou.");
         } else falhar("Ação inválida para esta etapa.", 409);
       }
+      if (sala.versao !== versaoAnterior) notificar(sala);
       await persistir(sala);
       return publico(sala, usuario);
     },

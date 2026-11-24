@@ -52,7 +52,7 @@ MFA_ENCRYPTION_KEY=chave_base64_de_32_bytes
 - `DATABASE_URL`: conexão com o PostgreSQL. Altere usuário, senha, servidor ou porta quando necessário.
 - `ADMIN_EMAIL` e `ADMIN_SENHA`: credenciais da conta de administrador criada na primeira inicialização.
 - Para trocar o e-mail de um administrador existente, defina o novo endereço em `ADMIN_EMAIL` e o antigo em `ADMIN_EMAIL_ANTERIOR`. Ao iniciar, o sistema atualiza a mesma conta, preservando senha e autenticação em duas etapas. Depois da atualização, `ADMIN_EMAIL_ANTERIOR` pode ser removido. Se o novo endereço já pertencer a outra conta ativa, a alteração será recusada.
-- O banco e as permissões permitem vários administradores, cada um com sua conta. O painel atual não oferece criação ou promoção de administradores; `ADMIN_EMAIL` configura apenas uma conta por inicialização e não remove os outros administradores existentes.
+- Para criar um segundo administrador na inicialização, configure `ADMIN_EMAIL_ADICIONAL` e `ADMIN_SENHA_ADICIONAL` junto às variáveis da conta principal. Use endereços diferentes. Reinicializações preservam as senhas e a autenticação em duas etapas das contas existentes.
 - `PORT`: porta em que o site será aberto. O valor padrão é `3000`.
 - `MFA_ENCRYPTION_KEY`: chave usada para proteger os segredos do aplicativo autenticador armazenados no banco. Ela deve ter 32 bytes codificados em Base64.
 
@@ -175,7 +175,7 @@ Os vínculos antigos de `professor_alunos` são preservados e continuam no paine
 
 No painel do aluno, selecione **Com um colega** para criar uma sala ou entrar por código. Para entrar, basta o código recebido: a dificuldade será a da sala. Para criar, selecione a dificuldade e um código numérico de até oito dígitos e compartilhe-o com outro aluno. O tema acompanha a seleção do painel. Ambos precisam ter concluído o pré-teste. As partidas usam perguntas aprovadas da dificuldade e do tema selecionados; se escolher “Todos os temas”, a sala pode sortear perguntas de qualquer categoria.
 
-As salas permanecem na memória de uma única instância do servidor e atualizam o estado a cada segundo. Reiniciar o servidor encerra salas abertas; salas sem atividade expiram após 30 minutos. Os resultados de partidas concluídas ou encerradas por desistência ficam no histórico de cada aluno.
+As salas permanecem na memória de uma única instância do servidor. O WebSocket avisa os jogadores quando a sala muda. Se a conexão cair, a página consulta o estado por HTTP enquanto tenta reconectar. Reiniciar o servidor encerra salas abertas; salas sem atividade expiram após 30 minutos. Os resultados de partidas concluídas ou encerradas por desistência ficam no histórico de cada aluno.
 
 ## Estrutura do projeto (MVC)
 

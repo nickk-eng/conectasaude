@@ -171,10 +171,13 @@ async function buscarIdAtivoPorEmail(email) {
 async function criarAdmin(email, senhaHash) {
   const normalizado = String(email).trim().toLowerCase();
   const resultado = await banco.query(
-    "INSERT INTO usuarios (email, email_hash, email_criptografado, senha_hash, perfil, nome) VALUES ($1, $2, $3, $4, 'admin', 'Administrador') RETURNING id",
+    `INSERT INTO usuarios (email, email_hash, email_criptografado, senha_hash, perfil, nome)
+     VALUES ($1, $2, $3, $4, 'admin', 'Administrador')
+     ON CONFLICT (email_hash) WHERE email_hash IS NOT NULL DO NOTHING
+     RETURNING id`,
     [emailUtil.mascararEmail(normalizado), emailUtil.gerarHashEmail(normalizado), emailUtil.criptografarEmail(normalizado), senhaHash],
   );
-  return resultado.rows[0].id;
+  return resultado.rows[0]?.id || null;
 }
 
 async function alterarEmailAdmin(emailAnterior, emailNovo) {

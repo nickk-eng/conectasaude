@@ -13,7 +13,7 @@ function extrairToken(req) {
 
 async function autenticarSessao(req, res, next) {
   const token = extrairToken(req);
-  const usuario = token ? await sessaoModel.buscarUsuarioPorToken(token) : null;
+  const usuario = await buscarUsuarioDaSessao(token);
 
   if (!usuario) {
     return res.status(401).json({ mensagem: "Faça login para continuar." });
@@ -22,6 +22,12 @@ async function autenticarSessao(req, res, next) {
   req.usuario = usuario;
   res.set("Cache-Control", "no-store");
   next();
+}
+
+function buscarUsuarioDaSessao(token) {
+  return typeof token === "string" && TOKEN_VALIDO.test(token)
+    ? sessaoModel.buscarUsuarioPorToken(token)
+    : null;
 }
 
 function autenticar(req, res, next) {
@@ -52,4 +58,5 @@ module.exports = {
   autenticarSessao,
   permitir,
   extrairToken,
+  buscarUsuarioDaSessao,
 };
